@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Reward_Log.belongsTo(models.User, {foreignKey: 'user_id', targetKey: 'id', as:"Reward_Log"})
+      Reward_Log.belongsTo(models.User, {foreignKey: 'user_id', targetKey: 'id', as:"Obtained_Reward_Log"})
       Reward_Log.belongsTo(models.User, {foreignKey: 'admin_id', targetKey: 'id', as: "Approved_Reward_Log"})
       Reward_Log.belongsTo(models.Reward, {foreignKey: 'reward_id', targetKey: 'id'})
     }

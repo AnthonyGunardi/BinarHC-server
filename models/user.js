@@ -12,9 +12,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       User.hasMany(models.Reward, {foreignKey: 'user_id', sourceKey: 'id'})
-      User.hasMany(models.Reward_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Reward_Log'})
+      User.hasMany(models.Reward_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Reward_Log'})
       User.hasMany(models.Reward_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Reward_Log'})
-      User.hasMany(models.Point, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasOne(models.Point, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasMany(models.Point_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Point_Log'})
+      User.hasMany(models.Point_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Point_Log'})
     }
   }
   User.init({
@@ -41,6 +43,18 @@ module.exports = (sequelize, DataTypes) => {
         },
         notNull: {
           msg: 'NIP is Required'
+        },
+        async isUnique(value, next) {
+          try {
+            const user = await User.findOne({ where: { nip: value } })
+            if (user) {
+              throw new Error('NIP is already registered');
+            }
+            next()
+          }
+          catch(err) {
+            next(err)
+          }
         }
       }
     },
@@ -73,7 +87,10 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     photo: DataTypes.STRING,
-    is_admin: DataTypes.BOOLEAN,
+    is_admin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     is_active: DataTypes.BOOLEAN
   }, {
     sequelize,
