@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Point, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasMany(models.Point_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Point_Log'})
       User.hasMany(models.Point_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Point_Log'})
+      User.hasOne(models.Biodata, {foreignKey: 'user_id', sourceKey: 'id'})
     }
   }
   User.init({
@@ -37,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false,
       unique:true,
+      defaultValue: Date.now().toString(36),
       validate: {
         notEmpty: {
           msg: 'NIP is Required'
@@ -77,6 +79,7 @@ module.exports = (sequelize, DataTypes) => {
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: '123456',
       validate: {
         notEmpty: {
           msg: `Password is Required`
@@ -89,12 +92,20 @@ module.exports = (sequelize, DataTypes) => {
     photo: DataTypes.STRING,
     is_admin: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      defaultValue: false
     },
-    is_active: DataTypes.BOOLEAN
+    is_active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
   }, {
     sequelize,
     modelName: 'User',
+    hooks: {
+      beforeCreate: (user, options) => {
+        user.password = user.email;
+      }
+    }
   });
   return User;
 };
