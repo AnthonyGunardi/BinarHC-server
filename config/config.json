@@ -1,18 +1,19 @@
 {
   "development": {
+    "username": "cia",
+    "password": "@Silahkan567890",
+    "database": "db_hc_binar",
+    "host": "103.30.194.121",
+    "dialect": "mariadb",
+    "dialectOptions": { "connectTimeout": 15000 }
+  },
+  "test": {
     "username": "root",
     "password": "@Silahkan567890",
     "database": "db_hc_binar",
     "host": "localhost",
     "dialect": "mariadb",
     "dialectOptions": { "connectTimeout": 15000 }
-  },
-  "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
   },
   "production": {
     "username": "cia",
