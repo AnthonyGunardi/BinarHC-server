@@ -5,5 +5,6 @@ const authentication = require('../middlewares/userAuthentication');
 route.get('/', authentication, UserController.findAllUser);
 route.post('/register', UserController.register);
 route.post('/login', UserController.login);
+route.post('/adminlogin', UserController.adminLogin);
 
 module.exports = route;

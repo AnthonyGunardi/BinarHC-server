@@ -1,5 +1,6 @@
 const { User, Point } = require('../models');
 const AccessToken = require('../helpers/accessToken');
+const { sendData } = require('../helpers/response.js');
 
 class UserController {
   static async register(req, res, next) {
@@ -38,7 +39,9 @@ class UserController {
       const user = await User.findOne({
         where: {
           email: userData.email,
-          password: userData.password
+          password: userData.password,
+          is_admin: false,
+          is_active: true
         }
       });
       if (!user) {
@@ -50,7 +53,16 @@ class UserController {
             is_admin: user.is_admin
           };
           const accessToken = AccessToken.generate(payload);
-          res.status(200).json({ id: user.id, email: user.email, accessToken });      
+          const data = {
+            firstname: user.firstname,
+            lastname: user.lastname,
+            nip: user.nip,
+            email: user.email,
+            photo: user.photo,
+            is_admin: user.is_admin,
+            accessToken
+          }
+          sendData(200, data, "Login successful", res)      
       }
     }
     catch (err) {
@@ -68,7 +80,8 @@ class UserController {
         where: {
           email: userData.email,
           password: userData.password,
-          is_admin: true
+          is_admin: true,
+          is_active: true
         }
       });
       if (!user) {
@@ -80,7 +93,16 @@ class UserController {
             is_admin: user.is_admin
           };
           const accessToken = AccessToken.generate(payload);
-          res.status(200).json({ id: user.id, email: user.email, accessToken });      
+          const data = {
+            firstname: user.firstname,
+            lastname: user.lastname,
+            nip: user.nip,
+            email: user.email,
+            photo: user.photo,
+            is_admin: user.is_admin,
+            accessToken
+          }
+          sendData(200, data, "Login successful", res)         
       }
     }
     catch (err) {
