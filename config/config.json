@@ -1,26 +1,29 @@
 {
   "development": {
-    "username": "cia",
-    "password": "@Silahkan567890",
+    "username": "root",
+    "password": "mj26",
     "database": "db_hc_binar",
-    "host": "103.30.194.121",
-    "dialect": "mariadb",
+    "host": "127.0.0.1",
+    "port": "8889",
+    "dialect": "mysql",
     "dialectOptions": { "connectTimeout": 15000 }
   },
   "test": {
     "username": "root",
-    "password": "@Silahkan567890",
+    "password": "mj26",
     "database": "db_hc_binar",
-    "host": "localhost",
-    "dialect": "mariadb",
+    "host": "127.0.0.1",
+    "port": "8889",
+    "dialect": "mysql",
     "dialectOptions": { "connectTimeout": 15000 }
   },
   "production": {
-    "username": "cia",
-    "password": "@Silahkan567890",
+    "username": "root",
+    "password": "mj26",
     "database": "db_hc_binar",
-    "host": "103.30.194.121",
-    "dialect": "mariadb",
+    "host": "127.0.0.1",
+    "port": "8889",
+    "dialect": "mysql",
     "dialectOptions": { "connectTimeout": 15000 }
   }
 }
