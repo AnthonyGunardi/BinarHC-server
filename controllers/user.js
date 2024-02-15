@@ -88,21 +88,15 @@ class UserController {
         res.status(401).json({ message: 'Wrong Username or Password' });
       } else {
           const payload = {
-            id: user.id,
-            email: user.email,
-            is_admin: user.is_admin
-          };
-          const accessToken = AccessToken.generate(payload);
-          const data = {
             firstname: user.firstname,
             lastname: user.lastname,
             nip: user.nip,
             email: user.email,
             photo: user.photo,
             is_admin: user.is_admin,
-            accessToken
-          }
-          sendData(200, data, "Login successful", res)         
+          };
+          const accessToken = AccessToken.generate(payload);
+          sendData(200, accessToken, "Login successful", res)         
       }
     }
     catch (err) {
