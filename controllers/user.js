@@ -96,7 +96,10 @@ class UserController {
             is_admin: user.is_admin,
           };
           const accessToken = AccessToken.generate(payload);
-          sendData(200, accessToken, "Login successful", res)         
+          const data = {
+            accessToken
+          }
+          sendData(200, data, "Login successful", res)         
       }
     }
     catch (err) {
