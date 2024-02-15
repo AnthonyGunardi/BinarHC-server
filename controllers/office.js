@@ -6,11 +6,15 @@ class OfficeController {
     const officeData = {
       name: req.body.name, 
       description: req.body.description,
-      slug: req.body.name.toLowerCase().replaceAll(" ", "-"),
+      slug: req.body.slug,
       is_active: req.body.is_active
     };
     try {
-      const office = await Office.findOne({ where: { name: officeData.name } });
+      const office = await Office.findOne({ 
+        where: { 
+          slug: officeData.slug
+        } 
+      });
       if (!Boolean(office)) {
         const newOffice = await Office.create(officeData);
         const { id, name, description, slug } = newOffice;
@@ -24,17 +28,31 @@ class OfficeController {
     };
   };
 
-  static async getAllOffices(req, res) {
+  static async getAllOffices(req, res, next) {
     try {
         const offices = await Office.findAll({
-          attributes:['name', 'description', 'slug'],
+          attributes:['name', 'description', 'slug', 'is_active'],
           order: [['name', 'asc']]
         });
         sendData(200, offices, "Success get all offices", res);
     } catch (err) {
         next(err)
     };
-};
+  };
+
+  static async getOffice(req, res, next) {
+    try {
+        const office = await Office.findOne({
+            where: {
+                slug: req.params.slug,
+            }
+        })
+        if (!office) return sendResponse(404, "Office is not found", res)
+        sendData(200, office, "Success get office data", res)
+    } catch (err) {
+        next(err)
+    }
+  }
 
   static async update(req, res, next) {
     const id = req.params.id
