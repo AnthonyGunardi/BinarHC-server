@@ -1,7 +1,7 @@
 const UserController = require('./user');
 const OfficeController = require('./office');
-const ActivityController = require('./activity');
+const PositionController = require('./position');
 
 module.exports = { 
-  UserController, OfficeController, ActivityController
+  UserController, OfficeController, PositionController
 };
