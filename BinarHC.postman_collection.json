@@ -1,0 +1,928 @@
+{
+	"info": {
+		"_postman_id": "179ec7fc-cb6d-4f95-8047-fc4d7c2f2a4c",
+		"name": "BinarHC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14055803"
+	},
+	"item": [
+		{
+			"name": "localhost:5006/v1/users/register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "firstname",
+							"value": "Tester",
+							"type": "text"
+						},
+						{
+							"key": "lastname",
+							"value": "01",
+							"type": "text"
+						},
+						{
+							"key": "nip",
+							"value": "123456",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "tester01@mail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"type": "text"
+						},
+						{
+							"key": "photo",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "is_admin",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "is_active",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:5006/v1/users/register",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"v1",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "201 Created",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "firstname",
+									"value": "Tester",
+									"type": "text"
+								},
+								{
+									"key": "lastname",
+									"value": "03",
+									"type": "text"
+								},
+								{
+									"key": "nip",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "tester03@mail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "photo",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "is_admin",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5006/v1/users/register",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								"register"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "97"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"61-9LynD8nPVbt3VbQi8NtNBqSSmnM\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 06 Feb 2024 08:15:00 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": 3,\n    \"firstname\": \"Tester\",\n    \"email\": \"tester03@mail.com\",\n    \"balance\": 0,\n    \"message\": \"User is created\"\n}"
+				},
+				{
+					"name": "400 Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "firstname",
+									"value": "Tester",
+									"type": "text"
+								},
+								{
+									"key": "lastname",
+									"value": "01",
+									"type": "text"
+								},
+								{
+									"key": "nip",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "tester01@mail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "photo",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "is_admin",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5006/v1/users/register",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								"register"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "32"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"20-g0sdjyUSrl2aRK9cNYI5OO5jKHg\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 06 Feb 2024 08:14:17 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"User already exist\"\n}"
+				},
+				{
+					"name": "400 Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "firstname",
+									"value": "Tester",
+									"type": "text"
+								},
+								{
+									"key": "lastname",
+									"value": "05",
+									"type": "text"
+								},
+								{
+									"key": "nip",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "tester05@mail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "photo",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "is_admin",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5006/v1/users/register",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								"register"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "39"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"27-JFwqXacwHlRleqNO4RgXAbbCuqY\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 06 Feb 2024 08:43:29 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"NIP is already registered\"\n}"
+				},
+				{
+					"name": "400 Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "firstname",
+									"value": "Tester",
+									"type": "text"
+								},
+								{
+									"key": "lastname",
+									"value": "05",
+									"type": "text"
+								},
+								{
+									"key": "nip",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "tester05@mail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "photo",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "is_admin",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5006/v1/users/register",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								"register"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "29"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"1d-E6z6ySNv28GRn2PoRZURFudKZkI\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 06 Feb 2024 08:48:20 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"NIP is Required\"\n}"
+				},
+				{
+					"name": "400 Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "firstname",
+									"value": "Tester",
+									"type": "text"
+								},
+								{
+									"key": "lastname",
+									"value": "04",
+									"type": "text"
+								},
+								{
+									"key": "nip",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "tester04",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								},
+								{
+									"key": "photo",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "is_admin",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5006/v1/users/register",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								"register"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "40"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"28-nLukqiS1pNDab6kVR6Ozj0NYRhI\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 06 Feb 2024 08:20:14 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Email address is not valid\"\n}"
+				}
+			]
+		},
+		{
+			"name": "localhost:5006/v1/users/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "tester01@mail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:5006/v1/users/login",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"v1",
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "200 OK",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "tester01@mail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5006/v1/users/login",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								"login"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "250"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"fa-+d6cDcvMau0ePqtoSjnpEYA1i3E\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 06 Feb 2024 09:08:30 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": 1,\n    \"email\": \"tester01@mail.com\",\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0ZXIwMUBtYWlsLmNvbSIsImlzX2FkbWluIjpmYWxzZSwiaWF0IjoxNzA3MjEwNTEwLCJleHAiOjE3MDc2NDI1MTB9.7NEaByFS_8wwvIpbjmCe7QyjqAeZJeqVUhX4WiLI7Ik\"\n}"
+				},
+				{
+					"name": "401 Unauthorized",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "tester01@mail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "1234568",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5006/v1/users/login",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								"login"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "40"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"28-8sEiL4o/Ad7uZXCSwLtJpc+rtOA\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 06 Feb 2024 09:09:18 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Wrong Username or Password\"\n}"
+				}
+			]
+		},
+		{
+			"name": "localhost:5006/v1/users/",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "access_token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0ZXIwMUBtYWlsLmNvbSIsImlzX2FkbWluIjpmYWxzZSwiaWF0IjoxNzA3Mjg2MzUxLCJleHAiOjE3MDc3MTgzNTF9.V1XeDH1RSNaAHup9XLF0ItWkMSAWGsdMuUJJehlLC-41",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:5006/v1/users/",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"v1",
+						"users",
+						""
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "200 OK",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0ZXIwMUBtYWlsLmNvbSIsImlzX2FkbWluIjpmYWxzZSwiaWF0IjoxNzA3Mjg2MzUxLCJleHAiOjE3MDc3MTgzNTF9.V1XeDH1RSNaAHup9XLF0ItWkMSAWGsdMuUJJehlLC-4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:5006/v1/users/",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								""
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1040"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"410-dENBrudIOYunfKwEF0Wqkhtfj8M\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 07 Feb 2024 09:45:59 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"id\": 1,\n        \"firstname\": \"Tester\",\n        \"lastname\": \"01\",\n        \"nip\": \"123456\",\n        \"email\": \"tester01@mail.com\",\n        \"password\": \"123456\",\n        \"photo\": \"\",\n        \"is_admin\": false,\n        \"is_active\": false,\n        \"createdAt\": \"2024-02-07T06:11:46.000Z\",\n        \"updatedAt\": \"2024-02-07T06:11:46.000Z\",\n        \"Point\": {\n            \"balance\": 0\n        }\n    },\n    {\n        \"id\": 2,\n        \"firstname\": \"Tester\",\n        \"lastname\": \"02\",\n        \"nip\": \"123457\",\n        \"email\": \"tester02@mail.com\",\n        \"password\": \"123456\",\n        \"photo\": \"\",\n        \"is_admin\": false,\n        \"is_active\": false,\n        \"createdAt\": \"2024-02-07T06:12:14.000Z\",\n        \"updatedAt\": \"2024-02-07T06:12:14.000Z\",\n        \"Point\": {\n            \"balance\": 0\n        }\n    },\n    {\n        \"id\": 4,\n        \"firstname\": \"Tester\",\n        \"lastname\": \"03\",\n        \"nip\": \"lsbh44st\",\n        \"email\": \"tester03@mail.com\",\n        \"password\": \"123456\",\n        \"photo\": null,\n        \"is_admin\": false,\n        \"is_active\": false,\n        \"createdAt\": \"2024-02-07T07:33:57.000Z\",\n        \"updatedAt\": \"2024-02-07T07:33:57.000Z\",\n        \"Point\": {\n            \"balance\": 0\n        }\n    },\n    {\n        \"id\": 5,\n        \"firstname\": \"Tester\",\n        \"lastname\": \"04\",\n        \"nip\": \"lsbhopto\",\n        \"email\": \"tester04@mail.com\",\n        \"password\": \"tester04@mail.com\",\n        \"photo\": null,\n        \"is_admin\": false,\n        \"is_active\": false,\n        \"createdAt\": \"2024-02-07T07:50:18.000Z\",\n        \"updatedAt\": \"2024-02-07T07:50:18.000Z\",\n        \"Point\": {\n            \"balance\": 0\n        }\n    }\n]"
+				},
+				{
+					"name": "403 Forbidden",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0ZXIwMUBtYWlsLmNvbSIsImlzX2FkbWluIjpmYWxzZSwiaWF0IjoxNzA3Mjg2MzUxLCJleHAiOjE3MDc3MTgzNTF9.V1XeDH1RSNaAHup9XLF0ItWkMSAWGsdMuUJJehlLC-41",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:5006/v1/users/",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"v1",
+								"users",
+								""
+							]
+						}
+					},
+					"status": "Forbidden",
+					"code": 403,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "33"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"21-DJzq5QTqfBEbgRfde3R0O81W6r8\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 07 Feb 2024 09:45:14 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Token is not valid!\"\n}"
+				}
+			]
+		}
+	]
+}
