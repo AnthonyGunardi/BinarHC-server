@@ -1,4 +1,4 @@
-class response {
+class Response {
     static sendResponse (statusCode, message, res) {
         return res.status(statusCode).json({
             message: message
@@ -23,4 +23,4 @@ class response {
 }
 
 
-module.exports = response;
+module.exports = Response;

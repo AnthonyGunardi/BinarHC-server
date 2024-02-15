@@ -20,9 +20,9 @@ class UserController {
         const newUser = await User.create(userData);
         const { id, firstname, email } = newUser;
         const newPoint = await Point.create({ balance: 0, user_id: id});
-        res.status(201).json({ id, firstname, email, balance: newPoint.balance, message: 'User is created' });
+        sendData(201, { id, firstname, email, balance: newPoint.balance }, "User is created", res);   
       } else {
-        res.status(400).json({ message: 'User already exist' });
+        sendResponse(400, 'User already exist', res)
       }
     }
     catch (err) {
@@ -113,11 +113,7 @@ class UserController {
           attributes:['balance']
         }
       });
-      if (!users || users.length == 0) {
-        res.status(404).json({ message: 'User is not found'})
-      } else {
-          res.status(200).json(users);
-      }
+      sendData(200, users, "Success get all users", res)
     }
     catch (err) {
       next(err);

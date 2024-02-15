@@ -2,6 +2,7 @@ const route = require('express').Router();
 const { OfficeController } = require('../controllers');
 const authentication = require('../middlewares/userAuthentication');
 
-route.post('/', OfficeController.create);
+route.get('/', authentication, OfficeController.getAllOffices);
+route.post('/', authentication, OfficeController.create);
 
 module.exports = route;

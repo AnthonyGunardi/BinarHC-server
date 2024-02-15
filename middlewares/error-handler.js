@@ -1,6 +1,8 @@
+const { sendResponse, sendData } = require('../helpers/response.js');
+
 const errorHandler = (err, req, res, next) => {
   if (err.status) {
-      res.status(err.status).json({ message: err.message });
+      sendResponse(err.status, err.message, res)
   } else if (err.name == `SequelizeValidationError` || err.name == `SequelizeUniqueConstraintError`) {
       let errors = [];
       for (let i = 0; i < err.errors.length; i++) {
@@ -19,9 +21,9 @@ const errorHandler = (err, req, res, next) => {
           }
       }
       let error = errors.join(', ');
-      res.status(400).json({ message: error });
+      sendResponse(400, error, res);
   } else {
-      res.status(500).json({ message: `Internal Server Error` });
+      sendResponse(500, 'Internal server error', res);
   }
 }
 

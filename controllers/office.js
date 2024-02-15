@@ -1,25 +1,37 @@
 const { Office } = require('../models');
+const { sendResponse, sendData } = require('../helpers/response.js');
 
 class OfficeController {
   static async create(req, res, next) {
     const officeData = {
       name: req.body.name, 
-      description: req.body.description
+      description: req.body.description,
+      slug: req.body.name.toLowerCase().replaceAll(" ", "-"),
+      is_active: req.body.is_active
     };
     try {
-      const office = await Office.findOne({ where: { name: userData.name } });
+      const office = await Office.findOne({ where: { name: officeData.name } });
       if (!Boolean(office)) {
         const newOffice = await Office.create(officeData);
-        const { id, name, description } = newOffice;
-        res.status(201).json({ id, name, description, message: 'Office is created' });
+        const { id, name, description, slug } = newOffice;
+        sendData(201, { id, name, description, slug }, "Office is created", res);  
       } else {
-        res.status(400).json({ message: 'Office already exist' });
+        sendResponse(400, 'Office already exist', res);
       }
     }
     catch (err) {
       next(err)
     };
   };
+
+  static async getAllOffices(req, res) {
+    try {
+        const offices = await Office.findAll()
+        sendData(200, offices, "Success get all offices", res)
+    } catch (err) {
+        next(err)
+    };
+};
 
   static async update(req, res, next) {
     const id = req.params.id

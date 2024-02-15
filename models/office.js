@@ -27,7 +27,12 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    description: DataTypes.TEXT
+    description: DataTypes.TEXT,
+    slug: DataTypes.STRING,
+    is_active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    }
   }, {
     sequelize,
     modelName: 'Office',
