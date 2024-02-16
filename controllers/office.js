@@ -65,13 +65,16 @@ class OfficeController {
   static async toggleOffice(req, res, next) {
     const slug = req.params.slug
     let officeData = {
-      is_active: req.body.is_active
+      is_active: false
     };
     try {
       const office = await Office.findOne({
         where: { slug }
       })
       if (!office) return sendResponse(404, "Office is not found", res)
+      if (office.is_active == false) {
+        officeData.is_active = true
+      }
       const updated = await Office.update(officeData, {
         where: { slug },
         returning: true
