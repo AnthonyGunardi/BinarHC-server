@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Office_Phone.belongsTo(models.Office, {foreignKey: 'office_id', targetKey: 'id'})
+      Office_Phone.belongsTo(models.Phone, {foreignKey: 'phone_id', targetKey: 'id'})
     }
   }
   Office_Phone.init({

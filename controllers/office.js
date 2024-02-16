@@ -1,4 +1,4 @@
-const { Office } = require('../models');
+const { Office, Office_Phone, Phone } = require('../models');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class OfficeController {
@@ -41,10 +41,18 @@ class OfficeController {
   };
 
   static async getOffice(req, res, next) {
+    const slug = req.params.slug
     try {
         const office = await Office.findOne({
-            where: {
-                slug: req.params.slug,
+            where: { slug },
+            attributes:['name', 'description', 'slug', 'is_active'],
+            include: {
+              model: Office_Phone,
+              attributes:['phone_id'],
+              include: {
+                model: Phone,
+                attributes:['code', 'phone_number', 'is_main']
+              }
             }
         })
         if (!office) return sendResponse(404, "Office is not found", res)
@@ -53,6 +61,27 @@ class OfficeController {
         next(err)
     }
   }
+
+  static async toggleOffice(req, res, next) {
+    const slug = req.params.slug
+    let officeData = {
+      is_active: req.body.is_active
+    };
+    try {
+      const office = await Office.findOne({
+        where: { slug }
+      })
+      if (!office) return sendResponse(404, "Office is not found", res)
+      const updated = await Office.update(officeData, {
+        where: { slug },
+        returning: true
+      })
+      sendResponse(200, "Success update office", res)
+  }
+    catch (err) {
+      next(err)
+    }
+  };
 
   static async update(req, res, next) {
     const id = req.params.id

@@ -1,6 +1,6 @@
 const { User, Point } = require('../models');
 const AccessToken = require('../helpers/accessToken');
-const { sendData } = require('../helpers/response.js');
+const { sendResponse, sendData } = require('../helpers/response.js');
 
 class UserController {
   static async register(req, res, next) {
