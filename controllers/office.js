@@ -35,7 +35,8 @@ class OfficeController {
           order: [['name', 'asc']]
         });
         sendData(200, offices, "Success get all offices", res);
-    } catch (err) {
+    } 
+    catch (err) {
         next(err)
     };
   };
@@ -57,7 +58,8 @@ class OfficeController {
         })
         if (!office) return sendResponse(404, "Office is not found", res)
         sendData(200, office, "Success get office data", res)
-    } catch (err) {
+    } 
+    catch (err) {
         next(err)
     }
   }
@@ -80,25 +82,30 @@ class OfficeController {
         returning: true
       })
       sendResponse(200, "Success update office", res)
-  }
+    }
     catch (err) {
       next(err)
     }
   };
 
   static async update(req, res, next) {
-    const id = req.params.id
+    const slug = req.params.slug
+    const officeData = {
+      name: req.body.name,
+      slug: req.body.slug,
+      description: req.body.description
+    };
     try {
-      const officeData = {
-        name: req.body.name, 
-        description: req.body.description
-      };
-      const user = await Office.update(officeData, {
-        where: { id },
+      const office = await Office.findOne({
+        where: { slug }
+      })
+      if (!office) return sendResponse(404, "Office is not found", res)
+      const updated = await Office.update(officeData, {
+        where: { slug },
         returning: true
       })
-      res.status(200).json({ message: 'Office is updated'})
-  }
+      sendResponse(200, "Success update office", res)
+    }
     catch (err) {
       next(err)
     }
