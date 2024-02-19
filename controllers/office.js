@@ -89,7 +89,7 @@ class OfficeController {
   };
 
   static async update(req, res, next) {
-    const slug = req.params.slug
+    const currentSlug = req.params.slug
     const officeData = {
       name: req.body.name,
       slug: req.body.slug,
@@ -97,11 +97,11 @@ class OfficeController {
     };
     try {
       const office = await Office.findOne({
-        where: { slug }
+        where: { slug: currentSlug }
       })
       if (!office) return sendResponse(404, "Office is not found", res)
       const updated = await Office.update(officeData, {
-        where: { slug },
+        where: { slug: currentSlug },
         returning: true
       })
       sendResponse(200, "Success update office", res)
