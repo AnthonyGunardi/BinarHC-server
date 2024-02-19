@@ -93,7 +93,8 @@ class OfficeController {
     const officeData = {
       name: req.body.name,
       slug: req.body.slug,
-      description: req.body.description
+      description: req.body.description,
+      is_active: req.body.is_active
     };
     try {
       const office = await Office.findOne({
