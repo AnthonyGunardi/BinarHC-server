@@ -1,27 +1,36 @@
-const { Office, Office_Phone, Phone } = require('../models');
+const { Posts, User, Event } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 const { Op } = require('sequelize');
 
-class OfficeController {
+class PostController {
   static async create(req, res, next) {
-    const officeData = {
-      name: req.body.name, 
-      description: req.body.description,
-      slug: req.body.slug,
-      is_active: req.body.is_active
-    };
+    const email = req.body.email
+    const userEmail = req.user.email
     try {
-      const office = await Office.findOne({ 
+      const user = await User.findOne({ 
+        where: { email } 
+      });
+      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+      const postData = {
+        title: req.body.title, 
+        slug: req.body.slug,
+        description: req.body.description,
+        type: req.body.type,
+        published_at: req.body.published_at,
+        user_id: user.id,
+        is_active: false
+      };
+      const post = await Posts.findOne({ 
         where: { 
-          slug: officeData.slug
+          slug: postData.slug
         } 
       });
-      if (!Boolean(office)) {
-        const newOffice = await Office.create(officeData);
-        const { id, name, description, slug } = newOffice;
-        sendData(201, { id, name, description, slug }, "Success create office", res);  
+      if (!Boolean(post)) {
+        const newPost = await Posts.create(postData);
+        const { id, name, description, slug } = newPost;
+        sendData(201, { id, name, description, slug }, "Success create post", res);  
       } else {
-        sendResponse(400, 'Office already exist', res);
+        sendResponse(400, 'Post already exist', res);
       }
     }
     catch (err) {
@@ -29,36 +38,32 @@ class OfficeController {
     };
   };
 
-  static async getAllOffices(req, res, next) {
+  static async getAllPosts(req, res, next) {
     try {
-        const offices = await Office.findAll({
-          attributes:['name', 'description', 'slug', 'is_active'],
-          order: [['name', 'asc']]
+        const posts = await Posts.findAll({
+          attributes:['title', 'slug', 'description', 'type', 'is_active'],
+          order: [['title', 'asc']]
         });
-        sendData(200, offices, "Success get all offices", res);
+        sendData(200, posts, "Success get all posts", res);
     } 
     catch (err) {
         next(err)
     };
   };
 
-  static async getOffice(req, res, next) {
+  static async getPost(req, res, next) {
     const slug = req.params.slug
     try {
-        const office = await Office.findOne({
+        const post = await Posts.findOne({
             where: { slug },
-            attributes:['name', 'description', 'slug', 'is_active'],
+            attributes:['title', 'slug', 'description', 'type', 'is_active'],
             include: {
-              model: Office_Phone,
-              attributes:['phone_id'],
-              include: {
-                model: Phone,
-                attributes:['code', 'phone_number', 'is_main']
-              }
+              model: Event,
+              attributes:['title']
             }
         })
-        if (!office) return sendResponse(404, "Office is not found", res)
-        sendData(200, office, "Success get office data", res)
+        if (!post) return sendResponse(404, "Post is not found", res)
+        sendData(200, office, "Success get post data", res)
     } 
     catch (err) {
         next(err)
@@ -127,4 +132,4 @@ class OfficeController {
   };
 };
 
-module.exports = OfficeController;
+module.exports = PostController;
