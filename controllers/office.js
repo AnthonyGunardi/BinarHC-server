@@ -1,5 +1,6 @@
 const { Office, Office_Phone, Phone } = require('../models');
 const { sendResponse, sendData } = require('../helpers/response.js');
+const { Op } = require('sequelize');
 
 class OfficeController {
   static async create(req, res, next) {
@@ -94,22 +95,35 @@ class OfficeController {
       name: req.body.name,
       slug: req.body.slug,
       description: req.body.description,
-      is_active: req.is_active
+      is_active: req.body.is_active
     };
     try {
       const office = await Office.findOne({
         where: { slug: currentSlug }
       })
       if (!office) return sendResponse(404, "Office is not found", res)
-      const updated = await Office.update(officeData, {
-        where: { slug: currentSlug },
-        returning: true
+      const officeWithNewSlug = await Office.findOne({
+        where: { 
+          [Op.and]: [
+            { 
+              id: {
+                [Op.ne]: office.id, 
+              } 
+            },
+            { slug: officeData.slug }
+        ]
+          }
       })
-      sendResponse(200, "Success update office", res)
+      if (officeWithNewSlug) return sendResponse(403, "Slug already used", res)
+      const updated = await Office.update(officeData, {
+        where: { id: office.id }
+      })
+      sendData(200, office, 'success', res)
     }
     catch (err) {
       next(err)
     }
+    
   };
 };
 
