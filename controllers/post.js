@@ -41,8 +41,8 @@ class PostController {
   static async getAllPosts(req, res, next) {
     try {
         const posts = await Posts.findAll({
-          attributes:['title', 'slug', 'description', 'type', 'is_active'],
-          order: [['title', 'asc']]
+          attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'createdAt'],
+          order: [['createdAt', 'desc']]
         });
         sendData(200, posts, "Success get all posts", res);
     } 

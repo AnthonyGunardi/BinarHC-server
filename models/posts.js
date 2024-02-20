@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   Posts.init({
     title: DataTypes.STRING,
     slug: DataTypes.STRING,
+    thumbnail: DataTypes.STRING,
     description: DataTypes.TEXT,
     type: DataTypes.STRING,
     publishied_at: DataTypes.DATE,
