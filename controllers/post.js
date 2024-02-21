@@ -1,4 +1,4 @@
-const { Posts, User, Event } = require('../models/index.js');
+const { Posts, User, Events } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
@@ -9,15 +9,12 @@ class PostController {
   static async create(req, res, next) {
     const email = req.body.email
     const userEmail = req.user.email
-    const file = req.file.path;
+    const file = req.file.path || null;
     try {
       const user = await User.findOne({ 
         where: { email } 
       });
       if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
-      if (!file) {
-        return res.status(400).json({ message: 'No File is selected' });
-      }
       const postData = {
         title: req.body.title, 
         slug: req.body.slug,
@@ -65,38 +62,38 @@ class PostController {
     try {
         const post = await Posts.findOne({
             where: { slug },
-            attributes:['title', 'slug', 'description', 'type', 'is_active'],
+            attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
             include: {
-              model: Event,
+              model: Events,
               attributes:['title']
             }
         })
         if (!post) return sendResponse(404, "Post is not found", res)
-        sendData(200, office, "Success get post data", res)
+        sendData(200, post, "Success get post data", res)
     } 
     catch (err) {
         next(err)
     }
   }
 
-  static async toggleOffice(req, res, next) {
+  static async togglePost(req, res, next) {
     const slug = req.params.slug
-    let officeData = {
+    let postData = {
       is_active: false
     };
     try {
-      const office = await Office.findOne({
+      const post = await Posts.findOne({
         where: { slug }
       })
-      if (!office) return sendResponse(404, "Office is not found", res)
-      if (office.is_active == false) {
-        officeData.is_active = true
+      if (!post) return sendResponse(404, "Post is not found", res)
+      if (post.is_active == false) {
+        postData.is_active = true
       }
-      const updated = await Office.update(officeData, {
+      const updated = await Posts.update(postData, {
         where: { slug },
         returning: true
       })
-      sendResponse(200, "Success update office", res)
+      sendResponse(200, "Success update post", res)
     }
     catch (err) {
       next(err)
@@ -105,34 +102,45 @@ class PostController {
 
   static async update(req, res, next) {
     const currentSlug = req.params.slug
-    const officeData = {
-      name: req.body.name,
-      slug: req.body.slug,
-      description: req.body.description,
-      is_active: req.body.is_active
-    };
+    const email = req.body.email
+    const userEmail = req.user.email
+    const file = req.file.path || null;
     try {
-      const office = await Office.findOne({
+      const user = await User.findOne({ 
+        where: { email } 
+      });
+      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+      const postData = {
+        title: req.body.title, 
+        slug: req.body.slug,
+        thumbnail: file,
+        description: req.body.description,
+        type: req.body.type,
+        published_at: req.body.published_at || new Date(),
+        user_id: user.id,
+        is_active: req.body.is_active
+      };
+      const post = await Posts.findOne({
         where: { slug: currentSlug }
       })
-      if (!office) return sendResponse(404, "Office is not found", res)
-      const officeWithNewSlug = await Office.findOne({
+      if (!post) return sendResponse(404, "Post is not found", res)
+      const postWithNewSlug = await Posts.findOne({
         where: { 
           [Op.and]: [
             { 
               id: {
-                [Op.ne]: office.id, 
+                [Op.ne]: post.id, 
               } 
             },
-            { slug: officeData.slug }
+            { slug: postData.slug }
         ]
           }
       })
-      if (officeWithNewSlug) return sendResponse(403, "Slug already used", res)
-      const updated = await Office.update(officeData, {
-        where: { id: office.id }
+      if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
+      const updated = await Posts.update(postData, {
+        where: { id: post.id }
       })
-      sendData(200, office, 'success', res)
+      sendData(200, post, 'success', res)
     }
     catch (err) {
       next(err)
