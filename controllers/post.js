@@ -14,11 +14,12 @@ class PostController {
       const postData = {
         title: req.body.title, 
         slug: req.body.slug,
+        thumbnail: req.body.thumbnail,
         description: req.body.description,
         type: req.body.type,
-        published_at: req.body.published_at,
+        published_at: req.body.published_at || new Date(),
         user_id: user.id,
-        is_active: false
+        is_active: req.body.is_active
       };
       const post = await Posts.findOne({ 
         where: { 
@@ -41,7 +42,7 @@ class PostController {
   static async getAllPosts(req, res, next) {
     try {
         const posts = await Posts.findAll({
-          attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'createdAt'],
+          attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
           order: [['createdAt', 'desc']]
         });
         sendData(200, posts, "Success get all posts", res);

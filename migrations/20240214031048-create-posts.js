@@ -26,7 +26,7 @@ module.exports = {
       type: {
         type: Sequelize.STRING
       },
-      publishied_at: {
+      published_at: {
         type: Sequelize.DATE
       },
       user_id: {
