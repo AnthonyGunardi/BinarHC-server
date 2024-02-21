@@ -9,7 +9,7 @@ class PostController {
   static async create(req, res, next) {
     const email = req.body.email
     const userEmail = req.user.email
-    const file = req.file.path || null;
+    const file = req.file?.path || null;
     try {
       const user = await User.findOne({ 
         where: { email } 
@@ -33,6 +33,9 @@ class PostController {
       if (!Boolean(post)) {
         const newPost = await Post.create(postData);
         const { id, name, description, slug } = newPost;
+        if (postData.type == 'event') {
+          const newEvent = await Event.create({ post_id: id, is_active: false });
+        }
         sendData(201, { id, name, description, slug }, "Success create post", res);  
       } else {
         sendResponse(400, 'Post already exist', res);
@@ -104,7 +107,7 @@ class PostController {
     const currentSlug = req.params.slug
     const email = req.body.email
     const userEmail = req.user.email
-    const file = req.file.path || null;
+    const file = req.file?.path || null;
     try {
       const user = await User.findOne({ 
         where: { email } 
@@ -138,9 +141,10 @@ class PostController {
       })
       if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
       const updated = await Post.update(postData, {
-        where: { id: post.id }
+        where: { id: post.id },
+        returning: true
       })
-      sendData(200, post, 'success', res)
+      sendResponse(200, "Success update post", res)
     }
     catch (err) {
       next(err)

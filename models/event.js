@@ -16,10 +16,9 @@ module.exports = (sequelize, DataTypes) => {
   }
   Event.init({
     title: DataTypes.STRING,
-    slug: DataTypes.STRING,
     url: DataTypes.STRING,
     point: DataTypes.INTEGER,
-    publishied_at: DataTypes.DATE,
+    published_at: DataTypes.DATE,
     post_id: DataTypes.INTEGER,
     is_active: DataTypes.BOOLEAN
   }, {

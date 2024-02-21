@@ -12,21 +12,13 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
-      slug: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-        validate:{
-            notEmpty: true
-        }
-      },
       url: {
         type: Sequelize.STRING
       },
       point: {
         type: Sequelize.INTEGER
       },
-      publishied_at: {
+      published_at: {
         type: Sequelize.DATE
       },
       post_id: {

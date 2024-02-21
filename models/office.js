@@ -31,20 +31,15 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.TEXT,
     slug: {
       type: DataTypes.STRING,
-      // validate: {
-      //   async isUnique(value, next) {
-      //     try {
-      //       const office = await Office.findOne({ where: { slug: value } })
-      //       if (office) {
-      //         throw new Error('Slug is already registered');
-      //       }
-      //       next()
-      //     }
-      //     catch(err) {
-      //       next(err)
-      //     }
-      //   }
-      // }
+      allowNull: false,
+      validate:{
+        notEmpty: {
+          msg: `Slug is Required`
+        },
+        notNull: {
+          msg: `Slug is Required`
+        }
+      }
     },
     is_active: {
       type: DataTypes.BOOLEAN,

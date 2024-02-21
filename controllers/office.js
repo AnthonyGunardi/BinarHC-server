@@ -116,9 +116,10 @@ class OfficeController {
       })
       if (officeWithNewSlug) return sendResponse(403, "Slug already used", res)
       const updated = await Office.update(officeData, {
-        where: { id: office.id }
+        where: { id: office.id },
+        returning: true
       })
-      sendData(200, office, 'success', res)
+      sendResponse(200, "Success update office", res)
     }
     catch (err) {
       next(err)

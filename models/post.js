@@ -17,7 +17,18 @@ module.exports = (sequelize, DataTypes) => {
   }
   Post.init({
     title: DataTypes.STRING,
-    slug: DataTypes.STRING,
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate:{
+        notEmpty: {
+          msg: `Slug is Required`
+        },
+        notNull: {
+          msg: `Slug is Required`
+        }
+      }
+    },
     thumbnail: DataTypes.STRING,
     description: DataTypes.TEXT,
     type: DataTypes.STRING,
