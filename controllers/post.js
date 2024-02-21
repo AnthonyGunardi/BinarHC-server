@@ -1,4 +1,4 @@
-const { Posts, User, Events } = require('../models/index.js');
+const { Post, User, Event } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
@@ -25,13 +25,13 @@ class PostController {
         user_id: user.id,
         is_active: req.body.is_active
       };
-      const post = await Posts.findOne({ 
+      const post = await Post.findOne({ 
         where: { 
           slug: postData.slug
         } 
       });
       if (!Boolean(post)) {
-        const newPost = await Posts.create(postData);
+        const newPost = await Post.create(postData);
         const { id, name, description, slug } = newPost;
         sendData(201, { id, name, description, slug }, "Success create post", res);  
       } else {
@@ -46,7 +46,7 @@ class PostController {
 
   static async getAllPosts(req, res, next) {
     try {
-        const posts = await Posts.findAll({
+        const posts = await Post.findAll({
           attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
           order: [['createdAt', 'desc']]
         });
@@ -60,11 +60,11 @@ class PostController {
   static async getPost(req, res, next) {
     const slug = req.params.slug
     try {
-        const post = await Posts.findOne({
+        const post = await Post.findOne({
             where: { slug },
             attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
             include: {
-              model: Events,
+              model: Event,
               attributes:['title']
             }
         })
@@ -82,14 +82,14 @@ class PostController {
       is_active: false
     };
     try {
-      const post = await Posts.findOne({
+      const post = await Post.findOne({
         where: { slug }
       })
       if (!post) return sendResponse(404, "Post is not found", res)
       if (post.is_active == false) {
         postData.is_active = true
       }
-      const updated = await Posts.update(postData, {
+      const updated = await Post.update(postData, {
         where: { slug },
         returning: true
       })
@@ -120,11 +120,11 @@ class PostController {
         user_id: user.id,
         is_active: req.body.is_active
       };
-      const post = await Posts.findOne({
+      const post = await Post.findOne({
         where: { slug: currentSlug }
       })
       if (!post) return sendResponse(404, "Post is not found", res)
-      const postWithNewSlug = await Posts.findOne({
+      const postWithNewSlug = await Post.findOne({
         where: { 
           [Op.and]: [
             { 
@@ -137,7 +137,7 @@ class PostController {
           }
       })
       if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
-      const updated = await Posts.update(postData, {
+      const updated = await Post.update(postData, {
         where: { id: post.id }
       })
       sendData(200, post, 'success', res)

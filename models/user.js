@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Point_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Point_Log'})
       User.hasMany(models.Point_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Point_Log'})
       User.hasOne(models.Biodata, {foreignKey: 'user_id', sourceKey: 'id'})
-      User.hasMany(models.Posts, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasMany(models.Post, {foreignKey: 'user_id', sourceKey: 'id'})
     }
   }
   User.init({

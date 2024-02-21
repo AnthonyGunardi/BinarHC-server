@@ -2,7 +2,7 @@ const route = require('express').Router();
 const { PostController } = require('../controllers');
 const authentication = require('../middlewares/userAuthentication');
 const multer = require('multer');
-const diskStorage = require('../middlewares/diskStorage');
+const diskStorage = require('../config/diskStorage');
 
 route.get('/', authentication, PostController.getAllPosts);
 route.post('/', authentication, multer({ storage: diskStorage }).single("thumbnail"), PostController.create);
