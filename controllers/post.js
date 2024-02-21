@@ -1,20 +1,27 @@
 const { Posts, User, Event } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 const { Op } = require('sequelize');
+const fs = require('fs')
+const { promisify } = require('util')
+const unlinkAsync = promisify(fs.unlink)
 
 class PostController {
   static async create(req, res, next) {
     const email = req.body.email
     const userEmail = req.user.email
+    const file = req.file.path;
     try {
       const user = await User.findOne({ 
         where: { email } 
       });
       if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+      if (!file) {
+        return res.status(400).json({ message: 'No File is selected' });
+      }
       const postData = {
         title: req.body.title, 
         slug: req.body.slug,
-        thumbnail: req.body.thumbnail,
+        thumbnail: file,
         description: req.body.description,
         type: req.body.type,
         published_at: req.body.published_at || new Date(),
@@ -35,6 +42,7 @@ class PostController {
       }
     }
     catch (err) {
+      await unlinkAsync(req.file.path)
       next(err)
     };
   };
