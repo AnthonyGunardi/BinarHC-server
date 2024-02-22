@@ -4,47 +4,104 @@ const { Op } = require('sequelize');
 const fs = require('fs')
 const { promisify } = require('util')
 const unlinkAsync = promisify(fs.unlink)
+const path = require('node:path');
 
 class PostController {
   static async create(req, res, next) {
     const email = req.body.email
     const userEmail = req.user.email
     const file = req.file?.path || null;
-    try {
-      const user = await User.findOne({ 
-        where: { email } 
-      });
-      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
-      const postData = {
-        title: req.body.title, 
-        slug: req.body.slug,
-        thumbnail: file,
-        description: req.body.description,
-        type: req.body.type,
-        published_at: req.body.published_at || new Date(),
-        user_id: user.id,
-        is_active: req.body.is_active
-      };
-      const post = await Post.findOne({ 
-        where: { 
-          slug: postData.slug
-        } 
-      });
-      if (!Boolean(post)) {
-        const newPost = await Post.create(postData);
-        const { id, name, description, slug } = newPost;
-        if (postData.type == 'event') {
-          const newEvent = await Event.create({ post_id: id, is_active: false });
+    // try {
+    //   const user = await User.findOne({ 
+    //     where: { email } 
+    //   });
+    //   if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+    //   const postData = {
+    //     title: req.body.title, 
+    //     slug: req.body.slug,
+    //     thumbnail: file,
+    //     description: req.body.description,
+    //     type: req.body.type,
+    //     published_at: req.body.published_at || new Date(),
+    //     user_id: user.id,
+    //     is_active: req.body.is_active
+    //   };
+    //   const post = await Post.findOne({ 
+    //     where: { 
+    //       slug: postData.slug
+    //     } 
+    //   });
+    //   if (!Boolean(post)) {
+    //     const newPost = await Post.create(postData);
+    //     const { id, name, description, slug } = newPost;
+    //     if (postData.type == 'event') {
+    //       const newEvent = await Event.create({ post_id: id, is_active: false });
+    //     }
+    //     sendData(201, { id, name, description, slug }, "Success create post", res);  
+    //   } else {
+    //     sendResponse(400, 'Post already exist', res);
+    //   }
+    // }
+    // catch (err) {
+    //   await unlinkAsync(req.file.path)
+    //   next(err)
+    // };
+  };
+
+  static async create2(req, res, next) {
+    if (req.files === null) return sendResponse(400, "Image null", res)
+    const email = req.body.email
+    const userEmail = req.user.email
+    const file = req.files.file;
+    const fileSize = file.data.length;
+    const ext = path.extname(file?.name);
+    const fileName = file.md5 + ext;
+    const url = `thumbnail-posts/${fileName}`;
+
+    //validation type file
+    const allowedType = ['.png', '.jpg', '.jpeg'];
+    if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
+    
+    //validation size file max 5mb
+    if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+    
+    file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
+        //validation process upload file to server
+        if(err) return sendResponse(502, err.message, res)
+        try {
+          const user = await User.findOne({ 
+            where: { email } 
+          });
+          if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+          const postData = {
+            title: req.body.title, 
+            slug: req.body.slug,
+            thumbnail: url,
+            description: req.body.description,
+            type: req.body.type,
+            published_at: req.body.published_at || new Date(),
+            user_id: user.id,
+            is_active: req.body.is_active
+          };
+          const post = await Post.findOne({ 
+            where: { 
+              slug: postData.slug
+            } 
+          });
+
+          if (!Boolean(post)) {
+            const newPost = await Post.create(postData);
+            const { id, name, description, slug, thumbnail } = newPost;
+            sendData(201, { id, name, description, slug, thumbnail }, "Success create post", res);  
+          } else {
+            sendResponse(400, 'Post already exist', res);
+          }
         }
-        sendData(201, { id, name, description, slug }, "Success create post", res);  
-      } else {
-        sendResponse(400, 'Post already exist', res);
-      }
-    }
-    catch (err) {
-      await unlinkAsync(req.file.path)
-      next(err)
-    };
+        catch (err) {
+          await unlinkAsync(req.file.path)
+          next(err)
+        };
+    })
   };
 
   static async getAllPosts(req, res, next) {

@@ -7,11 +7,19 @@ const cors = require('cors');
 const port = process.env.PORT || 5006;
 const routes = require('./routes');
 const errorHandler = require('./middlewares/error-handler');
+// const path = require('node:path');
+// const { fileURLToPath } = require('node:url');
+const fileUpload = require ('express-fileupload');
 
 //MIDDLEWARES
+app.use(fileUpload())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static('uploads'));
+app.use(express.static('public'));
+
+// const _filename = fileURLToPath(import.meta.url);
+// const _dirname = path.dirname(_filename);
+// app.use("/images", express.static(path.join(_dirname, "./public/images")))
 app.use(cors());
 //routes
 app.get('/', (req, res) => {
