@@ -4,6 +4,7 @@ const PositionController = require('./position');
 const PostController = require('./post');
 const EventController = require('./event');
 const PointController = require('./point');
+const ProvinceController = require('./indonesia_province');
 
 module.exports = { 
   UserController, 
@@ -11,5 +12,6 @@ module.exports = {
   PositionController, 
   PostController, 
   EventController, 
-  PointController
+  PointController,
+  ProvinceController
 };
