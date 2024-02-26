@@ -26,6 +26,7 @@ class UserController {
       }
     }
     catch (err) {
+      console.log('ini errornya', err)
       next(err)
     };
   };
@@ -77,7 +78,44 @@ class UserController {
         where: {
           email: userData.email,
           password: userData.password,
-          is_admin: true,
+          is_admin: 'admin',
+          is_active: true
+        }
+      });
+      if (!user) {
+        res.status(401).json({ message: 'Wrong Username or Password' });
+      } else {
+          const payload = {
+            firstname: user.firstname,
+            lastname: user.lastname,
+            nip: user.nip,
+            email: user.email,
+            photo: user.photo,
+            is_admin: user.is_admin
+          };
+          const accessToken = AccessToken.generate(payload);
+          const data = {
+            accessToken
+          }
+          sendData(200, data, "Login successful", res)         
+      }
+    }
+    catch (err) {
+      next(err);
+    }
+  };
+
+  static async SuperAdminLogin(req, res, next) {
+    const userData = {
+      email: req.body.email,
+      password: req.body.password
+    };
+    try {
+      const user = await User.findOne({
+        where: {
+          email: userData.email,
+          password: userData.password,
+          is_admin: 'superadmin',
           is_active: true
         }
       });

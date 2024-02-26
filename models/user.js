@@ -92,7 +92,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     photo: DataTypes.STRING,
     is_admin: {
-      type: DataTypes.BOOLEAN,
+      type: DataTypes.ENUM,
+      values: ['active', 'pending', 'deleted'],
       defaultValue: false
     },
     is_active: {

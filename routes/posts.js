@@ -8,7 +8,8 @@ route.get('/', authentication, PostController.getAllPosts);
 // route.post('/', authentication, multer({ storage: diskStorage }).single("thumbnail"), PostController.create);
 route.post('/', authentication, PostController.create2);
 route.get('/:slug', authentication, PostController.getPost);
-route.put('/:slug', authentication, multer({ storage: diskStorage }).single("thumbnail"), PostController.update);
+// route.put('/:slug', authentication, multer({ storage: diskStorage }).single("thumbnail"), PostController.update);
+route.put('/:slug', authentication, PostController.update2);
 route.put('/toggle/:slug', authentication, PostController.togglePost);
 
 module.exports = route;
