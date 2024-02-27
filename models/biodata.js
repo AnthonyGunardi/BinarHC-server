@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       Biodata.belongsTo(models.User, {foreignKey: 'user_id', targetKey: 'id'})
       Biodata.belongsTo(models.Office, {foreignKey: 'office_id', targetKey: 'id'})
       Biodata.belongsTo(models.Position, {foreignKey: 'position_id', targetKey: 'id'})
+      Biodata.belongsTo(models.Echelon, {foreignKey: 'echelon_id', targetKey: 'id'})
     }
   }
   Biodata.init({

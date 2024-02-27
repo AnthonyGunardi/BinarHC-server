@@ -1,12 +1,11 @@
 const { Post, User, Event } = require('../models/index.js');
-const { sendResponse, sendData } = require('../helpers/response.js');
 const { Op } = require('sequelize');
+const { sendResponse, sendData } = require('../helpers/response.js');
 const fs = require('fs')
 const { promisify } = require('util')
 const unlinkAsync = promisify(fs.unlink)
 const path = require('node:path');
-const moment = require('moment');
-const {createTimeStamp} = require('../helpers/timestamp.js');
+const { createTimeStamp } = require('../helpers/timestamp.js');
 
 class PostController {
   static async create(req, res, next) {

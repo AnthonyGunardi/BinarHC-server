@@ -1,4 +1,5 @@
 const { User, Point } = require('../models');
+const { Op } = require('sequelize');
 const AccessToken = require('../helpers/accessToken');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
@@ -78,45 +79,11 @@ class UserController {
         where: {
           email: userData.email,
           password: userData.password,
-          is_admin: 'admin',
-          is_active: true
-        }
-      });
-      if (!user) {
-        res.status(401).json({ message: 'Wrong Username or Password' });
-      } else {
-          const payload = {
-            firstname: user.firstname,
-            lastname: user.lastname,
-            nip: user.nip,
-            email: user.email,
-            photo: user.photo,
-            is_admin: user.is_admin
-          };
-          const accessToken = AccessToken.generate(payload);
-          const data = {
-            accessToken
-          }
-          sendData(200, data, "Login successful", res)         
-      }
-    }
-    catch (err) {
-      next(err);
-    }
-  };
-
-  static async SuperAdminLogin(req, res, next) {
-    const userData = {
-      email: req.body.email,
-      password: req.body.password
-    };
-    try {
-      const user = await User.findOne({
-        where: {
-          email: userData.email,
-          password: userData.password,
-          is_admin: 'superadmin',
-          is_active: true
+          [Op.or]: [
+            { is_admin: 'admin' },
+            { is_admin: 'superadmin' }
+          ],
+          is_active: true,
         }
       });
       if (!user) {
@@ -152,6 +119,38 @@ class UserController {
         }
       });
       sendData(200, users, "Success get all users", res)
+    }
+    catch (err) {
+      next(err);
+    }
+  };
+
+  static async findAllEmployees(req, res, next) {
+    try {
+      const users = await User.findAll({
+        where: { is_admin: 'employee' },
+        attributes:['firstname', 'lastname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
+        order: [['firstname', 'asc']],
+        include: {
+          model: Point,
+          attributes:['balance']
+        }
+      });
+      sendData(200, users, "Success get all employees", res)
+    }
+    catch (err) {
+      next(err);
+    }
+  };
+
+  static async findAllAdmins(req, res, next) {
+    try {
+      const users = await User.findAll({
+        where: { is_admin: 'admin' },
+        attributes:['firstname', 'lastname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
+        order: [['firstname', 'asc']]
+      });
+      sendData(200, users, "Success get all admins", res)
     }
     catch (err) {
       next(err);
