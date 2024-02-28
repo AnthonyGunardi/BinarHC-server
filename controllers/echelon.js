@@ -59,8 +59,8 @@ class EchelonController {
   static async update(req, res, next) {
     const currentCode = req.params.code
     const echelonData = {
-      title: req.body.name,
-      code: req.body.slug,
+      title: req.body.title,
+      code: req.body.code,
       description: req.body.description
     };
     try {
@@ -76,13 +76,13 @@ class EchelonController {
                 [Op.ne]: echelon.id, 
               } 
             },
-            { code: echelonData.slug }
+            { code: echelonData.code }
         ]
           }
       })
       if (echelonWithNewCode) return sendResponse(403, "Code is already used", res)
       const updated = await Echelon.update(echelonData, {
-        where: { code: currentCode },
+        where: { id: echelon.id },
         returning: true
       })
       sendResponse(200, "Success update echelon", res)

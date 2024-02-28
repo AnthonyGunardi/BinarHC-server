@@ -27,6 +27,18 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate:{
+        notEmpty: {
+          msg: `Slug is Required`
+        },
+        notNull: {
+          msg: `Slug is Required`
+        }
+      }
+    },
     description: DataTypes.TEXT
   }, {
     sequelize,
