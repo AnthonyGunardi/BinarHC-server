@@ -1,7 +1,10 @@
-const { User, Point, Biodata } = require('../models');
+const { User, Point, Biodata, Office, Position, Echelon } = require('../models');
 const { Op } = require('sequelize');
 const AccessToken = require('../helpers/accessToken');
-const { sendResponse, sendData } = require('../helpers/response.js');
+const fs = require('fs')
+const path = require('node:path');
+const { sendResponse, sendData } = require('../helpers/response');
+const { generateNIP } = require('../helpers/generateNip');
 
 class UserController {
   static async registerAdmin(req, res, next) {
@@ -29,18 +32,54 @@ class UserController {
     };
   };
 
-  static async registerEmployee(req, res, next) {
-    const userData = {
-      firstname: req.body.firstname, 
-      lastname: req.body.lastname, 
-      nip: req.body.nip, 
-      email: req.body.email, 
-      password: req.body.password, 
-      photo: req.body.photo, 
-      is_admin: 'employee', 
-      is_active: req.body.is_active
-    };
+  static async registerEmployee(req, res, next) {    let url = null
+    //upload file if req.files isn't null
+    if (req.files !== null) {
+      const file = req.files.photo;
+      const fileSize = file.data.length;
+      const ext = path.extname(file.name);
+      const fileName = file.md5 + ext;
+      const allowedType = ['.png', '.jpg', '.jpeg'];
+      url = `user-profiles/${fileName}`;
+
+      //validate file type
+      if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+      //validate file size max 5mb
+      if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+      //place the file on server
+      file.mv(`./public/images/user-profiles/${fileName}`, async (err) => {
+        if(err) return sendResponse(502, err.message, res)
+      })
+    }
+
     try {
+      const users = await User.findAll({
+        where: { is_admin: 'employee' }
+      });
+      const userCount = users.length + 1;
+      const nip = generateNIP('BINAR', userCount);
+      const office = await Office.findOne({
+        where: {slug: req.body.office_slug}
+      })
+      if (!office) return sendResponse(404, "Office not found", res)
+      const position = await Position.findOne({
+        where: {slug: req.body.position_slug}
+      })
+      if (!position) return sendResponse(404, "Position not found", res)
+      const echelon = await Echelon.findOne({
+        where: {code: req.body.echelon_code}
+      })
+      if (!echelon) return sendResponse(404, "Echelon not found", res)
+      const userData = {
+        firstname: req.body.firstname, 
+        lastname: req.body.lastname, 
+        nip, 
+        email: req.body.email, 
+        // password: req.body.password, 
+        photo: url, 
+        is_admin: 'employee', 
+        is_active: req.body.is_active
+      };
       const user = await User.findOne({ 
         where:
           {
@@ -55,10 +94,10 @@ class UserController {
       } else {
         const newUser = await User.create(userData);
         const { id, firstname, lastname, email } = newUser;
-        const { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, office_id, position_id, echelon_id } = req.body
+        const { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, office_slug, position_slug, echelon_code } = req.body
         const newPoint = await Point.create({ balance: 0, user_id: id});
         const newBiodata = await Biodata.create(
-          { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, office_id, position_id, echelon_id, 
+          { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, office_id: office.id, position_id: position.id, echelon_id: echelon.id, 
             user_id: id
           }
         );

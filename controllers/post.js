@@ -2,8 +2,6 @@ const { Post, User, Event } = require('../models/index.js');
 const { Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 const fs = require('fs')
-const { promisify } = require('util')
-const unlinkAsync = promisify(fs.unlink)
 const path = require('node:path');
 const { createTimeStamp } = require('../helpers/timestamp.js');
 
