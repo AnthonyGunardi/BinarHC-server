@@ -2,10 +2,12 @@ const route = require('express').Router();
 const { UserController } = require('../controllers');
 const authentication = require('../middlewares/userAuthentication');
 
+route.get('/:nip', authentication, UserController.getEmployee);
+route.put('/:nip', authentication, UserController.update);
 route.get('/employees', authentication, UserController.findAllEmployees);
 route.get('/admins', authentication, UserController.findAllAdmins);
-route.post('/register', UserController.register);
+route.post('/admins/register', authentication, UserController.registerAdmin);
+route.post('/register', authentication, UserController.registerEmployee);
 route.post('/login', UserController.login);
-route.post('/adminlogin', UserController.adminLogin);
 
 module.exports = route;

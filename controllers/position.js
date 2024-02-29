@@ -33,59 +33,59 @@ class PositionController {
       sendData(200, positions, "Success Get All Positions", res)
     } catch (error) {
         sendResponse(500, error.message, res)
-    };
+      };
   };
 
-    static async getPosition(req, res) {
-      const slug = req.params.slug
-      try {
-        const position = await Position.findOne({
-            where: { slug },
-            attributes:['title', 'slug', 'description']
-        })
-        if (!position) return sendResponse(404, "Position not found", res)
-        sendData(200, position, "Success Get Detail Position", res)
-      } 
-      catch (error) {
-        sendResponse(500, error.message, res)
-      }
+  static async getPosition(req, res) {
+    const slug = req.params.slug
+    try {
+      const position = await Position.findOne({
+          where: { slug },
+          attributes:['title', 'slug', 'description']
+      })
+      if (!position) return sendResponse(404, "Position not found", res)
+      sendData(200, position, "Success Get Detail Position", res)
+    } 
+    catch (error) {
+      sendResponse(500, error.message, res)
     }
+  }
 
-    static async update(req, res, next) {
-      const currentSlug = req.params.slug
-      const positionData = {
-        title: req.body.title,
-        slug: req.body.slug,
-        description: req.body.description
-      };
-      try {
-        const position = await Position.findOne({
-          where: { slug: currentSlug }
-        })
-        if (!position) return sendResponse(404, "Position is not found", res)
-        const positionWithNewSlug = await Position.findOne({
-          where: { 
-            [Op.and]: [
-              { 
-                id: {
-                  [Op.ne]: position.id, 
-                } 
-              },
-              { slug: positionData.slug }
-          ]
-            }
-        })
-        if (positionWithNewSlug) return sendResponse(403, "Slug is already used", res)
-        const updated = await Position.update(positionData, {
-          where: { id: position.id },
-          returning: true
-        })
-        sendResponse(200, "Success update position", res)
-      }
-      catch (err) {
-        next(err)
-      }
+  static async update(req, res, next) {
+    const currentSlug = req.params.slug
+    const positionData = {
+      title: req.body.title,
+      slug: req.body.slug,
+      description: req.body.description
     };
+    try {
+      const position = await Position.findOne({
+        where: { slug: currentSlug }
+      })
+      if (!position) return sendResponse(404, "Position is not found", res)
+      const positionWithNewSlug = await Position.findOne({
+        where: { 
+          [Op.and]: [
+            { 
+              id: {
+                [Op.ne]: position.id, 
+              } 
+            },
+            { slug: positionData.slug }
+        ]
+          }
+      })
+      if (positionWithNewSlug) return sendResponse(403, "Slug is already used", res)
+      const updated = await Position.update(positionData, {
+        where: { id: position.id },
+        returning: true
+      })
+      sendResponse(200, "Success update position", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  };
 };
 
 module.exports = PositionController;

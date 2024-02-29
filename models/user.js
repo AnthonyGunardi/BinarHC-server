@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Point, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasMany(models.Point_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Point_Log'})
       User.hasMany(models.Point_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Point_Log'})
-      User.hasOne(models.Biodata, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasOne(models.Biodata, {foreignKey: 'user_id', sourceKey: 'id', as: 'Biodata'})
       User.hasMany(models.Post, {foreignKey: 'user_id', sourceKey: 'id'})
     }
   }
@@ -46,18 +46,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         notNull: {
           msg: 'NIP is Required'
-        },
-        async isUnique(value, next) {
-          try {
-            const user = await User.findOne({ where: { nip: value } })
-            if (user) {
-              throw new Error('NIP is already registered');
-            }
-            next()
-          }
-          catch(err) {
-            next(err)
-          }
         }
       }
     },
