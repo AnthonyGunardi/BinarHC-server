@@ -32,7 +32,8 @@ class UserController {
     };
   };
 
-  static async registerEmployee(req, res, next) {    let url = null
+  static async registerEmployee(req, res, next) {    
+    let url = null
     //upload file if req.files isn't null
     if (req.files !== null) {
       const file = req.files.photo;
@@ -53,29 +54,36 @@ class UserController {
     }
 
     try {
+      const office_slug = req.body.office_slug;
+      const position_slug = req.body.position_slug;
+      const echelon_code = req.body.echelon_code;
+
+      //check if the office_slug, position_slug & echelon_code are valid
+      const office = await Office.findOne({
+        where: {slug: office_slug}
+      })
+      if (!office) return sendResponse(404, "Office not found", res)
+      const position = await Position.findOne({
+        where: {slug: position_slug}
+      })
+      if (!position) return sendResponse(404, "Position not found", res)
+      const echelon = await Echelon.findOne({
+        where: {code: echelon_code}
+      })
+      if (!echelon) return sendResponse(404, "Echelon not found", res)
+
+      //generate NIP
       const users = await User.findAll({
         where: { is_admin: 'employee' }
       });
       const userCount = users.length + 1;
       const nip = generateNIP('BINAR', userCount);
-      const office = await Office.findOne({
-        where: {slug: req.body.office_slug}
-      })
-      if (!office) return sendResponse(404, "Office not found", res)
-      const position = await Position.findOne({
-        where: {slug: req.body.position_slug}
-      })
-      if (!position) return sendResponse(404, "Position not found", res)
-      const echelon = await Echelon.findOne({
-        where: {code: req.body.echelon_code}
-      })
-      if (!echelon) return sendResponse(404, "Echelon not found", res)
+
       const userData = {
         firstname: req.body.firstname, 
         lastname: req.body.lastname, 
         nip, 
         email: req.body.email, 
-        // password: req.body.password, 
         photo: url, 
         is_admin: 'employee', 
         is_active: req.body.is_active
@@ -89,20 +97,17 @@ class UserController {
             ]
           }
       });
-      if (Boolean(user)) {
-        sendResponse(400, 'User already exist', res)
-      } else {
-        const newUser = await User.create(userData);
-        const { id, firstname, lastname, email } = newUser;
-        const { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, office_slug, position_slug, echelon_code } = req.body
-        const newPoint = await Point.create({ balance: 0, user_id: id});
-        const newBiodata = await Biodata.create(
-          { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, office_id: office.id, position_id: position.id, echelon_id: echelon.id, 
-            user_id: id
-          }
-        );
-        sendData(201, { firstname, lastname, email, balance: newPoint.balance }, "User is created", res);  
-      }
+      if (Boolean(user)) return sendResponse(400, 'User already exist', res)
+      const newUser = await User.create(userData);
+      const { id, firstname, lastname, email } = newUser;
+      const { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status } = req.body
+      const newPoint = await Point.create({ balance: 0, user_id: id});
+      const newBiodata = await Biodata.create(
+        { birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, office_id: office.id, position_id: position.id, echelon_id: echelon.id, 
+          user_id: id
+        }
+      );
+      sendData(201, { firstname, lastname, email, balance: newPoint.balance }, "User is created", res);  
     }
     catch (err) {
       next(err)

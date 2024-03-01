@@ -5,7 +5,10 @@ const EchelonController = require('./echelon');
 const PostController = require('./post');
 const EventController = require('./event');
 const PointController = require('./point');
-const ProvinceController = require('./indonesia_province');
+const IndonesiaProvinceController = require('./indonesia_province');
+const IndonesiaCityController = require('./indonesia_city');
+const IndonesiaDistrictController = require('./indonesia_district');
+const IndonesiaVillageController = require('./indonesia_village');
 
 module.exports = { 
   UserController, 
@@ -15,5 +18,8 @@ module.exports = {
   PostController, 
   EventController, 
   PointController,
-  ProvinceController
+  IndonesiaProvinceController,
+  IndonesiaCityController,
+  IndonesiaDistrictController,
+  IndonesiaVillageController
 };
