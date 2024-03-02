@@ -1,16 +1,14 @@
 const { Post, User, Event } = require('../models/index.js');
 const { Op } = require('sequelize');
-const { sendResponse, sendData } = require('../helpers/response.js');
 const fs = require('fs')
 const path = require('node:path');
+const { sendResponse, sendData } = require('../helpers/response.js');
 const { createTimeStamp } = require('../helpers/timestamp.js');
 
 class PostController {
   static async create(req, res, next) {
-    const email = req.body.email
-    const userEmail = req.user.email
-    let url = null
     //upload file if req.files isn't null
+    let url = null
     if (req.files !== null) {
       const file = req.files.file;
       const fileSize = file.data.length;
@@ -30,32 +28,25 @@ class PostController {
     }
     
     try {
+      const userEmail = req.user.email
+      const { email, title, slug, description, type, published_at, is_active } = req.body;
+
+      //check if user is exist and is login
       const user = await User.findOne({ 
         where: { email } 
       });
       if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
-      const postData = {
-        title: req.body.title, 
-        slug: req.body.slug,
-        thumbnail: url,
-        description: req.body.description,
-        type: req.body.type,
-        published_at: req.body.published_at,
-        user_id: user.id,
-        is_active: req.body.is_active
-      };
+
+      //check if post slug already exist
       const post = await Post.findOne({ 
-        where: { 
-          slug: postData.slug
-        } 
+        where: { slug } 
       });
-      if (!Boolean(post)) {
-        const newPost = await Post.create(postData);
-        const { id, name, description, slug, thumbnail } = newPost;
-        sendData(201, { id, name, description, slug, thumbnail }, "Success create post", res);  
-      } else {
-        sendResponse(400, 'Post already exist', res);
-      }
+      if (Boolean(post)) return sendResponse(400, 'Post already exist', res);
+
+      const newPost = await Post.create(
+        { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }
+      );
+      sendData(201, { id: newPost.id, name: newPost.name, slug: newPost.slug, description: newPost.description }, "Success create post", res);  
     }
     catch (err) {
       next(err)
