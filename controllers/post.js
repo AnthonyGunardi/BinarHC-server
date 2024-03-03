@@ -111,24 +111,28 @@ class PostController {
 
   static async update(req, res, next) {
     const currentSlug = req.params.slug
-    const email = req.body.email
     const userEmail = req.user.email
-
+    const { email, title, slug, description, type, scheduleDate, scheduleTime, is_active } = req.body;
+    const timeStamp = createTimeStamp(scheduleDate, scheduleTime);
+    const date = new Date(timeStamp);
     try {
+      //check if user is exist and is login
       const user = await User.findOne({ 
         where: { email } 
       });
       if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
 
+      //check if post slug is exist
       const post = await Post.findOne({
         where: { slug: currentSlug }
       })
       if (!post) return sendResponse(404, "Post is not found", res)
+
+      //upload file if req.files isn't null
       let url;
-      if(req.files === null) {
+      if(!req.files) {
         url = post.thumbnail;
       } else {
-        //upload file if req.files isn't null
         const file = req.files.thumbnail;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
@@ -144,23 +148,14 @@ class PostController {
         file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
           if(err) return sendResponse(502, err.message, res)
         })
+        //delete previous file on server
         if (post.thumbnail !== null) {
           const filePath = `./public/images/${post.thumbnail}`;
           fs.unlinkSync(filePath);
         }
       }
-      const timeStamp = createTimeStamp(req.body.scheduleDate, req.body.scheduleTime)
-      const date = new Date(timeStamp)
-      const postData = {
-        title: req.body.title, 
-        slug: req.body.slug,
-        thumbnail: url,
-        description: req.body.description,
-        type: req.body.type,
-        published_at: date,
-        user_id: user.id,
-        is_active: req.body.is_active
-      };
+
+      //check if new post slug is already used
       const postWithNewSlug = await Post.findOne({
         where: { 
           [Op.and]: [
@@ -169,15 +164,16 @@ class PostController {
                 [Op.ne]: post.id, 
               } 
             },
-            { slug: postData.slug }
-        ]
-          }
+            { slug }
+          ]
+        }
       })
       if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
-      const updated = await Post.update(postData, {
-        where: { id: post.id },
-        returning: true
-      })
+
+      const updatedPost = await Post.update(
+        { title, slug, thumbnail: url, description, type, published_at: date, user_id: user.id, is_active }, 
+        { where: { id: post.id }, returning: true }
+      )
       sendResponse(200, "Success update post", res)
     }
     catch (err) {
