@@ -1,0 +1,183 @@
+const { Reward, User, Event } = require('../models/index.js');
+const { Op } = require('sequelize');
+const fs = require('fs')
+const path = require('node:path');
+const { sendResponse, sendData } = require('../helpers/response.js');
+const { createTimeStamp } = require('../helpers/timestamp.js');
+
+class RewardController {
+  static async create(req, res, next) {
+    //upload file if req.files isn't null
+    let url = null
+    if (req.files !== null) {
+      const file = req.files.photo;
+      const fileSize = file.data.length;
+      const ext = path.extname(file.name);
+      const fileName = file.md5 + ext;
+      const allowedType = ['.png', '.jpg', '.jpeg'];
+      url = `reward-photos/${fileName}`;
+
+      //validate file type
+      if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+      //validate file size max 5mb
+      if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+      //place the file on server
+      file.mv(`./public/images/reward-photos/${fileName}`, async (err) => {
+        if(err) return sendResponse(502, err.message, res)
+      })
+    }
+    
+    try {
+      const userEmail = req.user.email
+      const { email, title, description, point, published_at, expired_at, is_active } = req.body;
+
+      //check if user is exist and is login
+      const user = await User.findOne({ 
+        where: { email } 
+      });
+      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+
+      //check if reward title already exist
+      const reward = await Reward.findOne({ 
+        where: { title } 
+      });
+      if (Boolean(reward)) return sendResponse(400, 'Reward already exist', res);
+
+      const newReward = await Reward.create(
+        { email, title, description, point, photo: url, published_at, expired_at, user_id: user.id, is_active }
+      );
+      sendData(201, { id: newReward.id, name: newReward.name, description: newReward.description, point: newReward.point }, "Success create reward", res);  
+    }
+    catch (err) {
+      next(err)
+    };
+  };
+
+  static async getAllRewards(req, res, next) {
+    try {
+      const posts = await Reward.findAll({
+        attributes:['title', 'description', 'point', 'photo', 'published_at', 'expired_at', 'user_id', 'is_active'],
+        order: [['title', 'asc']]
+      });
+      sendData(200, posts, "Success get all rewards", res);
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
+  static async getReward(req, res, next) {
+    const id = req.params.id
+    try {
+      const reward = await Reward.findOne({
+        where: { id },
+        attributes:['title', 'description', 'point', 'photo', 'published_at', 'expired_at', 'user_id', 'is_active']
+      })
+      if (!reward) return sendResponse(404, "Reward is not found", res)
+      sendData(200, reward, "Success get reward data", res)
+    } 
+    catch (err) {
+      next(err)
+    }
+  }
+
+  static async toggleReward(req, res, next) {
+    const id = req.params.id
+    let rewardData = {
+      is_active: false
+    };
+    try {
+      const reward = await Reward.findOne({
+        where: { id }
+      })
+      if (!reward) return sendResponse(404, "Reward is not found", res)
+      if (reward.is_active == false) {
+        rewardData.is_active = true
+      }
+      const updated = await Reward.update(rewardData, {
+        where: { id },
+        returning: true
+      })
+      sendResponse(200, "Success update reward", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  };
+
+  static async update(req, res, next) {
+    const currentTitle = req.params.title
+    const userEmail = req.user.email
+    const { email, title, description, point, publishedDate, publishedTime, expiredDate, expiredTime, is_active } = req.body;
+    const publishedTimestamp = createTimeStamp(publishedDate, publishedTime);
+    const published_date = new Date(publishedTimestamp);
+    const expiredTimestamp = createTimeStamp(expiredDate, expiredTime);
+    const expired_date = new Date(expiredTimestamp);
+    try {
+      //check if user is exist and is login
+      const user = await User.findOne({ 
+        where: { email } 
+      });
+      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+
+      //check if post slug is exist
+      const reward = await Reward.findOne({
+        where: { title: currentTitle }
+      })
+      if (!reward) return sendResponse(404, "Reward is not found", res)
+
+      //upload file if req.files isn't null
+      let url;
+      if(!req.files) {
+        url = post.thumbnail;
+      } else {
+        const file = req.files.thumbnail;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `thumbnail-posts/${fileName}`;
+    
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+        //delete previous file on server
+        if (post.thumbnail !== null) {
+          const filePath = `./public/images/${post.thumbnail}`;
+          fs.unlinkSync(filePath);
+        }
+      }
+
+      //check if new post slug is already used
+      const postWithNewSlug = await Post.findOne({
+        where: { 
+          [Op.and]: [
+            { 
+              id: {
+                [Op.ne]: post.id, 
+              } 
+            },
+            { slug }
+          ]
+        }
+      })
+      if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
+
+      const updatedPost = await Post.update(
+        { title, slug, thumbnail: url, description, type, published_at: date, user_id: user.id, is_active }, 
+        { where: { id: post.id }, returning: true }
+      )
+      sendResponse(200, "Success update post", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  };
+};
+
+module.exports = RewardController;

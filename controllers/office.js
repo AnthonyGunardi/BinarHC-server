@@ -32,7 +32,9 @@ class OfficeController {
   static async getAllOffices(req, res, next) {
     try {
         const offices = await Office.findAll({
-          attributes:['name', 'description', 'slug', 'is_active'],
+          attributes: {
+            exclude: ['id']
+          },
           order: [['name', 'asc']]
         });
         sendData(200, offices, "Success get all offices", res);
