@@ -106,13 +106,13 @@ class RewardController {
   };
 
   static async update(req, res, next) {
-    const currentTitle = req.params.title
+    const id = req.params.id
     const userEmail = req.user.email
     const { email, title, description, point, publishedDate, publishedTime, expiredDate, expiredTime, is_active } = req.body;
     const publishedTimestamp = createTimeStamp(publishedDate, publishedTime);
-    const published_date = new Date(publishedTimestamp);
+    const published_at = new Date(publishedTimestamp);
     const expiredTimestamp = createTimeStamp(expiredDate, expiredTime);
-    const expired_date = new Date(expiredTimestamp);
+    const expired_at = new Date(expiredTimestamp);
     try {
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -120,59 +120,59 @@ class RewardController {
       });
       if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
 
-      //check if post slug is exist
+      //check if reward is exist
       const reward = await Reward.findOne({
-        where: { title: currentTitle }
+        where: { id }
       })
       if (!reward) return sendResponse(404, "Reward is not found", res)
 
       //upload file if req.files isn't null
       let url;
       if(!req.files) {
-        url = post.thumbnail;
+        url = reward.photo;
       } else {
-        const file = req.files.thumbnail;
+        const file = req.files.photo;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;
         const allowedType = ['.png', '.jpg', '.jpeg'];
-        url = `thumbnail-posts/${fileName}`;
+        url = `reward-photos/${fileName}`;
     
         //validate file type
         if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
         //validate file size max 5mb
         if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
         //place the file on server
-        file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
+        file.mv(`./public/images/reward-photos/${fileName}`, async (err) => {
           if(err) return sendResponse(502, err.message, res)
         })
         //delete previous file on server
-        if (post.thumbnail !== null) {
-          const filePath = `./public/images/${post.thumbnail}`;
+        if (reward.photo !== null) {
+          const filePath = `./public/images/${reward.photo}`;
           fs.unlinkSync(filePath);
         }
       }
 
-      //check if new post slug is already used
-      const postWithNewSlug = await Post.findOne({
+      //check if new post title is already used
+      const rewardWithNewTitle = await Reward.findOne({
         where: { 
           [Op.and]: [
             { 
               id: {
-                [Op.ne]: post.id, 
+                [Op.ne]: id, 
               } 
             },
-            { slug }
+            { title: reward.title }
           ]
         }
       })
-      if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
+      if (rewardWithNewTitle) return sendResponse(403, "Title already used", res)
 
-      const updatedPost = await Post.update(
-        { title, slug, thumbnail: url, description, type, published_at: date, user_id: user.id, is_active }, 
-        { where: { id: post.id }, returning: true }
+      const updatedReward = await Reward.update(
+        { email, title, description, point, photo: url, published_at, expired_at, user_id: user.id, is_active }, 
+        { where: { id: reward.id }, returning: true }
       )
-      sendResponse(200, "Success update post", res)
+      sendResponse(200, "Success update reward", res)
     }
     catch (err) {
       next(err)

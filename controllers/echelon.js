@@ -31,7 +31,9 @@ class EchelonController {
   static async getAllEchelons(req, res, next) {
     try {
         const echelons = await Echelon.findAll({
-          attributes:['title', 'code', 'description'],
+          attributes: {
+            exclude: ['id']
+          },
           order: [['code', 'asc']]
         });
         sendData(200, echelons, "Success get all echelons", res);

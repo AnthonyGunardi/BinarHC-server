@@ -197,7 +197,27 @@ class UserController {
             {
               model: Biodata,
               as: 'Biodata',
-              attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'job', 'marital_status' ]
+              attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'job', 'marital_status' ],
+              include: [
+                {
+                  model: Office,
+                  attributes: {
+                    exclude: ['id']
+                  }
+                },
+                {
+                  model: Position,
+                  attributes: {
+                    exclude: ['id']
+                  }
+                },
+                {
+                  model: Echelon,
+                  attributes: {
+                    exclude: ['id']
+                  }
+                }
+              ]
             },
             {
               model: Point,
@@ -212,6 +232,31 @@ class UserController {
       next(error)
     }
   }
+
+  static async toggleUser(req, res, next) {
+    const currentNip = req.params.nip
+    console.log(currentNip)
+    let userData = {
+      is_active: false
+    };
+    try {
+      const user = await User.findOne({
+        where: { nip: currentNip }
+      })
+      if (!user) return sendResponse(404, "User is not found", res)
+      if (user.is_active == false) {
+        userData.is_active = true
+      }
+      const updated = await User.update(userData, {
+        where: { id: user.id },
+        returning: true
+      })
+      sendResponse(200, "Success update user", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  };
 
   static async update(req, res, next) {
     const currentNip = req.params.nip

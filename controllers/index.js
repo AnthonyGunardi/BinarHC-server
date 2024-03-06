@@ -6,6 +6,7 @@ const PostController = require('./post');
 const EventController = require('./event');
 const PointController = require('./point');
 const RewardController = require('./reward');
+const RewardLogController = require('./reward_log');
 const IndonesiaProvinceController = require('./indonesia_province');
 const IndonesiaCityController = require('./indonesia_city');
 const IndonesiaDistrictController = require('./indonesia_district');
@@ -20,6 +21,7 @@ module.exports = {
   EventController, 
   PointController,
   RewardController,
+  RewardLogController,
   IndonesiaProvinceController,
   IndonesiaCityController,
   IndonesiaDistrictController,
