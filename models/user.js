@@ -11,13 +11,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      User.hasMany(models.Reward, {foreignKey: 'user_id', sourceKey: 'id'})
-      User.hasMany(models.Reward_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Reward_Log'})
-      User.hasMany(models.Reward_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Reward_Log'})
+      User.hasOne(models.Biodata, {foreignKey: 'user_id', sourceKey: 'id', as: 'Biodata'})
       User.hasOne(models.Point, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasMany(models.Point_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Point_Log'})
       User.hasMany(models.Point_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Point_Log'})
-      User.hasOne(models.Biodata, {foreignKey: 'user_id', sourceKey: 'id', as: 'Biodata'})
+      User.hasMany(models.Reward, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasMany(models.Reward_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Reward_Log'})
+      User.hasMany(models.Reward_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Reward_Log'})
       User.hasMany(models.Post, {foreignKey: 'user_id', sourceKey: 'id'})
     }
   }

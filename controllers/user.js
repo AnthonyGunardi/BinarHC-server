@@ -1,4 +1,4 @@
-const { User, Point, Biodata, Office, Position, Echelon } = require('../models');
+const { User, Point, Biodata, Office, Position, Echelon, Reward_Log, Reward } = require('../models');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -221,9 +221,20 @@ class UserController {
             },
             {
               model: Point,
-              attributes:['balance']
-            }
-        ]
+              attributes: ['balance']
+            },
+            {
+              model: Reward_Log,
+              as: 'Obtained_Reward_Log',
+              attributes: {
+                exclude: ['id']
+              },
+              include: {
+                model: Reward,
+                attributes: ['title', 'description', 'point']
+              }
+            },
+          ]
       })
       if (!user) return sendResponse(404, "User not found", res)
       sendData(200, user, "Success Get Detail User", res)
