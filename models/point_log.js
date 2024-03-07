@@ -42,7 +42,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: DataTypes.TEXT,
     user_id: DataTypes.INTEGER,
-    admin_id: DataTypes.INTEGER
+    admin_id: DataTypes.INTEGER,
+    last_balance: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Point_Log',

@@ -7,26 +7,6 @@ const { createTimeStamp } = require('../helpers/timestamp.js');
 
 class PostController {
   static async create(req, res, next) {
-    //upload file if req.files isn't null
-    let url = null
-    if (req.files !== null) {
-      const file = req.files.file;
-      const fileSize = file.data.length;
-      const ext = path.extname(file.name);
-      const fileName = file.md5 + ext;
-      const allowedType = ['.png', '.jpg', '.jpeg'];
-      url = `thumbnail-posts/${fileName}`;
-
-      //validate file type
-      if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
-      //validate file size max 5mb
-      if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-      //place the file on server
-      file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
-        if(err) return sendResponse(502, err.message, res)
-      })
-    }
-    
     try {
       const userEmail = req.user.email
       const { email, title, slug, description, type, published_at, is_active } = req.body;
@@ -42,6 +22,26 @@ class PostController {
         where: { slug } 
       });
       if (Boolean(post)) return sendResponse(400, 'Post already exist', res);
+
+      //upload file if req.files isn't null
+      let url = null
+      if (req.files !== null) {
+        const file = req.files.file;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `thumbnail-posts/${fileName}`;
+
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
 
       const newPost = await Post.create(
         { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }

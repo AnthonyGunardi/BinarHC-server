@@ -7,26 +7,6 @@ const { createTimeStamp } = require('../helpers/timestamp.js');
 
 class RewardController {
   static async create(req, res, next) {
-    //upload file if req.files isn't null
-    let url = null
-    if (req.files !== null) {
-      const file = req.files.photo;
-      const fileSize = file.data.length;
-      const ext = path.extname(file.name);
-      const fileName = file.md5 + ext;
-      const allowedType = ['.png', '.jpg', '.jpeg'];
-      url = `reward-photos/${fileName}`;
-
-      //validate file type
-      if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
-      //validate file size max 5mb
-      if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-      //place the file on server
-      file.mv(`./public/images/reward-photos/${fileName}`, async (err) => {
-        if(err) return sendResponse(502, err.message, res)
-      })
-    }
-    
     try {
       const userEmail = req.user.email
       const { email, title, description, point, published_at, expired_at, is_active } = req.body;
@@ -43,6 +23,26 @@ class RewardController {
       });
       if (Boolean(reward)) return sendResponse(400, 'Reward already exist', res);
 
+      //upload file if req.files isn't null
+      let url = null
+      if (req.files !== null) {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `reward-photos/${fileName}`;
+
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/reward-photos/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
+
       const newReward = await Reward.create(
         { email, title, description, point, photo: url, published_at, expired_at, user_id: user.id, is_active }
       );
@@ -55,11 +55,15 @@ class RewardController {
 
   static async getAllRewards(req, res, next) {
     try {
-      const posts = await Reward.findAll({
-        attributes:['title', 'description', 'point', 'photo', 'published_at', 'expired_at', 'user_id', 'is_active'],
+      const rewards = await Reward.findAll({
+        include: {
+          model: User,
+          as: 'Author',
+          attributes: ['firstname', 'lastname' , 'email']
+        },
         order: [['title', 'asc']]
       });
-      sendData(200, posts, "Success get all rewards", res);
+      sendData(200, rewards, "Success get all rewards", res);
     } 
     catch (err) {
         next(err)
@@ -108,11 +112,7 @@ class RewardController {
   static async update(req, res, next) {
     const id = req.params.id
     const userEmail = req.user.email
-    const { email, title, description, point, publishedDate, publishedTime, expiredDate, expiredTime, is_active } = req.body;
-    const publishedTimestamp = createTimeStamp(publishedDate, publishedTime);
-    const published_at = new Date(publishedTimestamp);
-    const expiredTimestamp = createTimeStamp(expiredDate, expiredTime);
-    const expired_at = new Date(expiredTimestamp);
+    const { email, title, description, point, published_at, expired_at, is_active } = req.body;
     try {
       //check if user is exist and is login
       const user = await User.findOne({ 

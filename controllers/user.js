@@ -1,10 +1,11 @@
-const { User, Point, Biodata, Office, Position, Echelon, Reward_Log, Reward } = require('../models');
+const { User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward } = require('../models');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
 const AccessToken = require('../helpers/accessToken');
 const { sendResponse, sendData } = require('../helpers/response');
 const { generateNIP } = require('../helpers/generateNip');
+const { formatDate } = require('../helpers/formatDate');
 
 class UserController {
   static async registerAdmin(req, res, next) {
@@ -31,12 +32,12 @@ class UserController {
     try {
       const { firstname, lastname, email, is_active } = req.body
       const user = await User.findOne({ where: { email } });
-      if (!Boolean(user)) {
+      if (Boolean(user)) return sendResponse(400, 'User already exist', res)
         const newUser = await User.create({ firstname, lastname, email, photo: url, is_admin: 'admin', is_active });
         sendData(201, { firstname: newUser.firstname, lastname: newUser.lastname, email: newUser.email }, "User is created", res);   
-      } else {
-        sendResponse(400, 'User already exist', res)
-      }
+
+        
+
     }
     catch (err) {
       next(err)
@@ -44,32 +45,13 @@ class UserController {
   };
 
   static async registerEmployee(req, res, next) {    
-    //upload file if req.files isn't null
-    let url = null;
-    if (req.files !== null) {
-      const file = req.files.photo;
-      const fileSize = file.data.length;
-      const ext = path.extname(file.name);
-      const fileName = file.md5 + ext;
-      const allowedType = ['.png', '.jpg', '.jpeg'];
-      url = `user-profiles/${fileName}`;
-
-      //validate file type
-      if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
-      //validate file size max 5mb
-      if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-      //place the file on server
-      file.mv(`./public/images/user-profiles/${fileName}`, async (err) => {
-        if(err) return sendResponse(502, err.message, res)
-      })
-    }
-
     try {
       const { 
         firstname, lastname, email, is_active, 
         office_slug, position_slug, echelon_code, 
         birthday, hometown, hire_date, religion, gender, last_education, job, marital_status 
       } = req.body;
+      const password = formatDate(birthday);
 
       //check if the office_slug, position_slug & echelon_code are valid
       const office = await Office.findOne({
@@ -104,7 +86,27 @@ class UserController {
       });
       if (Boolean(user)) return sendResponse(400, 'User already exist', res)
 
-      const newUser = await User.create({ firstname, lastname, nip, email, photo: url, is_admin: 'employee', is_active });
+      //upload file if req.files isn't null
+      let url = null;
+      if (req.files !== null) {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `user-profiles/${fileName}`;
+
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/user-profiles/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
+
+      const newUser = await User.create({ firstname, lastname, nip, email, password, photo: url, is_admin: 'employee', is_active });
       const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
       const newBiodata = await Biodata.create(
         { 
@@ -134,6 +136,43 @@ class UserController {
       });
       if (!user) {
         res.status(401).json({ message: 'Wrong Username or Password' });
+      } else {
+          const payload = {
+            firstname: user.firstname,
+            lastname: user.lastname,
+            nip: user.nip,
+            email: user.email,
+            photo: user.photo,
+            is_admin: user.is_admin
+          };
+          const accessToken = AccessToken.generate(payload);
+          const data = {
+            accessToken
+          }
+          sendData(200, data, "Login successful", res)      
+      }
+    }
+    catch (err) {
+      next(err);
+    }
+  };
+
+  static async employeeLogin(req, res, next) {
+    const userData = {
+      nip: req.body.nip,
+      password: req.body.password,
+    };
+    try {
+      const user = await User.findOne({
+        where: {
+          nip: userData.nip,
+          password: userData.password,
+          is_admin: 'employee',
+          is_active: true
+        }
+      });
+      if (!user) {
+        res.status(401).json({ message: 'Wrong NIP or Password' });
       } else {
           const payload = {
             firstname: user.firstname,
@@ -224,6 +263,13 @@ class UserController {
               attributes: ['balance']
             },
             {
+              model: Point_Log,
+              as: 'Obtained_Point_Log',
+              attributes: {
+                exclude: ['id']
+              }
+            },
+            {
               model: Reward_Log,
               as: 'Obtained_Reward_Log',
               attributes: {
@@ -234,6 +280,9 @@ class UserController {
                 attributes: ['title', 'description', 'point']
               }
             },
+          ],
+          order: [
+            [ 'Obtained_Point_Log', 'updatedAt', 'desc' ]
           ]
       })
       if (!user) return sendResponse(404, "User not found", res)
@@ -246,7 +295,6 @@ class UserController {
 
   static async toggleUser(req, res, next) {
     const currentNip = req.params.nip
-    console.log(currentNip)
     let userData = {
       is_active: false
     };
@@ -269,41 +317,67 @@ class UserController {
     }
   };
 
-  static async update(req, res, next) {
-    const currentNip = req.params.nip
-    const userData = {
-      firstname: req.body.firstname, 
-      lastname: req.body.lastname, 
-      nip: req.body.nip, 
-      email: req.body.email, 
-      password: req.body.password, 
-      photo: req.body.photo,
-      is_active: req.body.is_active
-    };
-    const userBio = {
-      birthday: req.body.birthday, 
-      hometown: req.body.hometown, 
-      hire_date: req.body.hire_date, 
-      religion: req.body.religion, 
-      gender: req.body.gender, 
-      last_education: req.body.last_education,
-      job: req.body.job,
-      marital_status: req.body.marital_status,
-      office_id: req.body.office_id,
-      position_id: req.body.position_id,
-      echelon_id: req.body.echelon_id
-    };
+  static async resetEmployeePassword(req, res, next) {
+    const email = req.params.email;
     try {
       const user = await User.findOne({
-        where: { nip: currentNip },
-        include: 
-          { model: Biodata,
-          as: 'Biodata',
-          attributes:['id', 'birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'job', 'marital_status' ]
+        where: { email, is_admin: 'employee' },
+        include: { 
+          model: Biodata,
+          as: 'Biodata'
         }
       })
       if (!user) return sendResponse(404, "User is not found", res)
       if (!user.Biodata || user.Biodata === null ) return sendResponse(404, "User biodata is not found", res)
+
+      //set default password with user's birthday date in DDMMYYYY format
+      const password = formatDate(user.Biodata.birthday);
+      const updated = await User.update({ password }, {
+        where: { id: user.id },
+        returning: true
+      })
+      sendResponse(200, "Success update password", res)
+
+    }
+    catch (err) {
+      next(err)
+    }
+  }
+
+  static async updateEmployee(req, res, next) {
+    const currentNip = req.params.nip
+    const { 
+      firstname, lastname, email, password, is_active, 
+      office_slug, position_slug, echelon_code, 
+      birthday, hometown, hire_date, religion, gender, last_education, job, marital_status 
+    } = req.body;
+    try {
+      //check if user is exist
+      const user = await User.findOne({
+        where: { nip: currentNip },
+        include: { 
+          model: Biodata,
+          as: 'Biodata'
+        }
+      })
+      if (!user) return sendResponse(404, "User is not found", res)
+      if (!user.Biodata || user.Biodata === null ) return sendResponse(404, "User biodata is not found", res)
+
+      //check if the office_slug, position_slug & echelon_code are valid
+      const office = await Office.findOne({
+        where: {slug: office_slug}
+      });
+      if (!office) return sendResponse(404, "Office not found", res)
+      const position = await Position.findOne({
+        where: {slug: position_slug}
+      });
+      if (!position) return sendResponse(404, "Position not found", res)
+      const echelon = await Echelon.findOne({
+        where: {code: echelon_code}
+      });
+      if (!echelon) return sendResponse(404, "Echelon not found", res)
+
+      //check if new NIP or new email is already used
       const userWithNewNip = await User.findOne({
         where: { 
           [Op.and]: [
@@ -312,19 +386,58 @@ class UserController {
                 [Op.ne]: user.id, 
               } 
             },
-            { nip: userData.nip }
-        ]
-          }
+            { email }
+          ]
+        }
       })
-      if (userWithNewNip) return sendResponse(403, "NIP is already used", res)
-      const updatedUser = await User.update(userData, {
+      if (userWithNewNip) return sendResponse(403, "NIP or email is already used", res)
+
+      //upload file if req.files isn't null
+      let url;
+      if(!req.files) {
+        url = user.photo;
+      } else {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `user-profiles/${fileName}`;
+    
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/user-profiles/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+        //delete previous file on server
+        if (user.photo !== null) {
+          const filePath = `./public/images/${user.photo}`;
+          fs.unlinkSync(filePath);
+        }
+      }
+
+      const updatedUser = await User.update(
+        { 
+          firstname, lastname, password, email, photo: url, is_active 
+        }, 
+        {
         where: { id: user.id },
         returning: true
-      })
-      const updatedBiodata = await Biodata.update(userBio, {
+        }
+      )
+      const updatedBiodata = await Biodata.update(
+        { 
+          birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, 
+          office_id: office.id, position_id: position.id, echelon_id: echelon.id, user_id: user.id
+        }, 
+        {
         where: { id: user.Biodata.id },
         returning: true
-      })
+        }
+      )
       sendResponse(200, "Success update user", res)
     }
     catch (err) {
