@@ -9,35 +9,35 @@ const { formatDate } = require('../helpers/formatDate');
 
 class UserController {
   static async registerAdmin(req, res, next) {
-    //upload file if req.files isn't null
-    let url = null;
-    if (req.files !== null) {
-      const file = req.files.photo;
-      const fileSize = file.data.length;
-      const ext = path.extname(file.name);
-      const fileName = file.md5 + ext;
-      const allowedType = ['.png', '.jpg', '.jpeg'];
-      url = `admin-profiles/${fileName}`;
-
-      //validate file type
-      if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
-      //validate file size max 5mb
-      if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-      //place the file on server
-      file.mv(`./public/images/admin-profiles/${fileName}`, async (err) => {
-        if(err) return sendResponse(502, err.message, res)
-      })
-    }
-
     try {
-      const { firstname, lastname, email, is_active } = req.body
+      const { firstname, lastname, email, password, is_active } = req.body
+
+      //check if user is already exist
       const user = await User.findOne({ where: { email } });
       if (Boolean(user)) return sendResponse(400, 'User already exist', res)
-        const newUser = await User.create({ firstname, lastname, email, photo: url, is_admin: 'admin', is_active });
-        sendData(201, { firstname: newUser.firstname, lastname: newUser.lastname, email: newUser.email }, "User is created", res);   
 
-        
+      //upload file if req.files isn't null
+      let url = null;
+      if (req.files !== null) {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `admin-profiles/${fileName}`;
 
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/admin-profiles/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
+
+      const newUser = await User.create({ firstname, lastname, email, password, photo: url, is_admin: 'admin', is_active });
+      sendData(201, { firstname: newUser.firstname, lastname: newUser.lastname, email: newUser.email }, "User is created", res);
     }
     catch (err) {
       next(err)
@@ -121,36 +121,37 @@ class UserController {
     };
   };
 
-  static async login(req, res, next) {
+  static async adminLogin(req, res, next) {
     const userData = {
       email: req.body.email,
       password: req.body.password,
     };
     try {
+      //check if admin or super admin user is exist
       const user = await User.findOne({
         where: {
           email: userData.email,
           password: userData.password,
+          is_admin: {
+            [Op.or]: ['admin', 'superadmin']
+          },
           is_active: true
         }
       });
-      if (!user) {
-        res.status(401).json({ message: 'Wrong Username or Password' });
-      } else {
-          const payload = {
-            firstname: user.firstname,
-            lastname: user.lastname,
-            nip: user.nip,
-            email: user.email,
-            photo: user.photo,
-            is_admin: user.is_admin
-          };
-          const accessToken = AccessToken.generate(payload);
-          const data = {
-            accessToken
-          }
-          sendData(200, data, "Login successful", res)      
-      }
+      if (!user) return sendResponse(401, "Wrong Email or Password", res)
+
+      //generate Access Token
+      const payload = {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        nip: user.nip,
+        email: user.email,
+        photo: user.photo,
+        is_admin: user.is_admin
+      };
+      const accessToken = AccessToken.generate(payload);
+      const data = { accessToken }
+      sendData(200, data, "Login successful", res)      
     }
     catch (err) {
       next(err);
@@ -163,6 +164,7 @@ class UserController {
       password: req.body.password,
     };
     try {
+      //check if user is exist
       const user = await User.findOne({
         where: {
           nip: userData.nip,
@@ -171,23 +173,20 @@ class UserController {
           is_active: true
         }
       });
-      if (!user) {
-        res.status(401).json({ message: 'Wrong NIP or Password' });
-      } else {
-          const payload = {
-            firstname: user.firstname,
-            lastname: user.lastname,
-            nip: user.nip,
-            email: user.email,
-            photo: user.photo,
-            is_admin: user.is_admin
-          };
-          const accessToken = AccessToken.generate(payload);
-          const data = {
-            accessToken
-          }
-          sendData(200, data, "Login successful", res)      
-      }
+      if (!user) return sendResponse(401, "Wrong NIP or Password", res)
+
+      //generate Access Token
+      const payload = {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        nip: user.nip,
+        email: user.email,
+        photo: user.photo,
+        is_admin: user.is_admin
+      };
+      const accessToken = AccessToken.generate(payload);
+      const data = { accessToken }
+      sendData(200, data, "Login successful", res)      
     }
     catch (err) {
       next(err);

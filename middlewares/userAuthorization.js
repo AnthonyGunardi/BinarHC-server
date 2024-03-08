@@ -1,12 +1,12 @@
 const { User } = require('../models')
 
 async function authorization (req, res, next) {
-  const id = req.params.id
+  const nip = req.params.nip
   const user = await User.findOne({
-    where: { id }
+    where: { nip }
   })
   if (user) {
-    if (user.id === req.user.id) {
+    if (user.nip === req.user.nip) {
       next()
     } else {
       res.status(403).json({ message: "You are unauthorized to do this action!" })

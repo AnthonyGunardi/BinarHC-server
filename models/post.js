@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Post.belongsTo(models.User, {foreignKey: 'user_id', targetKey: 'id'})
       Post.hasOne(models.Event, {foreignKey: 'post_id', sourceKey: 'id'})
+      Post.hasMany(models.Post_Gallery, {foreignKey: 'post_id', sourceKey: 'id'})
     }
   }
   Post.init({

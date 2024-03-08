@@ -3,6 +3,7 @@ const OfficeController = require('./office');
 const PositionController = require('./position');
 const EchelonController = require('./echelon');
 const PostController = require('./post');
+const PostGalleryController = require('./post_gallery');
 const EventController = require('./event');
 const PointController = require('./point');
 const RewardController = require('./reward');
@@ -17,7 +18,8 @@ module.exports = {
   OfficeController, 
   PositionController,
   EchelonController,
-  PostController, 
+  PostController,
+  PostGalleryController, 
   EventController, 
   PointController,
   RewardController,

@@ -3,7 +3,7 @@ const SECRET_KEY= process.env.SECRET_KEY
 
 class AccessToken {
   static generate (payload) {
-    return jwt.sign(payload, SECRET_KEY, {expiresIn: '5d'})
+    return jwt.sign(payload, SECRET_KEY, {expiresIn: '3d'})
   };
 
   static verify (token, callback) {

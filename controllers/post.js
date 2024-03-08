@@ -1,4 +1,4 @@
-const { Post, User, Event } = require('../models/index.js');
+const { Post, User, Event, Post_Gallery } = require('../models/index.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -74,7 +74,13 @@ class PostController {
         attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
         include: {
           model: Event,
-          attributes:['title']
+          attributes: {
+            exclude: ['id']
+          },
+          model: Post_Gallery,
+          attributes: {
+            exclude: ['id']
+          },
         }
       })
       if (!post) return sendResponse(404, "Post is not found", res)
