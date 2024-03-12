@@ -3,7 +3,6 @@ const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
 const { sendResponse, sendData } = require('../helpers/response.js');
-const { createTimeStamp } = require('../helpers/timestamp.js');
 
 class PostController {
   static async create(req, res, next) {
@@ -118,9 +117,7 @@ class PostController {
   static async update(req, res, next) {
     const currentSlug = req.params.slug
     const userEmail = req.user.email
-    const { email, title, slug, description, type, scheduleDate, scheduleTime, is_active } = req.body;
-    const timeStamp = createTimeStamp(scheduleDate, scheduleTime);
-    const date = new Date(timeStamp);
+    const { email, title, slug, description, type, published_at, is_active } = req.body;
     try {
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -177,7 +174,7 @@ class PostController {
       if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
 
       const updatedPost = await Post.update(
-        { title, slug, thumbnail: url, description, type, published_at: date, user_id: user.id, is_active }, 
+        { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }, 
         { where: { id: post.id }, returning: true }
       )
       sendResponse(200, "Success update post", res)
