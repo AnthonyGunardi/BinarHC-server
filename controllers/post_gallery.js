@@ -21,7 +21,7 @@ class PostGalleryController {
       const post = await Post.findOne({ 
         where: { slug } 
       });
-      if (!post) return sendResponse(400, 'Post is not found', res);
+      if (!post) return sendResponse(404, 'Post is not found', res);
 
       //upload file if req.files isn't null
       let url = null
@@ -58,7 +58,7 @@ class PostGalleryController {
       const post = await Post.findOne({ 
         where: { slug } 
       });
-      if (!post) return sendResponse(400, 'Post is not found', res);
+      if (!post) return sendResponse(404, 'Post is not found', res);
 
       const galleries = await Post_Gallery.findAll({
         where: { post_id: post.id },

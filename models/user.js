@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Reward_Log, {foreignKey: 'user_id', sourceKey: 'id', as: 'Obtained_Reward_Log'})
       User.hasMany(models.Reward_Log, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Approved_Reward_Log'})
       User.hasMany(models.Post, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasMany(models.Family, {foreignKey: 'user_id', sourceKey: 'id'})
     }
   }
   User.init({

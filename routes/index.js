@@ -8,6 +8,7 @@ const eventRoute = require('./events');
 const pointRoute = require('./points');
 const rewardRoute = require('./rewards');
 const rewardLogRoute = require('./rewards_logs');
+const familyRoute = require('./family');
 const provinceRoute = require('./indonesia_provinces');
 const cityRoute = require('./indonesia_cities');
 const districtRoute = require('./indonesia_districts');
@@ -22,6 +23,7 @@ route.use('/v1/events', eventRoute);
 route.use('/v1/points', pointRoute);
 route.use('/v1/rewards', rewardRoute);
 route.use('/v1/reward_logs', rewardLogRoute);
+route.use('/v1/families', familyRoute)
 route.use('/v1/provinces', provinceRoute);
 route.use('/v1/cities', cityRoute);
 route.use('/v1/districts', districtRoute);
