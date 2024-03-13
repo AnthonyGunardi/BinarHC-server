@@ -70,6 +70,87 @@ class RewardController {
     };
   };
 
+  static async getRewardsByScroll(req, res, next) {
+    try {
+      const lastID = parseInt(req.query.lastID) || 0;
+      const limit = parseInt(req.query.limit) || 0;
+      const search = req.query.key || "";
+      const today = new Date();
+      let result = [];
+
+      if (lastID < 1) {
+        const results = await Reward.findAll({
+          where: {
+            [Op.or]: [
+              {title: {
+                [Op.like]: '%'+search+'%'
+              }}, 
+              {description:{
+                [Op.like]: '%'+search+'%'
+              }}
+            ],
+            published_at: {
+              [Op.lte]: today
+            },
+            expired_at: {
+              [Op.gt]: today
+            },
+            is_active: true
+          },
+          attributes: {
+            exclude: ['user_id']
+          },
+          limit: limit,
+          order: [
+            ['published_at', 'DESC']
+          ]
+        })
+        result = results
+      } else {
+        const results = await Reward.findAll({
+          where: {
+            id: {
+              [Op.lt]: lastID
+            },
+            [Op.or]: [
+              {title: {
+                [Op.like]: '%'+search+'%'
+              }}, 
+              {description: {
+                [Op.like]: '%'+search+'%'
+              }}
+            ],
+            published_at: {
+              [Op.lte]: today
+            },
+            expired_at: {
+              [Op.gt]: today
+            },
+            is_active: true
+          },
+          attributes: {
+            exclude: ['user_id']
+          },
+          limit: limit,
+          order: [
+            ['published_at', 'DESC']
+          ]
+        })
+        result = results
+      }
+      
+      const payload = {
+        datas: result,
+        lastID: result.length ? result[result.length - 1].id : 0,
+        hasMore: result.length >= limit ? true : false
+      };
+      sendData(200, payload, "Success get rewards data", res)
+    } 
+    catch (err) {
+      next(err)
+    };
+  };
+
   static async getReward(req, res, next) {
     const id = req.params.id
     try {

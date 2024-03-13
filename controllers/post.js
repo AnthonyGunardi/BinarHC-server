@@ -65,6 +65,83 @@ class PostController {
     };
   };
 
+  static async getPostsByScroll(req, res, next) {
+    try {
+      const lastID = parseInt(req.query.lastID) || 0;
+      const limit = parseInt(req.query.limit) || 0;
+      const search = req.query.key || "";
+      const today = new Date();
+      let result = [];
+
+      if (lastID < 1) {
+        //get posts where its title or description is like keyword, and its published date is less than today
+        const results = await Post.findAll({
+          where: {
+            [Op.or]: [
+              {title: {
+                [Op.like]: '%'+search+'%'
+              }}, 
+              {description:{
+                [Op.like]: '%'+search+'%'
+              }}
+            ],
+            published_at: {
+              [Op.lte]: today
+            },
+            is_active: true
+          },
+          attributes: {
+            exclude: ['user_id']
+          },
+          limit: limit,
+          order: [
+            ['published_at', 'DESC']
+          ]
+        })
+        result = results
+      } else {
+        // get posts where its ID is less than lastID, and its title or description is like keyword, and its published date is less than today
+        const results = await Post.findAll({
+          where: {
+            id: {
+              [Op.lt]: lastID
+            },
+            [Op.or]: [
+              {title: {
+                [Op.like]: '%'+search+'%'
+              }}, 
+              {description:{
+              [Op.like]: '%'+search+'%'
+              }}
+            ],
+            published_at: {
+              [Op.lte]: today
+            },
+            is_active: true
+          },
+          attributes: {
+            exclude: ['user_id']
+          },
+          limit: limit,
+          order: [
+            ['published_at', 'DESC']
+          ]
+        })
+        result = results
+      }
+      
+      const payload = {
+        datas: result,
+        lastID: result.length ? result[result.length - 1].id : 0,
+        hasMore: result.length >= limit ? true : false
+      };
+      sendData(200, payload, "Success get posts data", res)
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
   static async getPost(req, res, next) {
     const slug = req.params.slug
     try {
