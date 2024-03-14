@@ -33,7 +33,7 @@ class FamilyController {
       const families = await Family.findAll({
         where: { user_id: user.id },
         attributes: {
-          exclude: ['id']
+          exclude: ['user_id']
         },
         order: [['fullname', 'asc']]
       });

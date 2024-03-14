@@ -63,7 +63,7 @@ class PostGalleryController {
       const galleries = await Post_Gallery.findAll({
         where: { post_id: post.id },
         attributes: {
-          exclude: ['id']
+          exclude: ['post_id']
         },
         order: [['title', 'asc']]
       });
@@ -82,7 +82,7 @@ class PostGalleryController {
         include: {
           model: Post,
           attributes: {
-            exclude: ['id']
+            exclude: ['id', 'user_id']
           },
         }
       })
@@ -109,7 +109,7 @@ class PostGalleryController {
       if(!req.files) {
         url = gallery.path;
       } else {
-        const file = req.files.thumbnail;
+        const file = req.files.file;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;
