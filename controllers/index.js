@@ -13,6 +13,8 @@ const IndonesiaProvinceController = require('./indonesia_province');
 const IndonesiaCityController = require('./indonesia_city');
 const IndonesiaDistrictController = require('./indonesia_district');
 const IndonesiaVillageController = require('./indonesia_village');
+const UserAddressController = require('./user_address');
+const OfficeAddressController = require('./office_address');
 
 module.exports = { 
   UserController, 
@@ -29,5 +31,7 @@ module.exports = {
   IndonesiaProvinceController,
   IndonesiaCityController,
   IndonesiaDistrictController,
-  IndonesiaVillageController
+  IndonesiaVillageController,
+  UserAddressController,
+  OfficeAddressController
 };

@@ -1,4 +1,7 @@
-const { User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward } = require('../models');
+const { 
+  User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Address, 
+  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province 
+} = require('../models');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -279,9 +282,52 @@ class UserController {
                 attributes: ['title', 'description', 'point']
               }
             },
+            {
+              model: Family,
+              attributes: {
+                exclude: ['user_id']
+              }
+            },
+            {
+              model: User_Address,
+              attributes: {
+                exclude: ['user_id']
+              },
+              include: {
+                model: Address,
+                attributes: {
+                  exclude: ['village_id']
+                },
+                include: {
+                  model: Indonesia_Village,
+                  attributes: {
+                    exclude: ['id', 'district_id', 'created_at', 'updated_at']
+                  },
+                  include: {
+                    model: Indonesia_District,
+                    attributes: {
+                      exclude: ['id', 'city_id', 'created_at', 'updated_at']
+                    },
+                    include: {
+                      model: Indonesia_City,
+                      attributes: {
+                        exclude: ['id', 'province_id', 'created_at', 'updated_at']
+                      },
+                      include: {
+                        model: Indonesia_Province,
+                        attributes: {
+                          exclude: ['id', 'created_at', 'updated_at']
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           ],
           order: [
-            [ 'Obtained_Point_Log', 'updatedAt', 'desc' ]
+            [ 'Obtained_Point_Log', 'updatedAt', 'desc' ],
+            [ 'Obtained_Reward_Log', 'updatedAt', 'desc' ]
           ]
       })
       if (!user) return sendResponse(404, "User not found", res)

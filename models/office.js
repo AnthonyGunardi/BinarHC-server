@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Office.hasMany(models.Biodata, {foreignKey: 'office_id', sourceKey: 'id'})
+      Office.hasMany(models.Office_Address, {foreignKey: 'office_id', sourceKey: 'id'})
       Office.hasMany(models.Office_Phone, {foreignKey: 'office_id', sourceKey: 'id'})
     }
   }
