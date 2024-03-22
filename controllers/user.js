@@ -1,6 +1,6 @@
 const { 
   User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Address, 
-  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province 
+  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Phone
 } = require('../models');
 const { Op } = require('sequelize');
 const fs = require('fs')
@@ -321,6 +321,18 @@ class UserController {
                       }
                     }
                   }
+                }
+              }
+            },
+            {
+              model: User_Phone,
+              attributes: {
+                exclude: ['user_id']
+              },
+              include: {
+                model: Phone,
+                attributes: {
+                  exclude: ['id']
                 }
               }
             }

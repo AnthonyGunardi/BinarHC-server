@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Phone.hasMany(models.Office_Phone, {foreignKey: 'phone_id', sourceKey: 'id'})
+      Phone.hasMany(models.User_Phone, {foreignKey: 'phone_id', sourceKey: 'id'})
     }
   }
   Phone.init({

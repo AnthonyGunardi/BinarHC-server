@@ -16,6 +16,7 @@ const districtRoute = require('./indonesia_districts');
 const villageRoute = require('./indonesia_villages');
 const userAddressRoute = require('./user_address');
 const officeAddressRoute = require('./office_address');
+const userPhoneRoute = require('./user_phone');
 
 route.use('/v1/users', userRoute);
 route.use('/v1/offices', officeRoute);
@@ -32,7 +33,8 @@ route.use('/v1/provinces', provinceRoute);
 route.use('/v1/cities', cityRoute);
 route.use('/v1/districts', districtRoute);
 route.use('/v1/villages', villageRoute);
-route.use('/v1/user_address', userAddressRoute);
-route.use('/v1/office_address', officeAddressRoute);
+route.use('/v1/user_addresses', userAddressRoute);
+route.use('/v1/office_addresses', officeAddressRoute);
+route.use('/v1/user_phones', userPhoneRoute);
 
 module.exports = route;

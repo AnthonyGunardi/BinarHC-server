@@ -1,0 +1,76 @@
+const { User_Phone, User, Phone } = require('../models/index.js');
+const { sendResponse, sendData } = require('../helpers/response.js');
+
+class UserPhoneController {
+  static async create(req, res, next) {
+    try {
+      const nip = req.params.nip;
+      const { code, phone, is_main } = req.body;
+
+      //get user_id
+      const user = await User.findOne({ 
+        where: { nip } 
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      const phone_data = await Phone.create( { code, phone, is_main } );
+      const user_phone = await User_Phone.create( { user_id: user.id, phone_id: phone_data.id } );
+      sendData(201, { id: user_phone.id, code: phone_data.code, phone: phone_data.phone }, "Success create user phone", res);  
+    }
+    catch (err) {
+      next(err)
+    };
+  };
+
+  static async getPhones(req, res, next) {
+    const nip = req.params.nip;
+    try {
+      //get user_id
+      const user = await User.findOne({ 
+        where: { nip } 
+      });
+      if (!user) return sendResponse(404, 'User is not found', res);
+
+      const phones = await User_Phones.findAll({
+        where: { user_id: user.id },
+        attributes: {
+          exclude: ['user_id']
+        },
+        include: {
+          model: Phone,
+          attributes: {
+            exclude: ['id']
+          }
+        }
+
+      });
+      sendData(200, phones, "Success get all user phones", res);
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
+  static async update(req, res, next) {
+    const id = req.params.id
+    const { code, phone, is_main } = req.body;
+    try {
+      //Get phone_id
+      const user_phone = await User_Phone.findOne({
+        where: { id }
+      })
+      if (!user_phone) return sendResponse(404, "User phone is not found", res)
+
+      const updated = await Phone.update(
+        { code, phone, is_main }, 
+        { where: { id: user_phone.phone_id }, returning: true }
+      )
+      sendResponse(200, "Success update user phone", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  };
+};
+
+module.exports = UserPhoneController;
