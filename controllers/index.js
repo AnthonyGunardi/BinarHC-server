@@ -16,6 +16,8 @@ const IndonesiaVillageController = require('./indonesia_village');
 const UserAddressController = require('./user_address');
 const OfficeAddressController = require('./office_address');
 const UserPhoneController = require('./user_phone');
+const FamilyPhoneController = require('./family_phone');
+const OfficePhoneController = require('./office_phone');
 
 module.exports = { 
   UserController, 
@@ -35,5 +37,7 @@ module.exports = {
   IndonesiaVillageController,
   UserAddressController,
   OfficeAddressController,
-  UserPhoneController
+  UserPhoneController,
+  FamilyPhoneController,
+  OfficePhoneController
 };

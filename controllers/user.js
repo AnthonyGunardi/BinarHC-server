@@ -286,6 +286,18 @@ class UserController {
               model: Family,
               attributes: {
                 exclude: ['user_id']
+              },
+              include: {
+                model: Family_Phone,
+                attributes: {
+                  exclude: ['family_id']
+                },
+                include: {
+                  model: Phone,
+                  attributes: {
+                    exclude: ['id']
+                  }
+                }
               }
             },
             {
