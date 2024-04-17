@@ -2,7 +2,16 @@ const {
   User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Address, 
   Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Phone
 } = require('../models');
-const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
+let sequelize;
+const env = process.env.NODE_ENV || 'development';
+const config = require(__dirname + '/../config/config.json')[env];
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
+const { Op, fn, col } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
 const AccessToken = require('../helpers/accessToken');
@@ -224,6 +233,54 @@ class UserController {
       sendData(200, users, "Success get all employees", res)
     }
     catch (err) {
+      next(err);
+    }
+  };
+
+  static async findBirthdayEmployees(req, res, next) {
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+
+const futureDate = new Date();
+futureDate.setDate(today.getDate() + 30);
+    try {
+      const users = await User.findAll({
+        where: { is_admin: 'employee', is_active: true },
+        attributes:['firstname', 'lastname', 'nip', 'photo', 'is_active'],
+        include: {
+          model: Biodata,
+          as: 'Biodata',
+          where: {
+            [Op.or]: [
+              {
+                [Op.and]: [
+                  sequelize.literal(`MONTH(birthday) = ${today.getMonth() + 1}`),
+                  sequelize.literal(`DAY(birthday) >= ${today.getDate()}`),
+                ]
+              },
+              {
+                [Op.and]: [
+                  sequelize.literal(`MONTH(birthday) = ${futureDate.getMonth() + 1}`),
+                  Sequelize.literal(`DAY(birthday) <= ${futureDate.getDate()}`),
+                ]
+              }
+            ]
+          },
+          attributes:['birthday'],
+          include: {
+            model: Office,
+            attributes: {
+              exclude: ['id', 'createdAt', 'updatedAt']
+            }
+          }
+        },
+        order: [['Biodata', 'birthday', 'desc']]
+      });
+      sendData(200, users, "Success get all birthday employees", res)
+      // res.json({today, futureDate})
+    }
+    catch (err) {
+      console.log(err.message)
       next(err);
     }
   };
