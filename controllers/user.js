@@ -11,7 +11,7 @@ if (config.use_env_variable) {
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
-const { Op, fn, col } = require('sequelize');
+const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
 const AccessToken = require('../helpers/accessToken');
@@ -239,10 +239,8 @@ class UserController {
 
   static async findBirthdayEmployees(req, res, next) {
     const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-
-const futureDate = new Date();
-futureDate.setDate(today.getDate() + 30);
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + 30);
     try {
       const users = await User.findAll({
         where: { is_admin: 'employee', is_active: true },
