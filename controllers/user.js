@@ -1,6 +1,6 @@
 const { 
   User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Address, 
-  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Phone
+  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Family_Phone, Phone
 } = require('../models');
 const Sequelize = require('sequelize');
 let sequelize;
