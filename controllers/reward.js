@@ -1,4 +1,4 @@
-const { Reward, User, Event } = require('../models/index.js');
+const { Reward, User } = require('../models/index.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');

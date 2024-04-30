@@ -7,6 +7,7 @@ const postRoute = require('./posts');
 const postGalleryRoute = require('./post_gallery');
 const eventRoute = require('./events');
 const pointRoute = require('./points');
+const pointLogRoute = require('./point_logs');
 const rewardRoute = require('./rewards');
 const rewardLogRoute = require('./rewards_logs');
 const familyRoute = require('./family');
@@ -28,6 +29,7 @@ route.use('/v1/posts', postRoute);
 route.use('/v1/post_galleries', postGalleryRoute);
 route.use('/v1/events', eventRoute);
 route.use('/v1/points', pointRoute);
+route.use('/v1/point_logs', pointLogRoute);
 route.use('/v1/rewards', rewardRoute);
 route.use('/v1/reward_logs', rewardLogRoute);
 route.use('/v1/families', familyRoute)

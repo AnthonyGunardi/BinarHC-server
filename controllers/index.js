@@ -6,6 +6,7 @@ const PostController = require('./post');
 const PostGalleryController = require('./post_gallery');
 const EventController = require('./event');
 const PointController = require('./point');
+const PointLogController = require('./point_log');
 const RewardController = require('./reward');
 const RewardLogController = require('./reward_log');
 const FamilyController = require('./family');
@@ -28,6 +29,7 @@ module.exports = {
   PostGalleryController, 
   EventController, 
   PointController,
+  PointLogController,
   RewardController,
   RewardLogController,
   FamilyController,
