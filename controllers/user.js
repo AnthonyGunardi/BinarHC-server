@@ -321,7 +321,15 @@ class UserController {
             },
             {
               model: Point_Log,
-              as: 'Obtained_Point_Log'
+              as: 'Obtained_Point_Log',
+              attributes: {
+                exclude: ['user_id', 'admin_id']
+              },
+              include: {
+                model: User,
+                as: 'Approved_Point_Log',
+                attributes: ['firstname', 'lastname']
+              }
             },
             {
               model: Reward_Log,
