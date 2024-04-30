@@ -334,10 +334,20 @@ class UserController {
             {
               model: Reward_Log,
               as: 'Obtained_Reward_Log',
-              include: {
-                model: Reward,
-                attributes: ['title', 'description', 'point']
-              }
+              attributes: {
+                exclude: ['user_id', 'admin_id']
+              },
+              include: [
+                {
+                  model: Reward,
+                  attributes: ['title', 'description', 'point']
+                },
+                {
+                  model: User,
+                  as: 'Approved_Reward_Log',
+                  attributes: ['firstname', 'lastname']
+                }
+              ]
             },
             {
               model: Family,
