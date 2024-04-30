@@ -321,17 +321,11 @@ class UserController {
             },
             {
               model: Point_Log,
-              as: 'Obtained_Point_Log',
-              attributes: {
-                exclude: ['id']
-              }
+              as: 'Obtained_Point_Log'
             },
             {
               model: Reward_Log,
               as: 'Obtained_Reward_Log',
-              attributes: {
-                exclude: ['id']
-              },
               include: {
                 model: Reward,
                 attributes: ['title', 'description', 'point']
