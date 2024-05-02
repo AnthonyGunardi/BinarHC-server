@@ -14,6 +14,12 @@ class EventController {
       });
       if (!user) return sendResponse(404, "User is not found", res);
 
+      //check if event is exist
+      const event = await Event.findOne({ 
+        where: { title } 
+      });
+      if (event) return sendResponse(422, `Event with title "${title}" is already exist`, res);
+
       //get post_id
       const post = await Post.findOne({ 
         where: { slug } 
@@ -50,7 +56,7 @@ class EventController {
       });
       if (!post) return sendResponse(404, 'Post is not found', res);
 
-      const event = await Event.findOne({
+      const event = await Event.findAll({
         where: { post_id: post.id },
         attributes: {
           exclude: ['post_id']
@@ -63,7 +69,7 @@ class EventController {
         },
         order: [['title', 'asc']]
       });
-      sendData(200, event, "Success get event data", res);
+      sendData(200, event, "Success get events data", res);
     } 
     catch (err) {
         next(err)
