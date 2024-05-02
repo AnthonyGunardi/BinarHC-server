@@ -4,5 +4,6 @@ const authentication = require('../middlewares/userAuthentication');
 
 route.get('/', authentication, PointLogController.getPointLogs);
 route.get('/scroll', authentication, PointLogController.getPointLogsByScroll); //with query params, example: ?lastID=36&limit=5&key=lorem
+route.get('/:nip', authentication, PointLogController.getUserLogsByScroll); //with query params, example: ?lastID=36&limit=5
 
 module.exports = route;
