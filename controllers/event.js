@@ -1,7 +1,33 @@
-const { Event, Post } = require('../models/index.js');
+const { Event, Post, User } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class EventController {
+  static async create(req, res, next) {
+    try {
+      const slug = req.params.slug;
+      const email = req.user.email
+      const { title, url, point, published_at, is_active } = req.body;
+
+      //check if user is exist
+      const user = await User.findOne({ 
+        where: { email } 
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      //get post_id
+      const post = await Post.findOne({ 
+        where: { slug } 
+      });
+      if (!post) return sendResponse(404, 'Post is not found', res);
+
+      const newEvent = await Event.create( { title, url, point, published_at, post_id: post.id, is_active } );
+      sendData(201, { id: newEvent.id, title: newEvent.title }, "Success create event", res);  
+    }
+    catch (err) {
+      next(err)
+    };
+  };
+
   static async getAllEvents(req, res, next) {
     try {
         const events = await Event.findAll({
@@ -15,24 +41,34 @@ class EventController {
     };
   };
 
-  static async getEvent(req, res, next) {
-    const id = req.params.id
+  static async getEventBySlug(req, res, next) {
+    const slug = req.params.slug;
     try {
-        const event = await Event.findOne({
-            where: { id },
-            attributes:['id', 'title', 'url', 'point', 'published_at', 'post_id', 'is_active', 'createdAt'],
-            include: {
-              model: Post,
-              attributes:['title', 'slug']
-            }
-        })
-        if (!event) return sendResponse(404, "Event is not found", res)
-        sendData(200, event, "Success get event data", res)
+      //get post_id
+      const post = await Post.findOne({ 
+        where: { slug } 
+      });
+      if (!post) return sendResponse(404, 'Post is not found', res);
+
+      const event = await Event.findOne({
+        where: { post_id: post.id },
+        attributes: {
+          exclude: ['post_id']
+        },
+        include: {
+          model: Post,
+          attributes: {
+            exclude: ['user_id']
+          }
+        },
+        order: [['title', 'asc']]
+      });
+      sendData(200, event, "Success get event data", res);
     } 
     catch (err) {
         next(err)
-    }
-  }
+    };
+  };
 
   static async toggleEvent(req, res, next) {
     const id = req.params.id
