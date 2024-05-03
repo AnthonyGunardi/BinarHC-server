@@ -3,7 +3,6 @@ const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
 const { sendResponse, sendData } = require('../helpers/response.js');
-const { createTimeStamp } = require('../helpers/timestamp.js');
 
 class RewardController {
   static async create(req, res, next) {

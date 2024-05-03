@@ -1,4 +1,4 @@
-const { Point, Point_Log, User } = require('../models');
+const { Point, Point_Log, User, Reward, Reward_Log } = require('../models');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class PointController {
@@ -82,6 +82,47 @@ class PointController {
     catch (err) {
       next(err)
     };
+  }
+
+  static async redeem(req, res, next) {
+    const id = req.params.id;
+    const nip = req.user.nip;
+    try {
+      //check if reward is exist
+      const reward = await Reward.findOne({
+        where: { id, is_active: true }
+      })
+      if (!reward) return sendResponse(404, "Reward is not found", res)
+
+      //get user_id
+      const user = await User.findOne({ where: { nip } });
+      if (!Boolean(user)) return sendResponse(404, "User is not found", res)
+
+      //get current point balance
+      const currentPoint = await Point.findOne({ where: { user_id: user.id } });
+      if (!Boolean(currentPoint)) return sendResponse(404, "Point data is not found", res)
+
+      //check if point balance is sufficient to redeem
+      if (parseInt(currentPoint.balance) < parseInt(reward.point)) return sendResponse(400, "Insufficient point", res)
+
+      //get updated point balance
+      let updatedBalance;
+      updatedBalance = parseInt(currentPoint.balance) - parseInt(reward.point);
+      
+      await Point.update(
+        { balance: updatedBalance }, 
+        { where: { user_id: currentPoint.user_id } })
+      await Point_Log.create(
+        { type: "expense", point: reward.point, description: `Redeem reward: ${reward.title}`, user_id: user.id, last_balance: parseInt(currentPoint.balance) }
+      );
+      await Reward_Log.create(
+        { status: "pending", reward_id: reward.id, user_id: user.id}
+      );
+      sendResponse(200, "Success redeem reward", res)       
+    }
+    catch (err) {
+      next(err)
+    }
   }
 }
 

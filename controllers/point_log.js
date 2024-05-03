@@ -21,7 +21,7 @@ class PointLogController {
             attributes:['firstname', 'lastname', 'nip' ]
           }
         ],
-        order: [['updatedAt', 'desc']]
+        order: [['id', 'desc']]
       });
       sendData(200, logs, "Success get all point logs", res);
     } 
@@ -54,7 +54,7 @@ class PointLogController {
           },
           limit: limit,
           order: [
-            ['updatedAt', 'DESC']
+            ['id', 'DESC']
           ]
         })
         result = results

@@ -4,11 +4,64 @@ const { sendResponse, sendData } = require('../helpers/response.js');
 class RewardLogController {
   static async getRewardLogs(req, res, next) {
     try {
-      const logs = await Reward_Log.findAll({
+      const { status } = req.query;
+      const options = {
+        where: {},
         attributes: {
-          exclude : ['id']
+          exclude : ['reward_id','user_id', 'admin_id']
         },
-        order: [['updatedAt', 'desc']]
+        include: [
+          {
+            model: User,
+            as: 'Obtained_Reward_Log',
+            attributes:['firstname', 'lastname', 'nip' ]
+          },
+          {
+            model: User,
+            as: 'Approved_Reward_Log',
+            attributes:['firstname', 'lastname', 'nip' ]
+          },
+          {
+            model: Reward,
+            attributes:['id', 'title', 'description', 'point', 'photo', 'is_active']
+          }
+        ]
+      };
+    
+      // if status has a value (!== undefined), include it in the query
+      if (status !== undefined)
+        options.where.status = status;
+
+      const logs = await Reward_Log.findAll(options);
+      sendData(200, logs, "Success get all reward logs", res);
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
+  static async getRewardLogsByStatus(req, res, next) {
+    try {
+      const status = req.query.status;
+      const logs = await Reward_Log.findAll({
+        where: { status },
+        include: [
+          {
+            model: User,
+            as: 'Obtained_Reward_Log',
+            attributes:['firstname', 'lastname', 'nip' ]
+          },
+          {
+            model: User,
+            as: 'Approved_Reward_Log',
+            attributes:['firstname', 'lastname', 'nip' ]
+          },
+          {
+            model: Reward,
+            attributes:['title', 'description', 'point', 'photo', 'is_active']
+          }
+        ],
+        order: [['id', 'desc']]
       });
       sendData(200, logs, "Success get all reward logs", res);
     } 
