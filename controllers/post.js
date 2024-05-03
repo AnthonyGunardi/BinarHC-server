@@ -56,7 +56,13 @@ class PostController {
     try {
       const posts = await Post.findAll({
         attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
-        order: [['createdAt', 'desc']]
+        include: {
+          model: Event,
+          attributes: {
+            exclude: ['post_id']
+          }
+        },
+        order: [['id', 'desc']]
       });
       sendData(200, posts, "Success get all posts", res);
     } 
@@ -93,9 +99,15 @@ class PostController {
           attributes: {
             exclude: ['user_id']
           },
+          include: {
+            model: Event,
+            attributes: {
+              exclude: ['post_id']
+            }
+          },
           limit: limit,
           order: [
-            ['published_at', 'DESC']
+            ['id', 'DESC']
           ]
         })
         result = results
@@ -122,9 +134,15 @@ class PostController {
           attributes: {
             exclude: ['user_id']
           },
+          include: {
+            model: Event,
+            attributes: {
+              exclude: ['post_id']
+            }
+          },
           limit: limit,
           order: [
-            ['published_at', 'DESC']
+            ['id', 'DESC']
           ]
         })
         result = results
