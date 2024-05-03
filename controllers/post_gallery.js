@@ -141,6 +141,29 @@ class PostGalleryController {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //check if post gallery is exist
+      const gallery = await Post_Gallery.findOne({
+        where: { id }
+      })
+      if (!gallery) return sendResponse(404, "Post gallery is not found", res)
+      
+      //delete previous file on server
+      if (gallery.path !== null) {
+        const filePath = `./public/images/${gallery.path}`;
+        fs.unlinkSync(filePath);
+      }
+
+      const deleted = await Post_Gallery.destroy({ where: { id } })
+      sendResponse(200, "Success delete post gallery", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = PostGalleryController;

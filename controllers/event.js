@@ -56,7 +56,7 @@ class EventController {
       });
       if (!post) return sendResponse(404, 'Post is not found', res);
 
-      const event = await Event.findAll({
+      const event = await Event.findOne({
         where: { post_id: post.id },
         attributes: {
           exclude: ['post_id']

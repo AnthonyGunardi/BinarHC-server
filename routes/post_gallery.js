@@ -6,5 +6,6 @@ route.get('/gallery/:id', authentication, PostGalleryController.getGallery);
 route.get('/:slug', authentication, PostGalleryController.getGalleries);
 route.post('/:slug', authentication, PostGalleryController.create);
 route.put('/:id', authentication, PostGalleryController.update);
+route.delete('/:id', authentication, PostGalleryController.delete);
 
 module.exports = route;
