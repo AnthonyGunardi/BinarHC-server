@@ -166,16 +166,17 @@ class PostController {
       const post = await Post.findOne({
         where: { slug },
         attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
-        include: {
-          model: Event,
-          attributes: {
-            exclude: ['id']
+        include: [
+          {
+            model: Event,
+            attributes: {
+              exclude: ['id']
+            }
           },
-          model: Post_Gallery,
-          attributes: {
-            exclude: ['id']
-          },
-        }
+          {
+            model: Post_Gallery
+          }
+        ]
       })
       if (!post) return sendResponse(404, "Post is not found", res)
       sendData(200, post, "Success get post data", res)

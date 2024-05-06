@@ -161,7 +161,12 @@ class PostGalleryController {
       sendResponse(200, "Success delete post gallery", res)
     }
     catch (err) {
-      next(err)
+      if (err.code === 'ENOENT') {
+        await Post_Gallery.destroy({ where: { id } })
+        sendResponse(200, "Success delete post gallery", res)
+      } else {
+        next(err)
+      }
     }
   }
 };
