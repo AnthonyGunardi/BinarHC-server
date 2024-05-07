@@ -1,4 +1,4 @@
-const { Event, Post, User } = require('../models/index.js');
+const { Event, Post, Post_Gallery,User } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class EventController {
@@ -65,6 +65,12 @@ class EventController {
           model: Post,
           attributes: {
             exclude: ['user_id']
+          },
+          include: {
+            model: Post_Gallery,
+            attributes: {
+              exclude: ['post_id']
+            }
           }
         },
         order: [['title', 'asc']]

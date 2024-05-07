@@ -170,11 +170,14 @@ class PostController {
           {
             model: Event,
             attributes: {
-              exclude: ['id']
+              exclude: ['post_id']
             }
           },
           {
-            model: Post_Gallery
+            model: Post_Gallery,
+            attributes: {
+              exclude: ['post_id']
+            }
           }
         ]
       })
