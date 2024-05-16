@@ -1,4 +1,4 @@
-const { Reward_Log, User, Reward } = require('../models/index.js');
+const { Reward_Log, User, Reward, Point, Point_Log } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class RewardLogController {
@@ -165,6 +165,29 @@ class RewardLogController {
         where: { id },
         returning: true
       })
+
+      //refund user point if status is 'failed'
+      if (status === 'failed') {
+        //get current point balance
+        const currentPoint = await Point.findOne({ where: { user_id: reward_log.user_id } });
+
+        //get reward price
+        const reward = await Reward.findOne({
+          where: { id: reward_log.reward_id, is_active: true }
+        })
+        if (!reward) return sendResponse(404, "Reward is not found", res)
+
+        //get updated point balance
+        let updatedBalance;
+        updatedBalance = parseInt(currentPoint.balance) + parseInt(reward.point);
+        
+        await Point.update(
+          { balance: updatedBalance }, 
+          { where: { user_id: currentPoint.user_id } })
+        await Point_Log.create(
+          { type: "revenue", point: reward.point, description: `Point refund for reward: ${reward.title}`, user_id: reward_log.user_id, admin_id: user.id, last_balance: parseInt(currentPoint.balance) }
+        );
+      }
       sendResponse(200, "Success update reward log", res)
     }
     catch (err) {
