@@ -40,15 +40,16 @@ class RewardLogController {
     };
   };
 
-  static async getRewardLogsByStatus(req, res, next) {
+  static async getRewardLogsByNip(req, res, next) {
     try {
-      const status = req.query.status;
+      const nip = req.params.nip;
       const logs = await Reward_Log.findAll({
-        where: { status },
+        // where: { status },
         include: [
           {
             model: User,
             as: 'Obtained_Reward_Log',
+            where: { nip },
             attributes:['firstname', 'lastname', 'nip' ]
           },
           {

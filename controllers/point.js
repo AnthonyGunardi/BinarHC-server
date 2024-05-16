@@ -113,10 +113,10 @@ class PointController {
         { balance: updatedBalance }, 
         { where: { user_id: currentPoint.user_id } })
       await Point_Log.create(
-        { type: "expense", point: reward.point, description: `Redeem reward: ${reward.title}`, user_id: user.id, last_balance: parseInt(currentPoint.balance) }
+        { type: "expense", point: reward.point, description: `Redeem reward: ${reward.title}`, user_id: user.id, admin_id: reward.user_id, last_balance: parseInt(currentPoint.balance) }
       );
       await Reward_Log.create(
-        { status: "pending", reward_id: reward.id, user_id: user.id}
+        { status: "pending", reward_id: reward.id, user_id: user.id, admin_id: reward.user_id }
       );
       sendResponse(200, "Success redeem reward", res)       
     }
