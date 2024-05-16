@@ -480,6 +480,26 @@ class UserController {
     }
   }
 
+  static async updateEmployeePassword(req, res, next) {
+    const nip = req.params.nip;
+    const { old_password, new_password } = req.body;
+    try {
+      const user = await User.findOne({
+        where: { nip, password: old_password, is_admin: 'employee' }
+      })
+      if (!user) return sendResponse(404, "User is not found", res)
+
+      const updated = await User.update({ password: new_password }, {
+        where: { id: user.id },
+        returning: true
+      })
+      sendResponse(200, "Success update password", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
+
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
     const { 

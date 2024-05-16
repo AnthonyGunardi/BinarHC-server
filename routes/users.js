@@ -9,6 +9,7 @@ route.post('/register', authentication, adminAuthorization, UserController.regis
 route.post('/login', UserController.adminLogin);
 route.post('/employee/login', UserController.employeeLogin);
 route.put('/employee/reset/:email', authentication, adminAuthorization, UserController.resetEmployeePassword);
+route.put('/employee/password/:nip', authentication, UserController.updateEmployeePassword);
 route.get('/employees/birthday', authentication, UserController.findBirthdayEmployees);
 route.get('/employees', authentication, adminAuthorization, UserController.findAllEmployees);
 route.get('/:nip', authentication, UserController.getEmployee);
