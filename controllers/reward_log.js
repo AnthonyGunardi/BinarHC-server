@@ -43,28 +43,69 @@ class RewardLogController {
   static async getRewardLogsByNip(req, res, next) {
     try {
       const nip = req.params.nip;
-      const logs = await Reward_Log.findAll({
-        // where: { status },
-        include: [
-          {
-            model: User,
-            as: 'Obtained_Reward_Log',
-            where: { nip },
-            attributes:['firstname', 'lastname', 'nip' ]
+      const lastID = parseInt(req.query.lastID) || 0;
+      const limit = parseInt(req.query.limit) || 0;
+      let result = [];
+
+      if (lastID < 1) {
+        const logs = await Reward_Log.findAll({
+          include: [
+            {
+              model: User,
+              as: 'Obtained_Reward_Log',
+              where: { nip },
+              attributes:['firstname', 'lastname', 'nip' ]
+            },
+            {
+              model: User,
+              as: 'Approved_Reward_Log',
+              attributes:['firstname', 'lastname', 'nip' ]
+            },
+            {
+              model: Reward,
+              attributes:['title', 'description', 'point', 'photo', 'is_active']
+            }
+          ],
+          limit: limit,
+          order: [['id', 'desc']]
+        });
+        result = logs
+      } else {
+        const logs = await Reward_Log.findAll({
+          where: {
+            id: {
+              [Op.lt]: lastID
+            }
           },
-          {
-            model: User,
-            as: 'Approved_Reward_Log',
-            attributes:['firstname', 'lastname', 'nip' ]
-          },
-          {
-            model: Reward,
-            attributes:['title', 'description', 'point', 'photo', 'is_active']
-          }
-        ],
-        order: [['id', 'desc']]
-      });
-      sendData(200, logs, "Success get all reward logs", res);
+          include: [
+            {
+              model: User,
+              as: 'Obtained_Reward_Log',
+              where: { nip },
+              attributes:['firstname', 'lastname', 'nip' ]
+            },
+            {
+              model: User,
+              as: 'Approved_Reward_Log',
+              attributes:['firstname', 'lastname', 'nip' ]
+            },
+            {
+              model: Reward,
+              attributes:['title', 'description', 'point', 'photo', 'is_active']
+            }
+          ],
+          limit: limit,
+          order: [['id', 'desc']]
+        });
+        result = logs
+      }
+
+      const payload = {
+        datas: result,
+        lastID: result.length ? result[result.length - 1].id : 0,
+        hasMore: result.length >= limit ? true : false
+      };
+      sendData(200, payload, "Success get all reward logs", res)
     } 
     catch (err) {
         next(err)

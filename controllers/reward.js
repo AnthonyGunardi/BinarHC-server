@@ -101,7 +101,7 @@ class RewardController {
           },
           limit: limit,
           order: [
-            ['published_at', 'DESC']
+            ['id', 'DESC']
           ]
         })
         result = results
