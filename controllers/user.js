@@ -487,7 +487,7 @@ class UserController {
       const user = await User.findOne({
         where: { nip, password: old_password, is_admin: 'employee' }
       })
-      if (!user) return sendResponse(404, "User is not found", res)
+      if (!user) return sendResponse(404, "Old Password does not match", res)
 
       const updated = await User.update({ password: new_password }, {
         where: { id: user.id },
