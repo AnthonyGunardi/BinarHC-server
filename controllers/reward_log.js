@@ -1,4 +1,5 @@
 const { Reward_Log, User, Reward, Point, Point_Log } = require('../models/index.js');
+const { Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class RewardLogController {
