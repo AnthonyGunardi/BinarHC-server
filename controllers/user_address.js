@@ -51,27 +51,27 @@ class UserAddressController {
         include: {
           model: Address,
           attributes: {
-            exclude: ['id', 'village_id']
+            exclude: ['village_id']
           },
           include: {
             model: Indonesia_Village,
             attributes: {
-              exclude: ['id', 'district_id', 'created_at', 'updated_at']
+              exclude: ['district_id', 'created_at', 'updated_at']
             },
             include: {
               model: Indonesia_District,
               attributes: {
-                exclude: ['id', 'city_id', 'created_at', 'updated_at']
+                exclude: ['city_id', 'created_at', 'updated_at']
               },
               include: {
                 model: Indonesia_City,
                 attributes: {
-                  exclude: ['id', 'province_id', 'created_at', 'updated_at']
+                  exclude: ['province_id', 'created_at', 'updated_at']
                 },
                 include: {
                   model: Indonesia_Province,
                   attributes: {
-                    exclude: ['id', 'created_at', 'updated_at']
+                    exclude: ['created_at', 'updated_at']
                   }
                 }
               }

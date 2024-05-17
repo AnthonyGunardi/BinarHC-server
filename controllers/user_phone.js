@@ -49,10 +49,7 @@ class UserPhoneController {
           exclude: ['user_id']
         },
         include: {
-          model: Phone,
-          attributes: {
-            exclude: ['id']
-          }
+          model: Phone
         }
       });
       sendData(200, phones, "Success get all user phones", res);
