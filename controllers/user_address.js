@@ -118,6 +118,23 @@ class UserAddressController {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //Check if user address is exist
+      const user_address = await User_Address.findOne({
+        where: { id }
+      })
+      if (!user_address) return sendResponse(404, "User address is not found", res)
+
+      const deleted = await User_Address.destroy({ where: { id } })
+      sendResponse(200, "Success delete user address", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = UserAddressController;

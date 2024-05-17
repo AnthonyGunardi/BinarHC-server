@@ -93,6 +93,23 @@ class UserPhoneController {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //Check if user phone is exist
+      const user_phone = await User_Phone.findOne({
+        where: { id }
+      })
+      if (!user_phone) return sendResponse(404, "User phone is not found", res)
+
+      const deleted = await User_Phone.destroy({ where: { id } })
+      sendResponse(200, "Success delete user phone", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = UserPhoneController;
