@@ -1,4 +1,5 @@
 const { User_Address, User, Address, Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province } = require('../models/index.js');
+const { Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class UserAddressController {
@@ -12,6 +13,17 @@ class UserAddressController {
         where: { nip } 
       });
       if (!user) return sendResponse(404, "User is not found", res);
+
+      //if is_main is true, set all existing user addresses' is_main to false
+      if (is_main == 'true') {
+        const addresses = await User_Address.findAll({ 
+          where: { user_id: user.id } 
+        });
+        const addressIds = addresses.map((address) => address.address_id);
+        if (addressIds.length > 0) {
+          await Address.update({ is_main: false }, { where: { id: { [Op.in]: addressIds }, is_main: true } });
+        }
+      }
 
       const address = await Address.create( { name, postal_code, meta, is_main, village_id } );
       const user_address = await User_Address.create( { user_id: user.id, address_id: address.id } );
@@ -84,6 +96,17 @@ class UserAddressController {
         where: { id }
       })
       if (!user_address) return sendResponse(404, "User address is not found", res)
+
+      //if is_main is true, set all existing user addresses' is_main to false
+      if (is_main == 'true') {
+        const addresses = await User_Address.findAll({ 
+          where: { user_id: user_address.user_id } 
+        });
+        const addressIds = addresses.map((address) => address.address_id);
+        if (addressIds.length > 0) {
+          await Address.update({ is_main: false }, { where: { id: { [Op.in]: addressIds }, is_main: true } });
+        }
+      }
 
       const updated = await Address.update(
         { name, postal_code, meta, is_main, village_id }, 
