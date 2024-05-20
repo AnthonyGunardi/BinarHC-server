@@ -78,7 +78,6 @@ class UserAddressController {
             }
           }
         }
-
       });
       sendData(200, addresses, "Success get all addresses", res);
     } 

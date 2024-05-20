@@ -70,6 +70,23 @@ class OfficePhoneController {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //Check if office phone is exist
+      const office_phone = await Office_Phone.findOne({
+        where: { id }
+      })
+      if (!office_phone) return sendResponse(404, "Office phone is not found", res)
+
+      const deleted = await Office_Phone.destroy({ where: { id } })
+      sendResponse(200, "Success delete office phone", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = OfficePhoneController;

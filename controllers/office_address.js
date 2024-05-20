@@ -39,27 +39,27 @@ class OfficeAddressController {
         include: {
           model: Address,
           attributes: {
-            exclude: ['id', 'village_id']
+            exclude: ['village_id']
           },
           include: {
             model: Indonesia_Village,
             attributes: {
-              exclude: ['id', 'district_id', 'created_at', 'updated_at']
+              exclude: ['district_id', 'created_at', 'updated_at']
             },
             include: {
               model: Indonesia_District,
               attributes: {
-                exclude: ['id', 'city_id', 'created_at', 'updated_at']
+                exclude: ['city_id', 'created_at', 'updated_at']
               },
               include: {
                 model: Indonesia_City,
                 attributes: {
-                  exclude: ['id', 'province_id', 'created_at', 'updated_at']
+                  exclude: ['province_id', 'created_at', 'updated_at']
                 },
                 include: {
                   model: Indonesia_Province,
                   attributes: {
-                    exclude: ['id', 'created_at', 'updated_at']
+                    exclude: ['created_at', 'updated_at']
                   }
                 }
               }
@@ -95,6 +95,23 @@ class OfficeAddressController {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //Check if office address is exist
+      const office_address = await Office_Address.findOne({
+        where: { id }
+      })
+      if (!office_address) return sendResponse(404, "Office address is not found", res)
+
+      const deleted = await Office_Address.destroy({ where: { id } })
+      sendResponse(200, "Success delete office address", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = OfficeAddressController;
