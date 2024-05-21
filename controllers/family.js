@@ -1,4 +1,4 @@
-const { Family, User } = require('../models/index.js');
+const { Family, User, Family_Address, Family_Phone } = require('../models/index.js');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class FamilyController {
@@ -64,6 +64,38 @@ class FamilyController {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //Check if family is exist
+      const family = await Family.findOne({
+        where: { id }
+      })
+      if (!family) return sendResponse(404, "Family is not found", res)
+
+      const deleted = await Family.destroy({ where: { id } });
+
+      //Check if family address and family phone is exist
+      const familyAddresses = await Family_Address.findAll({
+        where: { family_id:id }
+      });
+      const familyPhones = await Family_Phone.findAll({
+        where: { family_id:id }
+      })
+      if (familyAddresses.length > 0) {
+        await Family_Address.destroy({ where: { family_id:id } })
+      };
+      if (familyPhones.length > 0) {
+        await Family_Phone.destroy({ where: { family_id:id } })
+      };
+
+      sendResponse(200, "Success delete family", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = FamilyController;
