@@ -1,4 +1,5 @@
 const { Office_Address, Office, Address, Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province } = require('../models/index.js');
+const { Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class OfficeAddressController {
