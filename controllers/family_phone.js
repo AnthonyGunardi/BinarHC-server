@@ -1,4 +1,4 @@
-const { Family_Phone, Family, Phone } = require('../models/index.js');
+const { Family_Phone, Family, User, Phone } = require('../models/index.js');
 const { Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
@@ -51,6 +51,49 @@ class FamilyPhoneController {
             exclude: ['id']
           }
         }
+      });
+      sendData(200, phones, "Success get all family phones", res);
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
+  static async getPhonesByNip(req, res, next) {
+    const nip = req.params.nip;
+    try {
+      //get user_id
+      const user = await User.findOne({ 
+        where: { nip } 
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      //check if family is exist
+      const families = await Family.findAll({ 
+        where: { user_id: user.id } 
+      });
+      if (!families) return sendResponse(404, 'Family is not found', res);
+      const familyIds = families.map((family) => family.id);
+
+      const phones = await Family_Phone.findAll({
+        where: { family_id: { [Op.in]: familyIds } },
+        attributes: {
+          exclude: ['family_id']
+        },
+        include: [
+          {
+            model: Family,
+            attributes: {
+              exclude: ['user_id', 'createdAt', 'updatedAt']
+            }
+          },
+          {
+            model: Phone,
+            attributes: {
+              exclude: ['id']
+            }
+          }
+        ]
       });
       sendData(200, phones, "Success get all family phones", res);
     } 

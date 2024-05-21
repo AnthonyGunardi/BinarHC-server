@@ -1,4 +1,4 @@
-const { Family_Address, Family, Address, Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province } = require('../models/index.js');
+const { Family_Address, Family, User, Address, Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province } = require('../models/index.js');
 const { Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
@@ -78,6 +78,73 @@ class FamilyAddressController {
             }
           }
         }
+      });
+      sendData(200, addresses, "Success get all addresses", res);
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
+  static async getAddressesByNip(req, res, next) {
+    const nip = req.params.nip;
+    try {
+      //get user_id
+      const user = await User.findOne({ 
+        where: { nip } 
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      //check if family is exist
+      const families = await Family.findAll({ 
+        where: { user_id: user.id } 
+      });
+      if (!families) return sendResponse(404, 'Family is not found', res);
+      const familyIds = families.map((family) => family.id);
+
+      const addresses = await Family_Address.findAll({
+        where: { family_id: { [Op.in]: familyIds } },
+        attributes: {
+          exclude: ['family_id']
+        },
+        include: [
+          {
+            model: Family,
+            attributes: {
+              exclude: ['user_id', 'createdAt', 'updatedAt']
+            }
+          },
+          {
+            model: Address,
+            attributes: {
+              exclude: ['village_id']
+            },
+            include: {
+              model: Indonesia_Village,
+              attributes: {
+                exclude: ['district_id', 'created_at', 'updated_at']
+              },
+              include: {
+                model: Indonesia_District,
+                attributes: {
+                  exclude: ['city_id', 'created_at', 'updated_at']
+                },
+                include: {
+                  model: Indonesia_City,
+                  attributes: {
+                    exclude: ['province_id', 'created_at', 'updated_at']
+                  },
+                  include: {
+                    model: Indonesia_Province,
+                    attributes: {
+                      exclude: ['created_at', 'updated_at']
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       });
       sendData(200, addresses, "Success get all addresses", res);
     } 
