@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Family.belongsTo(models.User, {foreignKey: 'user_id', targetKey: 'id'})
+      Family.hasMany(models.Family_Address, {foreignKey: 'family_id', sourceKey: 'id'})
       Family.hasMany(models.Family_Phone, {foreignKey: 'family_id', sourceKey: 'id'})
     }
   }

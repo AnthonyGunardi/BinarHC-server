@@ -13,6 +13,17 @@ class FamilyPhoneController {
       });
       if (!family) return sendResponse(404, "Family is not found", res);
 
+      //if is_main is true, set all existing family phones' is_main to false
+      if (is_main == 'true') {
+        const phones = await Family_Phone.findAll({ 
+          where: { family_id: family.id } 
+        });
+        const phoneIds = phones.map((phone) => phone.phone_id);
+        if (phoneIds.length > 0) {
+          await Phone.update({ is_main: false }, { where: { id: { [Op.in]: phoneIds }, is_main: true } });
+        }
+      }
+
       const phone_data = await Phone.create( { code, phone_number, is_main } );
       const family_phone = await Family_Phone.create( { family_id: family.id, phone_id: phone_data.id } );
       sendData(201, { id: family_phone.id, code: phone_data.code, phone_number: phone_data.phone_number }, "Success create family phone", res);  
@@ -57,6 +68,17 @@ class FamilyPhoneController {
       })
       if (!family_phone) return sendResponse(404, "Family phone is not found", res)
 
+      //if is_main is true, set all existing family phones' is_main to false
+      if (is_main == 'true') {
+        const phones = await Family_Phone.findAll({ 
+          where: { family_id: family_phone.family_id }
+        });
+        const phoneIds = phones.map((phone) => phone.phone_id);
+        if (phoneIds.length > 0) {
+          await Phone.update({ is_main: false }, { where: { id: { [Op.in]: phoneIds }, is_main: true } });
+        }
+      }
+
       const updated = await Phone.update(
         { code, phone_number, is_main }, 
         { where: { id: family_phone.phone_id }, returning: true }
@@ -67,6 +89,23 @@ class FamilyPhoneController {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //Check if family phone is exist
+      const family_phone = await Family_Phone.findOne({
+        where: { id }
+      })
+      if (!family_phone) return sendResponse(404, "Family phone is not found", res)
+
+      const deleted = await Family_Phone.destroy({ where: { id } })
+      sendResponse(200, "Success delete family phone", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = FamilyPhoneController;

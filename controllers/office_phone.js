@@ -13,6 +13,17 @@ class OfficePhoneController {
       });
       if (!office) return sendResponse(404, "Office is not found", res);
 
+      //if is_main is true, set all existing office phones' is_main to false
+      if (is_main == 'true') {
+        const phones = await Office_Phone.findAll({ 
+          where: { office_id: office.id } 
+        });
+        const phoneIds = phones.map((phone) => phone.phone_id);
+        if (phoneIds.length > 0) {
+          await Phone.update({ is_main: false }, { where: { id: { [Op.in]: phoneIds }, is_main: true } });
+        }
+      }
+
       const phone_data = await Phone.create( { code, phone_number, is_main } );
       const office_phone = await Office_Phone.create( { office_id: office.id, phone_id: phone_data.id } );
       sendData(201, { id: office_phone.id, code: phone_data.code, phone_number: phone_data.phone_number }, "Success create office phone", res);  
@@ -59,6 +70,17 @@ class OfficePhoneController {
         where: { id }
       })
       if (!office_phone) return sendResponse(404, "Office phone is not found", res)
+
+      //if is_main is true, set all existing office phones' is_main to false
+      if (is_main == 'true') {
+        const phones = await Office_Phone.findAll({ 
+          where: { office_id: office_phone.office_id } 
+        });
+        const phoneIds = phones.map((phone) => phone.phone_id);
+        if (phoneIds.length > 0) {
+          await Phone.update({ is_main: false }, { where: { id: { [Op.in]: phoneIds }, is_main: true } });
+        }
+      }
 
       const updated = await Phone.update(
         { code, phone_number, is_main }, 
