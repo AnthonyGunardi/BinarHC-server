@@ -1,6 +1,6 @@
 const { 
-  User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Address, 
-  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Family_Phone, Phone
+  User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Family_Address, Office_Address, Address, 
+  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Family_Phone, Office_Phone, Phone
 } = require('../models');
 const Sequelize = require('sequelize');
 let sequelize;
@@ -275,7 +275,6 @@ class UserController {
         order: [['Biodata', 'birthday', 'desc']]
       });
       sendData(200, users, "Success get all birthday employees", res)
-      // res.json({today, futureDate})
     }
     catch (err) {
       console.log(err.message)
@@ -287,74 +286,125 @@ class UserController {
     const nip = req.params.nip
     try {
       const user = await User.findOne({
-          where: { nip, is_admin: 'employee' },
-          attributes:['firstname', 'lastname', 'nip', 'email', 'photo', 'is_active'],
-          include: [
-            {
-              model: Biodata,
-              as: 'Biodata',
-              attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'job', 'marital_status' ],
-              include: [
-                {
-                  model: Office,
-                  attributes: {
-                    exclude: ['id']
-                  }
+        where: { nip, is_admin: 'employee' },
+        attributes:['firstname', 'lastname', 'nip', 'email', 'photo', 'is_active'],
+        include: [
+          {
+            model: Biodata,
+            as: 'Biodata',
+            attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'job', 'marital_status' ],
+            include: [
+              {
+                model: Office,
+                attributes: {
+                  exclude: ['id']
                 },
-                {
-                  model: Position,
-                  attributes: {
-                    exclude: ['id']
+                include: [
+                  {
+                    model: Office_Address,
+                    attributes: {
+                      exclude: ['office_id','createdAt', 'updatedAt']
+                    },
+                    include: {
+                      model: Address,
+                      attributes: {
+                        exclude: ['village_id']
+                      },
+                      include: {
+                        model: Indonesia_Village,
+                        attributes: {
+                          exclude: ['id', 'district_id', 'created_at', 'updated_at']
+                        },
+                        include: {
+                          model: Indonesia_District,
+                          attributes: {
+                            exclude: ['id', 'city_id', 'created_at', 'updated_at']
+                          },
+                          include: {
+                            model: Indonesia_City,
+                            attributes: {
+                              exclude: ['id', 'province_id', 'created_at', 'updated_at']
+                            },
+                            include: {
+                              model: Indonesia_Province,
+                              attributes: {
+                                exclude: ['id', 'created_at', 'updated_at']
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    model: Office_Phone,
+                    attributes: {
+                      exclude: ['office_id']
+                    },
+                    include: {
+                      model: Phone,
+                      attributes: {
+                        exclude: ['id']
+                      }
+                    }
                   }
-                },
-                {
-                  model: Echelon,
-                  attributes: {
-                    exclude: ['id']
-                  }
-                }
-              ]
-            },
-            {
-              model: Point,
-              attributes: ['balance']
-            },
-            {
-              model: Point_Log,
-              as: 'Obtained_Point_Log',
-              attributes: {
-                exclude: ['user_id', 'admin_id']
+                ]
               },
-              include: {
+              {
+                model: Position,
+                attributes: {
+                  exclude: ['id']
+                }
+              },
+              {
+                model: Echelon,
+                attributes: {
+                  exclude: ['id']
+                }
+              }
+            ]
+          },
+          {
+            model: Point,
+            attributes: ['balance']
+          },
+          {
+            model: Point_Log,
+            as: 'Obtained_Point_Log',
+            attributes: {
+              exclude: ['user_id', 'admin_id']
+            },
+            include: {
+              model: User,
+              as: 'Approved_Point_Log',
+              attributes: ['firstname', 'lastname']
+            }
+          },
+          {
+            model: Reward_Log,
+            as: 'Obtained_Reward_Log',
+            attributes: {
+              exclude: ['user_id', 'admin_id']
+            },
+            include: [
+              {
+                model: Reward,
+                attributes: ['title', 'description', 'point']
+              },
+              {
                 model: User,
-                as: 'Approved_Point_Log',
+                as: 'Approved_Reward_Log',
                 attributes: ['firstname', 'lastname']
               }
+            ]
+          },
+          {
+            model: Family,
+            attributes: {
+              exclude: ['user_id']
             },
-            {
-              model: Reward_Log,
-              as: 'Obtained_Reward_Log',
-              attributes: {
-                exclude: ['user_id', 'admin_id']
-              },
-              include: [
-                {
-                  model: Reward,
-                  attributes: ['title', 'description', 'point']
-                },
-                {
-                  model: User,
-                  as: 'Approved_Reward_Log',
-                  attributes: ['firstname', 'lastname']
-                }
-              ]
-            },
-            {
-              model: Family,
-              attributes: {
-                exclude: ['user_id']
-              },
-              include: {
+            include: [
+              {
                 model: Family_Phone,
                 attributes: {
                   exclude: ['family_id']
@@ -365,61 +415,98 @@ class UserController {
                     exclude: ['id']
                   }
                 }
-              }
-            },
-            {
-              model: User_Address,
-              attributes: {
-                exclude: ['user_id']
               },
-              include: {
-                model: Address,
+              {
+                model: Family_Address,
                 attributes: {
-                  exclude: ['village_id']
+                  exclude: ['family_id','createdAt', 'updatedAt']
                 },
                 include: {
-                  model: Indonesia_Village,
+                  model: Address,
                   attributes: {
-                    exclude: ['id', 'district_id', 'created_at', 'updated_at']
+                    exclude: ['village_id']
                   },
                   include: {
-                    model: Indonesia_District,
+                    model: Indonesia_Village,
                     attributes: {
-                      exclude: ['id', 'city_id', 'created_at', 'updated_at']
+                      exclude: ['id', 'district_id', 'created_at', 'updated_at']
                     },
                     include: {
-                      model: Indonesia_City,
+                      model: Indonesia_District,
                       attributes: {
-                        exclude: ['id', 'province_id', 'created_at', 'updated_at']
+                        exclude: ['id', 'city_id', 'created_at', 'updated_at']
                       },
                       include: {
-                        model: Indonesia_Province,
+                        model: Indonesia_City,
                         attributes: {
-                          exclude: ['id', 'created_at', 'updated_at']
+                          exclude: ['id', 'province_id', 'created_at', 'updated_at']
+                        },
+                        include: {
+                          model: Indonesia_Province,
+                          attributes: {
+                            exclude: ['id', 'created_at', 'updated_at']
+                          }
                         }
                       }
                     }
                   }
                 }
               }
+            ]
+          },
+          {
+            model: User_Address,
+            attributes: {
+              exclude: ['user_id']
             },
-            {
-              model: User_Phone,
+            include: {
+              model: Address,
               attributes: {
-                exclude: ['user_id']
+                exclude: ['village_id']
               },
               include: {
-                model: Phone,
+                model: Indonesia_Village,
                 attributes: {
-                  exclude: ['id']
+                  exclude: ['id', 'district_id', 'created_at', 'updated_at']
+                },
+                include: {
+                  model: Indonesia_District,
+                  attributes: {
+                    exclude: ['id', 'city_id', 'created_at', 'updated_at']
+                  },
+                  include: {
+                    model: Indonesia_City,
+                    attributes: {
+                      exclude: ['id', 'province_id', 'created_at', 'updated_at']
+                    },
+                    include: {
+                      model: Indonesia_Province,
+                      attributes: {
+                        exclude: ['id', 'created_at', 'updated_at']
+                      }
+                    }
+                  }
                 }
               }
             }
-          ],
-          order: [
-            [ 'Obtained_Point_Log', 'updatedAt', 'desc' ],
-            [ 'Obtained_Reward_Log', 'updatedAt', 'desc' ]
-          ]
+          },
+          {
+            model: User_Phone,
+            attributes: {
+              exclude: ['user_id']
+            },
+            include: {
+              model: Phone,
+              attributes: {
+                exclude: ['id']
+              }
+            }
+          }
+        ],
+        order: [
+          [ 'Obtained_Point_Log', 'updatedAt', 'desc' ],
+          [ 'Obtained_Reward_Log', 'updatedAt', 'desc' ]
+        ]
       })
       if (!user) return sendResponse(404, "User not found", res)
       sendData(200, user, "Success Get Detail User", res)
