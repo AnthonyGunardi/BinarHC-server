@@ -540,11 +540,11 @@ class UserController {
     }
   };
 
-  static async resetEmployeePassword(req, res, next) {
+  static async resetPassword(req, res, next) {
     const email = req.params.email;
     try {
       const user = await User.findOne({
-        where: { email, is_admin: 'employee' },
+        where: { email },
         include: { 
           model: Biodata,
           as: 'Biodata'

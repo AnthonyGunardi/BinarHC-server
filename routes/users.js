@@ -8,7 +8,7 @@ route.get('/admins', authentication, UserController.findAllAdmins);
 route.post('/register', authentication, adminAuthorization, UserController.registerEmployee);
 route.post('/login', UserController.adminLogin);
 route.post('/employee/login', UserController.employeeLogin);
-route.put('/employee/reset/:email', authentication, adminAuthorization, UserController.resetEmployeePassword);
+route.put('/employee/reset/:email', authentication, adminAuthorization, UserController.resetPassword);
 route.put('/employee/password/:nip', authentication, UserController.updateEmployeePassword);
 route.get('/employees/birthday', authentication, UserController.findBirthdayEmployees);
 route.get('/employees', authentication, adminAuthorization, UserController.findAllEmployees);
