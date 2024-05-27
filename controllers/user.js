@@ -567,12 +567,12 @@ class UserController {
     }
   }
 
-  static async updateEmployeePassword(req, res, next) {
+  static async updatePassword(req, res, next) {
     const nip = req.params.nip;
     const { old_password, new_password } = req.body;
     try {
       const user = await User.findOne({
-        where: { nip, password: old_password, is_admin: 'employee' }
+        where: { nip, password: old_password }
       })
       if (!user) return sendResponse(404, "Old Password does not match", res)
 
