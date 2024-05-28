@@ -1,4 +1,4 @@
-const { Point, Point_Log, User, Reward, Reward_Log } = require('../models');
+const { Point, Point_Log, User, Reward, Reward_Log, Post, Event } = require('../models');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class PointController {
@@ -47,26 +47,38 @@ class PointController {
 
   static async modifyByJoin(req, res, next) {
     try {
-      const nip = req.user.nip;
-      const { type, point, description } = req.body;
+      const slug = req.params.slug;
+      const nip = req.body.nip;
 
       //get user_id
       const user = await User.findOne({ where: { nip } });
       if (!Boolean(user)) return sendResponse(404, "User is not found", res)
+
+      //check if post is exist
+      const post = await Post.findOne({ 
+        where: { slug, type: 'event' },
+        include: {
+          model: Event,
+          attributes: {
+            exclude: ['post_id']
+          }
+        }
+      });
+      if (!Boolean(post)) return sendResponse(404, "Post is not found", res)
+      const point = post.Event.point
+
+      //check if point from the event already exist in point_log
+      const point_log = await Point_Log.findOne({ 
+        where: { type: 'revenue', point, description: 'join event', user_id: user.id, admin_id: post.user_id } 
+      })
+      if (point_log) return sendResponse(400, "Already get point from this event", res)
 
       //get current point balance
       const currentPoint = await Point.findOne({ where: { user_id: user.id } });
       if (!Boolean(currentPoint)) return sendResponse(404, "Point data is not found", res)
       
       //get updated point balance
-      let updatedBalance;
-      if (type == 'revenue') {
-        updatedBalance = parseInt(currentPoint.balance) + parseInt(point)
-      } else if (type == 'expense') {
-        updatedBalance = parseInt(currentPoint.balance) - parseInt(point)
-      } else {
-        return sendResponse(400, "Point Log type is required", res)
-      }
+      let updatedBalance = parseInt(currentPoint.balance) + parseInt(point)
 
       //check if point balance is smaller than zero
       if (parseInt(updatedBalance) < 0) return sendResponse(400, "Point can't get smaller than zero", res)
@@ -75,7 +87,7 @@ class PointController {
         { balance: updatedBalance }, 
         { where: { user_id: currentPoint.user_id } })
       await Point_Log.create(
-        { type, point, description, user_id: currentPoint.user_id, last_balance: parseInt(currentPoint.balance) }
+        { type: 'revenue', point, description: 'join event', user_id: currentPoint.user_id, admin_id: post.user_id, last_balance: parseInt(currentPoint.balance) }
       );
       sendResponse(200, "Success update point", res)
     }
