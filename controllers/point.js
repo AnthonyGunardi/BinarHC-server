@@ -80,9 +80,6 @@ class PointController {
       //get updated point balance
       let updatedBalance = parseInt(currentPoint.balance) + parseInt(point)
 
-      //check if point balance is smaller than zero
-      if (parseInt(updatedBalance) < 0) return sendResponse(400, "Point can't get smaller than zero", res)
-
       await Point.update(
         { balance: updatedBalance }, 
         { where: { user_id: currentPoint.user_id } })
