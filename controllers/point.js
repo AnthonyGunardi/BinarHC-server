@@ -69,9 +69,9 @@ class PointController {
 
       //check if point from the event already exist in point_log
       const point_log = await Point_Log.findOne({ 
-        where: { type: 'revenue', point, description: 'join event', user_id: user.id, admin_id: post.user_id } 
+        where: { type: 'revenue', point, description: `join event ${post.title}`, user_id: user.id, admin_id: post.user_id } 
       })
-      if (point_log) return sendResponse(400, "Already get point from this event", res)
+      if (point_log) return sendResponse(400, "Already attended this event", res)
 
       //get current point balance
       const currentPoint = await Point.findOne({ where: { user_id: user.id } });
@@ -84,7 +84,7 @@ class PointController {
         { balance: updatedBalance }, 
         { where: { user_id: currentPoint.user_id } })
       await Point_Log.create(
-        { type: 'revenue', point, description: 'join event', user_id: currentPoint.user_id, admin_id: post.user_id, last_balance: parseInt(currentPoint.balance) }
+        { type: 'revenue', point, description: `join event ${post.title}`, user_id: currentPoint.user_id, admin_id: post.user_id, last_balance: parseInt(currentPoint.balance) }
       );
       sendResponse(200, "Success update point", res)
     }
