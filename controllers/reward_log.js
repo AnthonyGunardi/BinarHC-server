@@ -15,12 +15,12 @@ class RewardLogController {
           {
             model: User,
             as: 'Obtained_Reward_Log',
-            attributes:['firstname', 'lastname', 'nip' ]
+            attributes:['fullname', 'nip' ]
           },
           {
             model: User,
             as: 'Approved_Reward_Log',
-            attributes:['firstname', 'lastname', 'nip' ]
+            attributes:['fullname', 'nip' ]
           },
           {
             model: Reward,
@@ -55,12 +55,12 @@ class RewardLogController {
               model: User,
               as: 'Obtained_Reward_Log',
               where: { nip },
-              attributes:['firstname', 'lastname', 'nip' ]
+              attributes:['fullname', 'nip' ]
             },
             {
               model: User,
               as: 'Approved_Reward_Log',
-              attributes:['firstname', 'lastname', 'nip' ]
+              attributes:['fullname', 'nip' ]
             },
             {
               model: Reward,
@@ -83,12 +83,12 @@ class RewardLogController {
               model: User,
               as: 'Obtained_Reward_Log',
               where: { nip },
-              attributes:['firstname', 'lastname', 'nip' ]
+              attributes:['fullname', 'nip' ]
             },
             {
               model: User,
               as: 'Approved_Reward_Log',
-              attributes:['firstname', 'lastname', 'nip' ]
+              attributes:['fullname', 'nip' ]
             },
             {
               model: Reward,
@@ -125,12 +125,12 @@ class RewardLogController {
           {
             model: User,
             as: 'Obtained_Reward_Log',
-            attributes:['firstname', 'lastname', 'nip' ]
+            attributes:['fullname', 'nip' ]
           },
           {
             model: User,
             as: 'Approved_Reward_Log',
-            attributes:['firstname', 'lastname', 'nip' ]
+            attributes:['fullname', 'nip' ]
           },
           {
             model: Reward,

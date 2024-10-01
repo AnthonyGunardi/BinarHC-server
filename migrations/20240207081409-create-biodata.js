@@ -9,6 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      id_card: {
+        type: Sequelize.STRING
+      },
       birthday: {
         type: Sequelize.DATEONLY
       },
@@ -26,9 +29,6 @@ module.exports = {
       },
       last_education: {
         type: Sequelize.STRING
-      },
-      job: {
-        type: Sequelize.TEXT
       },
       marital_status: {
         type: Sequelize.STRING

@@ -58,7 +58,7 @@ class RewardController {
         include: {
           model: User,
           as: 'Author',
-          attributes: ['firstname', 'lastname' , 'email']
+          attributes: ['fullname' , 'email']
         },
         order: [['title', 'asc']]
       });

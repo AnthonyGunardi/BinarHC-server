@@ -1,4 +1,4 @@
-const { 
+const {
   User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Family_Address, Office_Address, Address, 
   Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Family_Phone, Office_Phone, Phone
 } = require('../models');
@@ -22,7 +22,7 @@ const { formatDate } = require('../helpers/formatDate');
 class UserController {
   static async registerAdmin(req, res, next) {
     try {
-      const { firstname, lastname, email, password, is_active } = req.body
+      const { fullname, email, password, is_active } = req.body
 
       //check if user is already exist
       const user = await User.findOne({ where: { email } });
@@ -48,8 +48,8 @@ class UserController {
         })
       }
 
-      const newUser = await User.create({ firstname, lastname, email, password, photo: url, is_admin: 'admin', is_active });
-      sendData(201, { firstname: newUser.firstname, lastname: newUser.lastname, email: newUser.email }, "User is created", res);
+      const newUser = await User.create({ fullname, email, password, photo: url, is_admin: 'admin', is_active });
+      sendData(201, { fullname: newUser.fullname, email: newUser.email }, "User is created", res);
     }
     catch (err) {
       next(err)
@@ -59,9 +59,9 @@ class UserController {
   static async registerEmployee(req, res, next) {    
     try {
       const { 
-        firstname, lastname, email, is_active, 
+        fullname, nip, email, is_active, 
         office_slug, position_slug, echelon_code, 
-        birthday, hometown, hire_date, religion, gender, last_education, job, marital_status 
+        birthday, hometown, hire_date, religion, gender, last_education, marital_status 
       } = req.body;
       const password = formatDate(birthday);
 
@@ -80,11 +80,11 @@ class UserController {
       if (!echelon) return sendResponse(404, "Echelon not found", res)
 
       //generate NIP
-      const users = await User.findAll({
-        where: { is_admin: 'employee' }
-      });
-      const userCount = users.length + 1;
-      const nip = generateNIP('BINAR', userCount);
+      // const users = await User.findAll({
+      //   where: { is_admin: 'employee' }
+      // });
+      // const userCount = users.length + 1;
+      // const nip = generateNIP('BINAR', userCount);
 
       //check if user already exist
       const user = await User.findOne({ 
@@ -118,15 +118,15 @@ class UserController {
         })
       }
 
-      const newUser = await User.create({ firstname, lastname, nip, email, password, photo: url, is_admin: 'employee', is_active });
+      const newUser = await User.create({ fullname, nip, email, password, photo: url, is_admin: 'employee', is_active });
       const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
       const newBiodata = await Biodata.create(
         { 
-          birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, 
+          id_card, birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
           office_id: office.id, position_id: position.id, echelon_id: echelon.id, user_id: newUser.id
         }
       );
-      sendData(201, { firstname: newUser.firstname, lastname: newUser.lastname, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
+      sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
     }
     catch (err) {
       next(err)
@@ -154,8 +154,7 @@ class UserController {
 
       //generate Access Token
       const payload = {
-        firstname: user.firstname,
-        lastname: user.lastname,
+        fullname: user.fullname,
         nip: user.nip,
         email: user.email,
         photo: user.photo,
@@ -189,8 +188,7 @@ class UserController {
 
       //generate Access Token
       const payload = {
-        firstname: user.firstname,
-        lastname: user.lastname,
+        fullname: user.fullname,
         nip: user.nip,
         email: user.email,
         photo: user.photo,
@@ -209,8 +207,8 @@ class UserController {
     try {
       const users = await User.findAll({
         where: { is_admin: 'admin' },
-        attributes:['firstname', 'lastname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
-        order: [['firstname', 'asc']]
+        attributes:['fullname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
+        order: [['fullname', 'asc']]
       });
       sendData(200, users, "Success get all admins", res)
     }
@@ -223,8 +221,8 @@ class UserController {
     try {
       const users = await User.findAll({
         where: { is_admin: 'employee' },
-        attributes:['firstname', 'lastname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
-        order: [['firstname', 'asc']],
+        attributes:['fullname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
+        order: [['fullname', 'asc']],
         include: {
           model: Point,
           attributes:['balance']
@@ -244,7 +242,7 @@ class UserController {
     try {
       const users = await User.findAll({
         where: { is_admin: 'employee', is_active: true },
-        attributes:['firstname', 'lastname', 'nip', 'photo', 'is_active'],
+        attributes:['fullname', 'nip', 'photo', 'is_active'],
         include: {
           model: Biodata,
           as: 'Biodata',
@@ -287,12 +285,12 @@ class UserController {
     try {
       const user = await User.findOne({
         where: { nip, is_admin: 'employee' },
-        attributes:['firstname', 'lastname', 'nip', 'email', 'photo', 'is_active'],
+        attributes:['fullname', 'nip', 'email', 'photo', 'is_active'],
         include: [
           {
             model: Biodata,
             as: 'Biodata',
-            attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'job', 'marital_status' ],
+            attributes:['id_card','birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status' ],
             include: [
               {
                 model: Office,
@@ -377,7 +375,7 @@ class UserController {
             include: {
               model: User,
               as: 'Approved_Point_Log',
-              attributes: ['firstname', 'lastname']
+              attributes: ['fullname']
             }
           },
           {
@@ -394,7 +392,7 @@ class UserController {
               {
                 model: User,
                 as: 'Approved_Reward_Log',
-                attributes: ['firstname', 'lastname']
+                attributes: ['fullname']
               }
             ]
           },
@@ -590,9 +588,9 @@ class UserController {
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
     const { 
-      firstname, lastname, email, password, is_active, 
+      fullname, email, password, is_active, 
       office_slug, position_slug, echelon_code, 
-      birthday, hometown, hire_date, religion, gender, last_education, job, marital_status 
+      birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
     try {
       //check if user is exist
@@ -620,7 +618,7 @@ class UserController {
       });
       if (!echelon) return sendResponse(404, "Echelon not found", res)
 
-      //check if new NIP or new email is already used
+      //check if new email is already used
       const userWithNewNip = await User.findOne({
         where: { 
           [Op.and]: [
@@ -633,7 +631,7 @@ class UserController {
           ]
         }
       })
-      if (userWithNewNip) return sendResponse(403, "NIP or email is already used", res)
+      if (userWithNewNip) return sendResponse(403, "Email is already used", res)
 
       //upload file if req.files isn't null
       let url;
@@ -664,7 +662,7 @@ class UserController {
 
       const updatedUser = await User.update(
         { 
-          firstname, lastname, password, email, photo: url, is_active 
+          fullname, password, email, photo: url, is_active 
         }, 
         {
         where: { id: user.id },
@@ -673,7 +671,7 @@ class UserController {
       )
       const updatedBiodata = await Biodata.update(
         { 
-          birthday, hometown, hire_date, religion, gender, last_education, job, marital_status, 
+          id_card,birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
           office_id: office.id, position_id: position.id, echelon_id: echelon.id, user_id: user.id
         }, 
         {

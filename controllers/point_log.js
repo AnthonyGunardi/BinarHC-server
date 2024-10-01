@@ -13,12 +13,12 @@ class PointLogController {
           {
             model: User,
             as: 'Obtained_Point_Log',
-            attributes:['firstname', 'lastname', 'nip' ]
+            attributes:['fullname', 'nip' ]
           },
           {
             model: User,
             as: 'Approved_Point_Log',
-            attributes:['firstname', 'lastname', 'nip' ]
+            attributes:['fullname', 'nip' ]
           }
         ],
         order: [['id', 'desc']]
