@@ -59,10 +59,13 @@ class PositionController {
       description: req.body.description
     };
     try {
+      //check if position is exist
       const position = await Position.findOne({
         where: { slug: currentSlug }
       })
       if (!position) return sendResponse(404, "Position is not found", res)
+      
+      //check if new slug is already used
       const positionWithNewSlug = await Position.findOne({
         where: { 
           [Op.and]: [
