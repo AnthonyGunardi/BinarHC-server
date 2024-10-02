@@ -59,7 +59,7 @@ class UserController {
   static async registerEmployee(req, res, next) {    
     try {
       const { 
-        fullname, nip, email, is_active, 
+        fullname, nip, id_card,email, is_active, 
         office_slug, position_slug, echelon_code, 
         birthday, hometown, hire_date, religion, gender, last_education, marital_status 
       } = req.body;
@@ -118,11 +118,11 @@ class UserController {
         })
       }
 
-      const newUser = await User.create({ fullname, nip, email, password, photo: url, is_admin: 'employee', is_active });
+      const newUser = await User.create({ fullname, nip, id_card, email, password, photo: url, is_admin: 'employee', is_active });
       const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
       const newBiodata = await Biodata.create(
         { 
-          id_card, birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
+          birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
           office_id: office.id, position_id: position.id, echelon_id: echelon.id, user_id: newUser.id
         }
       );
@@ -221,7 +221,7 @@ class UserController {
     try {
       const users = await User.findAll({
         where: { is_admin: 'employee' },
-        attributes:['fullname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
+        attributes:['fullname', 'nip', 'email', 'id_card', 'photo', 'is_active', 'createdAt', 'updatedAt'],
         order: [['fullname', 'asc']],
         include: {
           model: Point,
@@ -285,12 +285,12 @@ class UserController {
     try {
       const user = await User.findOne({
         where: { nip, is_admin: 'employee' },
-        attributes:['fullname', 'nip', 'email', 'photo', 'is_active'],
+        attributes:['fullname', 'nip', 'email', 'id_card', 'photo', 'is_active'],
         include: [
           {
             model: Biodata,
             as: 'Biodata',
-            attributes:['id_card','birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status' ],
+            attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status' ],
             include: [
               {
                 model: Office,
@@ -588,7 +588,7 @@ class UserController {
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
     const { 
-      fullname, email, password, is_active, 
+      fullname, email, id_card, password, is_active, 
       office_slug, position_slug, echelon_code, 
       birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
@@ -662,7 +662,7 @@ class UserController {
 
       const updatedUser = await User.update(
         { 
-          fullname, password, email, photo: url, is_active 
+          fullname, password, id_card, email, photo: url, is_active 
         }, 
         {
         where: { id: user.id },
@@ -671,7 +671,7 @@ class UserController {
       )
       const updatedBiodata = await Biodata.update(
         { 
-          id_card,birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
+          birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
           office_id: office.id, position_id: position.id, echelon_id: echelon.id, user_id: user.id
         }, 
         {

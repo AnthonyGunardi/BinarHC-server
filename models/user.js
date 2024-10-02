@@ -80,6 +80,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
+    id_card: DataTypes.STRING,
     photo: DataTypes.STRING,
     is_admin: {
       type: DataTypes.ENUM,
