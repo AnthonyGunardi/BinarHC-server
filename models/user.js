@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Family, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasMany(models.User_Address, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasMany(models.User_Phone, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.belongsToMany(models.Position, {through: 'User_Position'})
     }
   }
   User.init({
