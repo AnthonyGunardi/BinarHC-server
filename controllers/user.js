@@ -59,21 +59,18 @@ class UserController {
   static async registerEmployee(req, res, next) {    
     try {
       const { 
-        fullname, nip, id_card,email, is_active, 
-        office_slug, position_slug, echelon_code, 
+        fullname, nip, id_card, email, is_active, 
+        office_slug, echelon_code, 
         birthday, hometown, hire_date, religion, gender, last_education, marital_status 
       } = req.body;
       const password = formatDate(birthday);
 
-      //check if the office_slug, position_slug & echelon_code are valid
+      //check if the office_slug & echelon_code are valid
       const office = await Office.findOne({
         where: {slug: office_slug}
       });
       if (!office) return sendResponse(404, "Office not found", res)
-      const position = await Position.findOne({
-        where: {slug: position_slug}
-      });
-      if (!position) return sendResponse(404, "Position not found", res)
+
       const echelon = await Echelon.findOne({
         where: {code: echelon_code}
       });
