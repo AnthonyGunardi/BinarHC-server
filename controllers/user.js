@@ -582,7 +582,7 @@ class UserController {
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
     const { 
-      fullname, nip, email, id_card, is_active, 
+      fullname, nip, id_card, email, is_active, 
       office_slug, echelon_code, 
       birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
@@ -609,7 +609,7 @@ class UserController {
       });
       if (!echelon) return sendResponse(404, "Echelon not found", res)
 
-      //check if new email is already used
+      //check if new email or NIP is already used
       const userWithNewNip = await User.findOne({
         where: { 
           [Op.and]: [
@@ -618,11 +618,15 @@ class UserController {
                 [Op.ne]: user.id, 
               } 
             },
-            { email }
+            { [Op.or]: [
+                { email },
+                { nip } 
+              ]
+            } 
           ]
         }
       })
-      if (userWithNewNip) return sendResponse(403, "Email is already used", res)
+      if (userWithNewNip) return sendResponse(403, "Email or NIP is already used", res)
 
       //upload file if req.files isn't null
       let url;
