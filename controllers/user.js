@@ -93,7 +93,7 @@ class UserController {
             ]
           }
       });
-      if (Boolean(user)) return sendResponse(400, 'User already exist', res)
+      if (Boolean(user)) return sendResponse(400, 'Email or NIP already exist', res)
 
       //upload file if req.files isn't null
       let url = null;
