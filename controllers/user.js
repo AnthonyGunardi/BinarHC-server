@@ -582,7 +582,7 @@ class UserController {
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
     const { 
-      fullname, email, id_card, password, is_active, 
+      fullname, nip, email, id_card, is_active, 
       office_slug, echelon_code, 
       birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
@@ -603,6 +603,7 @@ class UserController {
         where: {slug: office_slug}
       });
       if (!office) return sendResponse(404, "Office not found", res)
+
       const echelon = await Echelon.findOne({
         where: {code: echelon_code}
       });
@@ -652,7 +653,7 @@ class UserController {
 
       const updatedUser = await User.update(
         { 
-          fullname, password, id_card, email, photo: url, is_active 
+          fullname, nip, id_card, email, photo: url, is_active 
         }, 
         {
         where: { id: user.id },
