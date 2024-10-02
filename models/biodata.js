@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Biodata.belongsTo(models.User, {foreignKey: 'user_id', targetKey: 'id', as: 'Biodata'})
       Biodata.belongsTo(models.Office, {foreignKey: 'office_id', targetKey: 'id'})
-      Biodata.belongsTo(models.Position, {foreignKey: 'position_id', targetKey: 'id'})
       Biodata.belongsTo(models.Echelon, {foreignKey: 'echelon_id', targetKey: 'id'})
     }
   }
@@ -27,7 +26,6 @@ module.exports = (sequelize, DataTypes) => {
     marital_status: DataTypes.STRING,
     user_id: DataTypes.INTEGER,
     office_id: DataTypes.INTEGER,
-    position_id: DataTypes.INTEGER,
     echelon_id: DataTypes.INTEGER
   }, {
     sequelize,

@@ -123,7 +123,7 @@ class UserController {
       const newBiodata = await Biodata.create(
         { 
           birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
-          office_id: office.id, position_id: position.id, echelon_id: echelon.id, user_id: newUser.id
+          office_id: office.id, echelon_id: echelon.id, user_id: newUser.id
         }
       );
       sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
@@ -347,12 +347,6 @@ class UserController {
                     }
                   }
                 ]
-              },
-              {
-                model: Position,
-                attributes: {
-                  exclude: ['id']
-                }
               },
               {
                 model: Echelon,
@@ -672,7 +666,7 @@ class UserController {
       const updatedBiodata = await Biodata.update(
         { 
           birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
-          office_id: office.id, position_id: position.id, echelon_id: echelon.id, user_id: user.id
+          office_id: office.id, echelon_id: echelon.id, user_id: user.id
         }, 
         {
         where: { id: user.Biodata.id },

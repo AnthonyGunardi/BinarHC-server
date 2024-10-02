@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Position.hasMany(models.Biodata, {foreignKey: 'position_id', sourceKey: 'id'})
+      Position.belongsToMany(models.User, {through: 'User_Position'})
     }
   }
   Position.init({
