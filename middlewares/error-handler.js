@@ -10,12 +10,6 @@ const errorHandler = (err, req, res, next) => {
           if (element.message == `username must be unique`) {
             errors.push(`Username is Already Registered`);
           }
-          else if (element.message == `Password is Required`) {
-            errors.push(`Password is Required`);
-          }
-          else if (element.message == `Email address is not valid`) {
-            errors.push(`Email address is not valid`);
-          }
           else {
               errors.push(element.message);
           }
@@ -23,7 +17,7 @@ const errorHandler = (err, req, res, next) => {
       let error = errors.join(', ');
       sendResponse(400, error, res);
   } else if (err.name == `SequelizeDatabaseError`) {
-
+      sendResponse(500, 'Database error', res);
   } else {
       sendResponse(500, 'Internal server error', res);
   }
