@@ -354,6 +354,15 @@ class UserController {
             ]
           },
           {
+            model: Position,
+            through: {
+              attributes: []
+            },
+            attributes: {
+              exclude: ['id']
+            }
+          },
+          {
             model: Point,
             attributes: ['balance']
           },
