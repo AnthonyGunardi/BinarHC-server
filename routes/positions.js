@@ -6,7 +6,7 @@ route.get('/', authentication, PositionController.getPositions);
 route.post('/', authentication, PositionController.create);
 route.get('/assigned/:nip', authentication, PositionController.getUserPosition);
 route.put('/assign/:nip', authentication, PositionController.addUserPosition);
-route.delete('/remove/:nip', authentication, PositionController.removeUserPosition);
+route.delete('/remove', authentication, PositionController.removeUserPosition); //with query params, example: ?nip=12345&id=6
 route.get('/:slug', authentication, PositionController.getPosition);
 route.put('/:slug', authentication, PositionController.update);
 

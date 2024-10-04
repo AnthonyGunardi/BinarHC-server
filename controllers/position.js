@@ -138,8 +138,8 @@ class PositionController {
 
   static async removeUserPosition(req, res, next) {
     try {
-      const nip = req.params.nip;
-      const { slug } = req.body;
+      const nip = req.query.nip;
+      const id = req.query.id;
 
       //check if user is exist
       const user = await User.findOne({ 
@@ -147,17 +147,11 @@ class PositionController {
       });
       if (!user) return sendResponse(404, "User is not found", res);
 
-      //check if position is exist
-      const position = await Position.findOne({
-        where: { slug }
-      })
-      if(!position) return sendResponse(400, "Position is not exists", res)
-
       // Check if the position is associated with the user
-      const assigned = await user.getPositions( {
-        where: { slug }
+      const position = await user.getPositions( {
+        where: { id }
       });
-      if(assigned.length === 0) return sendResponse(400, "Position is not associated with the user", res)
+      if(position.length === 0) return sendResponse(400, "Position is not associated with the user", res)
 
       await user.removePosition(position, { through: 'User_Position' });
       sendResponse(200, "Success remove position", res)  
