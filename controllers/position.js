@@ -93,6 +93,24 @@ class PositionController {
     }
   };
 
+  static async getUserPosition(req, res, next) {
+    try {
+      const nip = req.params.nip;
+
+      //get user_id
+      const user = await User.findOne({ 
+        where: { nip } 
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      const assigned = await user.getPositions();
+      sendData(200, assigned, "Success get User Positions", res);  
+    }
+    catch (err) {
+      next(err)
+    };
+  };
+
   static async addUserPosition(req, res, next) {
     try {
       const nip = req.params.nip;
