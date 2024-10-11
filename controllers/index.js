@@ -20,6 +20,7 @@ const OfficeAddressController = require('./office_address');
 const UserPhoneController = require('./user_phone');
 const FamilyPhoneController = require('./family_phone');
 const OfficePhoneController = require('./office_phone');
+const OvertimeController = require('./overtime');
 
 module.exports = { 
   UserController, 
@@ -43,5 +44,6 @@ module.exports = {
   OfficeAddressController,
   UserPhoneController,
   FamilyPhoneController,
-  OfficePhoneController
+  OfficePhoneController,
+  OvertimeController
 };

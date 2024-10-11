@@ -23,6 +23,8 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.User_Address, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasMany(models.User_Phone, {foreignKey: 'user_id', sourceKey: 'id'})
       User.belongsToMany(models.Position, {through: 'User_Position'})
+      User.hasMany(models.Overtime, {foreignKey: 'employee_id', sourceKey: 'id', as: 'Overtime_Request'})
+      User.hasMany(models.Overtime, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Overtime_Approval'})
     }
   }
   User.init({
