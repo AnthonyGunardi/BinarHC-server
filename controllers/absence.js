@@ -1,4 +1,4 @@
-const { Overtime, User } = require('../models/index.js');
+const { Absence, User } = require('../models/index.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -8,7 +8,7 @@ class OvertimeController {
   static async createByEmployee(req, res, next) {
     try {
       const userEmail = req.user.email
-      const { date, clock_in, clock_out, status, meta, note } = req.body;
+      const { start_date, end_date, type, note } = req.body;
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -16,11 +16,11 @@ class OvertimeController {
       });
       if (!user) return sendResponse(404, "User is not found", res);
 
-      //check if overtime request already exist
-      const overtime = await Overtime.findOne({ 
-        where: { date, employee_id: user.id } 
+      //check if absence already exist
+      const absence = await Absence.findOne({ 
+        where: { start_date, end_date,employee_id: user.id } 
       });
-      if (Boolean(overtime)) return sendResponse(400, 'Overtime request already exist', res);
+      if (Boolean(absence)) return sendResponse(400, 'Absence request already exist', res);
 
       //upload file if req.files isn't null
       let url = null
@@ -30,22 +30,22 @@ class OvertimeController {
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;
         const allowedType = ['.png', '.jpg', '.jpeg'];
-        url = `overtime-requests/${fileName}`;
+        url = `absence-requests/${fileName}`;
 
         //validate file type
         if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
         //validate file size max 5mb
         if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
         //place the file on server
-        file.mv(`./public/images/overtime-requests/${fileName}`, async (err) => {
+        file.mv(`./public/images/absence-requests/${fileName}`, async (err) => {
           if(err) return sendResponse(502, err.message, res)
         })
       }
 
-      const newOvertime = await Overtime.create(
-        { date, clock_in, clock_out, status, photo: url, meta, note, employee_id: user.id }
+      const newAbsence = await Absence.create(
+        { start_date, end_date, photo: url, type, note, employee_id: user.id }
       );
-      sendData(201, { id: newOvertime.id, date: newOvertime.date, clock_in: newOvertime.clock_in, clock_out: newOvertime.clock_out, employee_id: newOvertime.employee_id }, "Success create overtime request", res);  
+      sendData(201, { id: newAbsence.id, start_date: newAbsence.start_date, end_date: newAbsence.end_date, type: newAbsence.type, status: newAbsence.status, note: newAbsence.note, employee_id: newAbsence.employee_id }, "Success create absence request", res);  
     }
     catch (err) {
       next(err)
@@ -71,11 +71,11 @@ class OvertimeController {
     };
   };
 
-  static async getUserOvertimesByScroll(req, res, next) {
+  static async getUserAbsencesByScroll(req, res, next) {
     try {
       const lastID = parseInt(req.query.lastID) || 0;
       const limit = parseInt(req.query.limit) || 0;
-      const status = req.query.status || "";
+      const type = req.query.type || "";
       const userEmail = req.user.email;
       let result = [];
 
@@ -86,19 +86,20 @@ class OvertimeController {
       if (!user) return sendResponse(404, "User is not found", res);
 
       if (lastID < 1) {
-        //get overtimes where its status is like keyword
-        const results = await Overtime.findAll({
+        //get absences where its type is like keyword
+        const results = await Absence.findAll({
           where: {
-            status: {
-              [Op.like]: '%'+status+'%'
-            }
+            type: {
+              [Op.like]: '%'+type+'%'
+            },
+            employee_id: user.id
           },
           attributes: {
             exclude: ['employee_id']
           },
           include: {
             model: User,
-            as: 'Overtime_Requester',
+            as: 'Absence_Requester',
             attributes: {
               exclude: ['createdAt', 'updatedAt']
             }
@@ -110,14 +111,14 @@ class OvertimeController {
         })
         result = results
       } else {
-        //get overtimes where its status is like keyword
-        const results = await Overtime.findAll({
+        //get absences where its type is like keyword
+        const results = await Absence.findAll({
           where: {
             id: {
               [Op.lt]: lastID
             },
             status: {
-              [Op.like]: '%'+status+'%'
+              [Op.like]: '%'+type+'%'
             },
           },
           attributes: {
@@ -143,7 +144,7 @@ class OvertimeController {
         lastID: result.length ? result[result.length - 1].id : 0,
         hasMore: result.length >= limit ? true : false
       };
-      sendData(200, payload, "Success get overtimes data", res)
+      sendData(200, payload, "Success get absences data", res)
     } 
     catch (err) {
         next(err)

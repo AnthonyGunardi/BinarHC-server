@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Absence.belongsTo(models.User, {foreignKey: 'employee_id', targetKey: 'id', as:"Absence_Requester"})
+      Absence.belongsTo(models.User, {foreignKey: 'admin_id', targetKey: 'id', as: "Absence_Approver"})
     }
   }
   Absence.init({
@@ -51,9 +53,23 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    status: DataTypes.STRING,
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'Pending',
+    },
     note: DataTypes.TEXT,
-    employee_id: DataTypes.INTEGER,
+    employee_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate:{
+        notEmpty: {
+          msg: `Employee ID is Required`
+        },
+        notNull: {
+          msg: `Employee ID is Required`
+        }
+      }
+    },
     admin_id: DataTypes.INTEGER
   }, {
     sequelize,
