@@ -327,7 +327,7 @@ class OvertimeController {
   static async update(req, res, next) {
     const id = req.params.id
     const userEmail = req.user.email
-    const { start_time, end_time, status, meta, note } = req.body;
+    const { start_time, end_time, type, status, meta, note } = req.body;
     try {
       //get user_id
       const user = await User.findOne({ 
@@ -369,10 +369,10 @@ class OvertimeController {
       }
 
       const updatedOvertime = await Overtime.update(
-        { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }, 
-        { where: { id: post.id }, returning: true }
+        { start_time, end_time, type, status, photo: url, meta, note, admin_id: user.id }, 
+        { where: { id: overtime.id }, returning: true }
       )
-      sendResponse(200, "Success update post", res)
+      sendResponse(200, "Success update Overtime", res)
     }
     catch (err) {
       next(err)
