@@ -40,17 +40,21 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    status: {
+    type: {
       type: DataTypes.STRING,
       allowNull:false,
       validate: {
         notEmpty: {
-          msg: 'Overtime Status is Required'
+          msg: 'Overtime Type is Required'
         },
         notNull: {
-          msg: 'Overtime Status is Required'
+          msg: 'Overtime Type is Required'
         }
       }
+    },
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'Pending',
     },
     photo: DataTypes.STRING,
     meta: DataTypes.TEXT,

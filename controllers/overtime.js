@@ -1,4 +1,4 @@
-const { Overtime, User } = require('../models/index.js');
+const { Overtime, User, Biodata, Office } = require('../models/index.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -8,7 +8,7 @@ class OvertimeController {
   static async createByEmployee(req, res, next) {
     try {
       const userEmail = req.user.email
-      const { start_time, end_time, status, meta, note } = req.body;
+      const { start_time, end_time, type, meta, note } = req.body;
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -43,7 +43,7 @@ class OvertimeController {
       }
 
       const newOvertime = await Overtime.create(
-        { start_time, end_time, status, photo: url, meta, note, employee_id: user.id }
+        { start_time, end_time, type, photo: url, meta, note, employee_id: user.id }
       );
       sendData(201, { id: newOvertime.id, start_time: newOvertime.start_time, end_time: newOvertime.end_time, employee_id: newOvertime.employee_id }, "Success create overtime request", res);  
     }
@@ -54,11 +54,13 @@ class OvertimeController {
 
   static async getAllOvertimes(req, res, next) {
     try {
-      const date = req.body.date;
-      const division_slug = req.body.division_slug;
+      const { division_slug, start_date, end_date } = req.body;
       const overtimes = await Overtime.findAll({
         where: {
-          start_time: {}
+          start_time: {
+            [Op.gte]: start_date,
+            [Op.lte]: end_date  
+          }
         },
         attributes: {
           exclude: ['employee_id', 'admin_id']
@@ -70,10 +72,12 @@ class OvertimeController {
             attributes: {
               exclude: ['createdAt', 'updatedAt']
             },
+            required: true,
             include: [
               {
                 model: Biodata,
                 as: 'Biodata',
+                required: true,
                 include: [
                   {
                     model: Office,
@@ -81,6 +85,7 @@ class OvertimeController {
                     where: {
                       slug: division_slug
                     },
+                    required: true,
                     attributes: []
                   }
                 ],
@@ -98,7 +103,7 @@ class OvertimeController {
         ],
         order: [['id', 'ASC']]
       });
-      sendData(200, posts, "Success get all posts", res);
+      sendData(200, overtimes, "Success get all overtimes", res);
     } 
     catch (err) {
         next(err)
@@ -109,15 +114,15 @@ class OvertimeController {
     try {
       const lastID = parseInt(req.query.lastID) || 0;
       const limit = parseInt(req.query.limit) || 0;
-      const status = req.query.status || "";
+      const type = req.query.type || "";
       let result = [];
 
       if (lastID < 1) {
         //get overtimes where its status is like keyword
         const results = await Overtime.findAll({
           where: {
-            status: {
-              [Op.like]: '%'+status+'%'
+            type: {
+              [Op.like]: '%'+type+'%'
             }
           },
           attributes: {
@@ -152,8 +157,8 @@ class OvertimeController {
             id: {
               [Op.lt]: lastID
             },
-            status: {
-              [Op.like]: '%'+status+'%'
+            type: {
+              [Op.like]: '%'+type+'%'
             },
           },
           attributes: {
@@ -320,65 +325,50 @@ class OvertimeController {
   };
 
   static async update(req, res, next) {
-    const currentSlug = req.params.slug
+    const id = req.params.id
     const userEmail = req.user.email
-    const { email, title, slug, description, type, published_at, is_active } = req.body;
+    const { start_time, end_time, status, meta, note } = req.body;
     try {
-      //check if user is exist and is login
+      //get user_id
       const user = await User.findOne({ 
-        where: { email } 
+        where: { email: userEmail } 
       });
-      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+      if (!user) return sendResponse(404, "User is not found", res);
 
-      //check if post slug is exist
-      const post = await Post.findOne({
-        where: { slug: currentSlug }
+      //check if overtime is exist
+      const overtime = await Overtime.findOne({
+        where: { id }
       })
-      if (!post) return sendResponse(404, "Post is not found", res)
+      if (!overtime) return sendResponse(404, "Overtime is not found", res)
 
       //upload file if req.files isn't null
       let url;
       if(!req.files) {
-        url = post.thumbnail;
+        url = overtime.photo;
       } else {
-        const file = req.files.thumbnail;
+        const file = req.files.file;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;
         const allowedType = ['.png', '.jpg', '.jpeg'];
-        url = `thumbnail-posts/${fileName}`;
+        url = `overtime-requests/${fileName}`;
     
         //validate file type
         if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
         //validate file size max 5mb
         if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
         //place the file on server
-        file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
+        file.mv(`./public/images/overtime-requests/${fileName}`, async (err) => {
           if(err) return sendResponse(502, err.message, res)
         })
         //delete previous file on server
-        if (post.thumbnail !== null) {
-          const filePath = `./public/images/${post.thumbnail}`;
+        if (overtime.photo !== null) {
+          const filePath = `./public/images/${overtime.photo}`;
           fs.unlinkSync(filePath);
         }
       }
 
-      //check if new post slug is already used
-      const postWithNewSlug = await Post.findOne({
-        where: { 
-          [Op.and]: [
-            { 
-              id: {
-                [Op.ne]: post.id, 
-              } 
-            },
-            { slug }
-          ]
-        }
-      })
-      if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
-
-      const updatedPost = await Post.update(
+      const updatedOvertime = await Overtime.update(
         { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }, 
         { where: { id: post.id }, returning: true }
       )

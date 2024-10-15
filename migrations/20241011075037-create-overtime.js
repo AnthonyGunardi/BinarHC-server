@@ -15,6 +15,9 @@ module.exports = {
       end_time: {
         type: Sequelize.DATE
       },
+      type: {
+        type: Sequelize.STRING
+      },
       status: {
         type: Sequelize.STRING
       },

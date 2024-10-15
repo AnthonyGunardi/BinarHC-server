@@ -1,4 +1,4 @@
-const { Absence, User } = require('../models/index.js');
+const { Absence, User, Biodata, Office } = require('../models/index.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -52,19 +52,58 @@ class OvertimeController {
     };
   };
 
-  static async getAllPosts(req, res, next) {
+  static async getAllAbsences(req, res, next) {
     try {
-      const posts = await Post.findAll({
-        attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
-        include: {
-          model: Event,
-          attributes: {
-            exclude: ['post_id']
+      const { division_slug, start_date, end_date } = req.body;
+      const absences = await Absence.findAll({
+        where: {
+          start_date: {
+            [Op.gte]: start_date,
+            [Op.lte]: end_date  
           }
         },
-        order: [['id', 'desc']]
+        attributes: {
+          exclude: ['employee_id', 'admin_id']
+        },
+        include: [
+          {
+            model: User,
+            as: 'Absence_Requester',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            },
+            required: true,
+            include: [
+              {
+                model: Biodata,
+                as: 'Biodata',
+                required: true,
+                include: [
+                  {
+                    model: Office,
+                    as: 'Office',
+                    where: {
+                      slug: division_slug
+                    },
+                    required: true,
+                    attributes: []
+                  }
+                ],
+                attributes: []
+              }
+            ]
+          },
+          {
+            model: User,
+            as: 'Absence_Approver',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            }
+          },
+        ],
+        order: [['id', 'ASC']]
       });
-      sendData(200, posts, "Success get all posts", res);
+      sendData(200, absences, "Success get all absences", res);
     } 
     catch (err) {
         next(err)
