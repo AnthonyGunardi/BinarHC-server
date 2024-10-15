@@ -16,39 +16,27 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Overtime.init({
-    date: {
-      type: DataTypes.DATEONLY,
+    start_time: {
+      type:DataTypes.DATE,
       allowNull:false,
       validate: {
         notEmpty: {
-          msg: 'Overtime Date is Required'
+          msg: 'Start Time is Required'
         },
         notNull: {
-          msg: 'Overtime Date is Required'
+          msg: 'Start Time is Required'
         }
       }
     },
-    clock_in: {
-      type:DataTypes.TIME,
+    end_time: {
+      type: DataTypes.DATE,
       allowNull:false,
       validate: {
         notEmpty: {
-          msg: 'Clock In is Required'
+          msg: 'End Time is Required'
         },
         notNull: {
-          msg: 'Clock In is Required'
-        }
-      }
-    },
-    clock_out: {
-      type: DataTypes.TIME,
-      allowNull:false,
-      validate: {
-        notEmpty: {
-          msg: 'Clock Out is Required'
-        },
-        notNull: {
-          msg: 'Clock Out is Required'
+          msg: 'End Time is Required'
         }
       }
     },

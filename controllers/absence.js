@@ -71,6 +71,87 @@ class OvertimeController {
     };
   };
 
+  static async getAbsencesByScroll(req, res, next) {
+    try {
+      const lastID = parseInt(req.query.lastID) || 0;
+      const limit = parseInt(req.query.limit) || 0;
+      const type = req.query.type || "";
+      let result = [];
+
+      if (lastID < 1) {
+        //get absences where its type is like keyword
+        const results = await Absence.findAll({
+          where: {
+            type: {
+              [Op.like]: '%'+type+'%'
+            },
+          },
+          attributes: {
+            exclude: ['employee_id', 'admin_id']
+          },
+          include: [
+            {
+              model: User,
+              as: 'Absence_Requester',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt']
+              }
+            },
+            {
+              model: User,
+              as: 'Absence_Approver',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt']
+              }
+            },
+          ],
+          limit: limit,
+          order: [
+            ['id', 'DESC']
+          ]
+        })
+        result = results
+      } else {
+        //get absences where its type is like keyword
+        const results = await Absence.findAll({
+          where: {
+            id: {
+              [Op.lt]: lastID
+            },
+            status: {
+              [Op.like]: '%'+type+'%'
+            },
+          },
+          attributes: {
+            exclude: ['employee_id']
+          },
+          include: {
+            model: User,
+            as: 'Overtime_Requester',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            }
+          },
+          limit: limit,
+          order: [
+            ['id', 'DESC']
+          ]
+        })
+        result = results
+      }
+      
+      const payload = {
+        datas: result,
+        lastID: result.length ? result[result.length - 1].id : 0,
+        hasMore: result.length >= limit ? true : false
+      };
+      sendData(200, payload, "Success get absences data", res)
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
   static async getUserAbsencesByScroll(req, res, next) {
     try {
       const lastID = parseInt(req.query.lastID) || 0;

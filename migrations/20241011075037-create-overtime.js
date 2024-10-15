@@ -9,14 +9,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      date: {
-        type: Sequelize.DATEONLY
+      start_time: {
+        type: Sequelize.DATE
       },
-      clock_in: {
-        type: Sequelize.TIME
-      },
-      clock_out: {
-        type: Sequelize.TIME
+      end_time: {
+        type: Sequelize.DATE
       },
       status: {
         type: Sequelize.STRING

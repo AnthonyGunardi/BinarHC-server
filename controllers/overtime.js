@@ -8,7 +8,7 @@ class OvertimeController {
   static async createByEmployee(req, res, next) {
     try {
       const userEmail = req.user.email
-      const { date, clock_in, clock_out, status, meta, note } = req.body;
+      const { start_time, end_time, status, meta, note } = req.body;
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -18,7 +18,7 @@ class OvertimeController {
 
       //check if overtime request already exist
       const overtime = await Overtime.findOne({ 
-        where: { date, employee_id: user.id } 
+        where: { start_time, end_time, employee_id: user.id } 
       });
       if (Boolean(overtime)) return sendResponse(400, 'Overtime request already exist', res);
 
@@ -43,28 +43,143 @@ class OvertimeController {
       }
 
       const newOvertime = await Overtime.create(
-        { date, clock_in, clock_out, status, photo: url, meta, note, employee_id: user.id }
+        { start_time, end_time, status, photo: url, meta, note, employee_id: user.id }
       );
-      sendData(201, { id: newOvertime.id, date: newOvertime.date, clock_in: newOvertime.clock_in, clock_out: newOvertime.clock_out, employee_id: newOvertime.employee_id }, "Success create overtime request", res);  
+      sendData(201, { id: newOvertime.id, start_time: newOvertime.start_time, end_time: newOvertime.end_time, employee_id: newOvertime.employee_id }, "Success create overtime request", res);  
     }
     catch (err) {
       next(err)
     };
   };
 
-  static async getAllPosts(req, res, next) {
+  static async getAllOvertimes(req, res, next) {
     try {
-      const posts = await Post.findAll({
-        attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
-        include: {
-          model: Event,
-          attributes: {
-            exclude: ['post_id']
-          }
+      const date = req.body.date;
+      const division_slug = req.body.division_slug;
+      const overtimes = await Overtime.findAll({
+        where: {
+          start_time: {}
         },
-        order: [['id', 'desc']]
+        attributes: {
+          exclude: ['employee_id', 'admin_id']
+        },
+        include: [
+          {
+            model: User,
+            as: 'Overtime_Requester',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            },
+            include: [
+              {
+                model: Biodata,
+                as: 'Biodata',
+                include: [
+                  {
+                    model: Office,
+                    as: 'Office',
+                    where: {
+                      slug: division_slug
+                    },
+                    attributes: []
+                  }
+                ],
+                attributes: []
+              }
+            ]
+          },
+          {
+            model: User,
+            as: 'Overtime_Approver',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            }
+          },
+        ],
+        order: [['id', 'ASC']]
       });
       sendData(200, posts, "Success get all posts", res);
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
+  static async getOvertimesByScroll(req, res, next) {
+    try {
+      const lastID = parseInt(req.query.lastID) || 0;
+      const limit = parseInt(req.query.limit) || 0;
+      const status = req.query.status || "";
+      let result = [];
+
+      if (lastID < 1) {
+        //get overtimes where its status is like keyword
+        const results = await Overtime.findAll({
+          where: {
+            status: {
+              [Op.like]: '%'+status+'%'
+            }
+          },
+          attributes: {
+            exclude: ['employee_id', 'admin_id']
+          },
+          include: [
+            {
+              model: User,
+              as: 'Overtime_Requester',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt']
+              }
+            },
+            {
+              model: User,
+              as: 'Overtime_Approver',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt']
+              }
+            },
+          ],
+          limit: limit,
+          order: [
+            ['id', 'DESC']
+          ]
+        })
+        result = results
+      } else {
+        //get overtimes where its status is like keyword
+        const results = await Overtime.findAll({
+          where: {
+            id: {
+              [Op.lt]: lastID
+            },
+            status: {
+              [Op.like]: '%'+status+'%'
+            },
+          },
+          attributes: {
+            exclude: ['employee_id']
+          },
+          include: {
+            model: User,
+            as: 'Overtime_Requester',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            }
+          },
+          limit: limit,
+          order: [
+            ['id', 'DESC']
+          ]
+        })
+        result = results
+      }
+      
+      const payload = {
+        datas: result,
+        lastID: result.length ? result[result.length - 1].id : 0,
+        hasMore: result.length >= limit ? true : false
+      };
+      sendData(200, payload, "Success get overtimes data", res)
     } 
     catch (err) {
         next(err)
@@ -91,7 +206,8 @@ class OvertimeController {
           where: {
             status: {
               [Op.like]: '%'+status+'%'
-            }
+            },
+            employee_id: user.id
           },
           attributes: {
             exclude: ['employee_id']
