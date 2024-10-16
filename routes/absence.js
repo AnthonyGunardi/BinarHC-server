@@ -8,6 +8,6 @@ route.get('/user', authentication, AbsenceController.getUserAbsencesByScroll); /
 // route.get('/:slug', authentication, PostController.getPost);
 route.post('/', authentication, AbsenceController.createByEmployee);
 // route.put('/toggle/:slug', authentication, PostController.togglePost);
-// route.put('/:slug', authentication, PostController.update);
+route.put('/:id', authentication, AbsenceController.update);
 
 module.exports = route;

@@ -25,7 +25,7 @@ class OvertimeController {
       //upload file if req.files isn't null
       let url = null
       if (req.files != null) {
-        const file = req.files.file;
+        const file = req.files.photo;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;
@@ -346,7 +346,7 @@ class OvertimeController {
       if(!req.files) {
         url = overtime.photo;
       } else {
-        const file = req.files.file;
+        const file = req.files.photo;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;

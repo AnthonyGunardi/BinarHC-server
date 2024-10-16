@@ -325,69 +325,54 @@ class OvertimeController {
   };
 
   static async update(req, res, next) {
-    const currentSlug = req.params.slug
+    const id = req.params.id
     const userEmail = req.user.email
-    const { email, title, slug, description, type, published_at, is_active } = req.body;
+    const { start_date, end_date, type, status, note } = req.body;
     try {
-      //check if user is exist and is login
+      //get user_id
       const user = await User.findOne({ 
-        where: { email } 
+        where: { email: userEmail } 
       });
-      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+      if (!user) return sendResponse(404, "User is not found", res);
 
-      //check if post slug is exist
-      const post = await Post.findOne({
-        where: { slug: currentSlug }
+      //check if absence is exist
+      const absence = await Absence.findOne({
+        where: { id }
       })
-      if (!post) return sendResponse(404, "Post is not found", res)
+      if (!absence) return sendResponse(404, "Absence is not found", res)
 
       //upload file if req.files isn't null
       let url;
       if(!req.files) {
-        url = post.thumbnail;
+        url = absence.photo;
       } else {
-        const file = req.files.thumbnail;
+        const file = req.files.photo;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;
         const allowedType = ['.png', '.jpg', '.jpeg'];
-        url = `thumbnail-posts/${fileName}`;
+        url = `absence-requests/${fileName}`;
     
         //validate file type
         if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
         //validate file size max 5mb
         if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
         //place the file on server
-        file.mv(`./public/images/thumbnail-posts/${fileName}`, async (err) => {
+        file.mv(`./public/images/absence-requests/${fileName}`, async (err) => {
           if(err) return sendResponse(502, err.message, res)
         })
         //delete previous file on server
-        if (post.thumbnail !== null) {
-          const filePath = `./public/images/${post.thumbnail}`;
+        if (absence.photo !== null) {
+          const filePath = `./public/images/${absence.photo}`;
           fs.unlinkSync(filePath);
         }
       }
 
-      //check if new post slug is already used
-      const postWithNewSlug = await Post.findOne({
-        where: { 
-          [Op.and]: [
-            { 
-              id: {
-                [Op.ne]: post.id, 
-              } 
-            },
-            { slug }
-          ]
-        }
-      })
-      if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
-
-      const updatedPost = await Post.update(
-        { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }, 
-        { where: { id: post.id }, returning: true }
+      const updatedAbsence = await Absence.update(
+        { start_date, end_date, photo: url,type, status, note, admin_id: user.id }, 
+        { where: { id: absence.id }, returning: true }
       )
-      sendResponse(200, "Success update post", res)
+      sendResponse(200, "Success update Absence", res)
     }
     catch (err) {
       next(err)
