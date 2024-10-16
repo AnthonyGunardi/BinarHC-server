@@ -45,7 +45,7 @@ class OvertimeController {
       const newOvertime = await Overtime.create(
         { start_time, end_time, type, photo: url, meta, note, employee_id: user.id }
       );
-      sendData(201, { id: newOvertime.id, start_time: newOvertime.start_time, end_time: newOvertime.end_time, employee_id: newOvertime.employee_id }, "Success create overtime request", res);  
+      sendData(201, { id: newOvertime.id, start_time: newOvertime.start_time, end_time: newOvertime.end_time, employee_id: newOvertime.employee_id }, "Berhasil diajukan", res);  
     }
     catch (err) {
       next(err)
