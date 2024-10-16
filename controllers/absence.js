@@ -45,7 +45,7 @@ class OvertimeController {
       const newAbsence = await Absence.create(
         { start_date, end_date, photo: url, type, note, employee_id: user.id }
       );
-      sendData(201, { id: newAbsence.id, start_date: newAbsence.start_date, end_date: newAbsence.end_date, type: newAbsence.type, status: newAbsence.status, note: newAbsence.note, employee_id: newAbsence.employee_id }, "Success create absence request", res);  
+      sendData(201, { id: newAbsence.id, start_date: newAbsence.start_date, end_date: newAbsence.end_date, type: newAbsence.type, status: newAbsence.status, note: newAbsence.note, employee_id: newAbsence.employee_id }, "Berhasil diajukan", res);  
     }
     catch (err) {
       next(err)
