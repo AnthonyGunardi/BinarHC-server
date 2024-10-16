@@ -195,7 +195,7 @@ class OvertimeController {
     try {
       const lastID = parseInt(req.query.lastID) || 0;
       const limit = parseInt(req.query.limit) || 0;
-      const status = req.query.status || "";
+      const type = req.query.type || "";
       const userEmail = req.user.email;
       let result = [];
 
@@ -206,11 +206,11 @@ class OvertimeController {
       if (!user) return sendResponse(404, "User is not found", res);
 
       if (lastID < 1) {
-        //get overtimes where its status is like keyword
+        //get overtimes where its type is like keyword
         const results = await Overtime.findAll({
           where: {
-            status: {
-              [Op.like]: '%'+status+'%'
+            type: {
+              [Op.like]: '%'+type+'%'
             },
             employee_id: user.id
           },
@@ -231,14 +231,14 @@ class OvertimeController {
         })
         result = results
       } else {
-        //get overtimes where its status is like keyword
+        //get overtimes where its type is like keyword
         const results = await Overtime.findAll({
           where: {
             id: {
               [Op.lt]: lastID
             },
-            status: {
-              [Op.like]: '%'+status+'%'
+            type: {
+              [Op.like]: '%'+type+'%'
             },
           },
           attributes: {
