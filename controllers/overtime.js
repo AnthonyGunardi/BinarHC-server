@@ -1,4 +1,4 @@
-const { Overtime, User, Biodata, Office } = require('../models/index.js');
+const { Overtime, User, Biodata, Office, Echelon } = require('../models/index.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -118,7 +118,7 @@ class OvertimeController {
             model: User,
             as: 'Overtime_Requester',
             attributes: {
-              exclude: ['createdAt', 'updatedAt']
+              exclude: ['id', 'email', 'password', 'id_card', 'createdAt', 'updatedAt']
             },
             required: true,
             include: [
@@ -126,16 +126,35 @@ class OvertimeController {
                 model: Biodata,
                 as: 'Biodata',
                 required: true,
+                attributes: {
+                  exclude: [
+                    'id', 
+                    'birthday', 
+                    'hometown', 
+                    'hire_date', 
+                    'religion', 
+                    'gender', 
+                    'last_education', 
+                    'marital_status',
+                    'user_id',
+                    'createdAt', 
+                    'updatedAt'
+                  ]
+                },
                 include: [
+                  {
+                    model: Echelon,
+                    required: false,
+                    attributes: ['title']
+                  },
                   {
                     model: Office,
                     as: 'Office',
                     where: division_slug ? { slug: division_slug } : {}, // Apply filter only if division_slug is provided
                     required: !!division_slug, // If division_slug is provided, make it required
-                    attributes: []
+                    attributes: ['name']
                   }
-                ],
-                attributes: []
+                ]
               }
             ]
           },
@@ -143,7 +162,7 @@ class OvertimeController {
             model: User,
             as: 'Overtime_Approver',
             attributes: {
-              exclude: ['createdAt', 'updatedAt']
+              exclude: ['id', 'email', 'password', 'id_card', 'createdAt', 'updatedAt']
             }
           },
         ],
