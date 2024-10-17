@@ -54,7 +54,7 @@ class OvertimeController {
 
   static async getAllAbsences(req, res, next) {
     try {
-      const { division_slug, start_date, end_date } = req.body;
+      const { division_slug, start_date, end_date } = req.query;
       const absences = await Absence.findAll({
         where: {
           start_date: {
@@ -82,10 +82,8 @@ class OvertimeController {
                   {
                     model: Office,
                     as: 'Office',
-                    where: {
-                      slug: division_slug
-                    },
-                    required: true,
+                    where: division_slug ? { slug: division_slug } : {}, // Apply filter only if division_slug is provided
+                    required: !!division_slug, // If division_slug is provided, make it required
                     attributes: []
                   }
                 ],

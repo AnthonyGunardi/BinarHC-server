@@ -52,9 +52,57 @@ class OvertimeController {
     };
   };
 
+  static async createByAdmin(req, res, next) {
+    try {
+      const userEmail = req.user.email
+      const { start_time, end_time, type, meta, note, employee_id } = req.body;
+
+      //check if user is exist and is login
+      const user = await User.findOne({ 
+        where: { email: userEmail } 
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      //check if overtime request already exist
+      const overtime = await Overtime.findOne({ 
+        where: { start_time, end_time, employee_id } 
+      });
+      if (Boolean(overtime)) return sendResponse(400, 'Overtime request already exist', res);
+
+      //upload file if req.files isn't null
+      let url = null
+      if (req.files != null) {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `overtime-requests/${fileName}`;
+
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/overtime-requests/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
+
+      const newOvertime = await Overtime.create(
+        { start_time, end_time, type, photo: url, meta, note, employee_id }
+      );
+      sendData(201, { id: newOvertime.id, start_time: newOvertime.start_time, end_time: newOvertime.end_time, employee_id: newOvertime.employee_id }, "Berhasil diajukan", res);  
+    }
+    catch (err) {
+      next(err)
+    };
+  };
+
   static async getAllOvertimes(req, res, next) {
     try {
       const { division_slug, start_date, end_date } = req.query;
+      
       const overtimes = await Overtime.findAll({
         where: {
           start_time: {
@@ -82,10 +130,8 @@ class OvertimeController {
                   {
                     model: Office,
                     as: 'Office',
-                    where: {
-                      slug: division_slug
-                    },
-                    required: true,
+                    where: division_slug ? { slug: division_slug } : {}, // Apply filter only if division_slug is provided
+                    required: !!division_slug, // If division_slug is provided, make it required
                     attributes: []
                   }
                 ],
