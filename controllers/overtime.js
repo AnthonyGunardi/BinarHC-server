@@ -54,7 +54,7 @@ class OvertimeController {
 
   static async getAllOvertimes(req, res, next) {
     try {
-      const { division_slug, start_date, end_date } = req.body;
+      const { division_slug, start_date, end_date } = req.query;
       const overtimes = await Overtime.findAll({
         where: {
           start_time: {
