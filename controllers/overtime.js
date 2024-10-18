@@ -55,17 +55,23 @@ class OvertimeController {
   static async createByAdmin(req, res, next) {
     try {
       const userEmail = req.user.email
-      const { start_time, end_time, type, meta, note, employee_id } = req.body;
+      const { start_time, end_time, type, nip, meta, note } = req.body;
 
-      //check if user is exist and is login
-      const user = await User.findOne({ 
+      //get admin_id
+      const admin = await User.findOne({ 
         where: { email: userEmail } 
       });
-      if (!user) return sendResponse(404, "User is not found", res);
+      if (!admin) return sendResponse(404, "User is not found", res);
+
+      //check if user is exist
+      const user = await User.findOne({ 
+        where: { nip } 
+      });
+      if (!user) return sendResponse(404, "Employee is not found", res);
 
       //check if overtime request already exist
       const overtime = await Overtime.findOne({ 
-        where: { start_time, end_time, employee_id } 
+        where: { start_time, end_time, employee_id: user.id } 
       });
       if (Boolean(overtime)) return sendResponse(400, 'Overtime request already exist', res);
 
@@ -90,9 +96,9 @@ class OvertimeController {
       }
 
       const newOvertime = await Overtime.create(
-        { start_time, end_time, type, photo: url, meta, note, employee_id }
+        { start_time, end_time, type, status: 'success', photo: url, meta, note, employee_id: user.id, admin_id: admin.id }
       );
-      sendData(201, { id: newOvertime.id, start_time: newOvertime.start_time, end_time: newOvertime.end_time, employee_id: newOvertime.employee_id }, "Berhasil diajukan", res);  
+      sendData(201, { id: newOvertime.id, start_time: newOvertime.start_time, end_time: newOvertime.end_time, employee_id: newOvertime.employee_id }, "Pengajuan Overtime berhasil", res);  
     }
     catch (err) {
       next(err)
@@ -334,59 +340,6 @@ class OvertimeController {
     catch (err) {
         next(err)
     };
-  };
-
-  static async getPost(req, res, next) {
-    const slug = req.params.slug
-    try {
-      const post = await Post.findOne({
-        where: { slug },
-        attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
-        include: [
-          {
-            model: Event,
-            attributes: {
-              exclude: ['post_id']
-            }
-          },
-          {
-            model: Post_Gallery,
-            attributes: {
-              exclude: ['post_id']
-            }
-          }
-        ]
-      })
-      if (!post) return sendResponse(404, "Post is not found", res)
-      sendData(200, post, "Success get post data", res)
-    } 
-    catch (err) {
-      next(err)
-    }
-  }
-
-  static async togglePost(req, res, next) {
-    const slug = req.params.slug
-    let postData = {
-      is_active: false
-    };
-    try {
-      const post = await Post.findOne({
-        where: { slug }
-      })
-      if (!post) return sendResponse(404, "Post is not found", res)
-      if (post.is_active == false) {
-        postData.is_active = true
-      }
-      const updated = await Post.update(postData, {
-        where: { slug },
-        returning: true
-      })
-      sendResponse(200, "Success update post", res)
-    }
-    catch (err) {
-      next(err)
-    }
   };
 
   static async update(req, res, next) {
