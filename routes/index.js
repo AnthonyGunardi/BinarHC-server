@@ -23,6 +23,7 @@ const familyPhoneRoute = require('./family_phone');
 const officePhoneRoute = require('./office_phone');
 const overtimeRoute = require('./overtime');
 const absenceRoute = require('./absence');
+const attendanceRoute = require('./attendance');
 
 route.use('/v1/users', userRoute);
 route.use('/v1/offices', officeRoute);
@@ -48,5 +49,6 @@ route.use('/v1/family_phones', familyPhoneRoute);
 route.use('/v1/office_phones', officePhoneRoute);
 route.use('/v1/overtimes', overtimeRoute);
 route.use('/v1/absences', absenceRoute);
+route.use('/v1/attendances', attendanceRoute);
 
 module.exports = route;
