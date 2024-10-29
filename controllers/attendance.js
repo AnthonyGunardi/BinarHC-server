@@ -1,4 +1,4 @@
-const { Attendance, User, Biodata, Office, Office_Address, Address, Echelon, Absence } = require('../models/index.js');
+const { Attendance, User, Biodata, Office, Office_Address, Address, Echelon, Absence, Overtime } = require('../models/index.js');
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
@@ -74,6 +74,22 @@ class AttendanceController {
         if (distance > 500) {
           return sendResponse(400, 'Anda berada di luar kantor', res);
         }
+      } else {
+        //check if user already have registered an approved overtime
+        const overtime = await Overtime.findOne({ 
+          where: {
+            start_date: {
+              [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
+            },
+            end_date: {
+              [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
+            },
+            type: 'WFA',
+            employee_id: user.id, 
+            status: 'success' 
+          } 
+        });
+        if (!Boolean(overtime)) return sendResponse(400, 'Anda belum mendapatkan ijin untuk WFA', res);
       }
 
       //upload file if req.files isn't null
@@ -104,6 +120,41 @@ class AttendanceController {
     catch (err) {
       next(err.message)
     };
+  };
+
+  static async clockOut(req, res, next) {
+    const nip = req.params.nip;
+    const userEmail = req.user.email;
+    const { clock_out } = req.body;
+    const today = new Date().toISOString().slice(0, 10);
+    try {
+      //get user_id
+      const user = await User.findOne({ 
+        where: { nip, email: userEmail } 
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      //check if attendance is exist
+      const attendance = await Attendance.findOne({
+        where: { user_id: user.id, date: today },
+      })
+      if (!attendance) return sendResponse(404, "Anda belum absensi masuk", res)
+      if (attendance.clock_out) return sendResponse(400, "Anda sudah absen pulang", res)
+
+      const updatedAttendance = await Attendance.update(
+        { clock_out }, 
+        { where: { 
+            date: today, 
+            user_id: user.id 
+          }, 
+          returning: true 
+        }
+      )
+      sendResponse(200, "Absen pulang berhasil", res)
+    }
+    catch (err) {
+      next(err)
+    }
   };
 
   static async createByAdmin(req, res, next) {
@@ -393,41 +444,6 @@ class AttendanceController {
     catch (err) {
         next(err)
     };
-  };
-
-  static async clockOut(req, res, next) {
-    const nip = req.params.nip;
-    const userEmail = req.user.email;
-    const { clock_out } = req.body;
-    const today = new Date().toISOString().slice(0, 10);
-    try {
-      //get user_id
-      const user = await User.findOne({ 
-        where: { nip, email: userEmail } 
-      });
-      if (!user) return sendResponse(404, "User is not found", res);
-
-      //check if attendance is exist
-      const attendance = await Attendance.findOne({
-        where: { user_id: user.id, date: today },
-      })
-      if (!attendance) return sendResponse(404, "Anda belum absensi masuk", res)
-      if (attendance.clock_out) return sendResponse(400, "Anda sudah absen pulang", res)
-
-      const updatedAttendance = await Attendance.update(
-        { clock_out }, 
-        { where: { 
-            date: today, 
-            user_id: user.id 
-          }, 
-          returning: true 
-        }
-      )
-      sendResponse(200, "Absen pulang berhasil", res)
-    }
-    catch (err) {
-      next(err)
-    }
   };
 };
 
