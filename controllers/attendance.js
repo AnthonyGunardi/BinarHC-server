@@ -70,10 +70,10 @@ class AttendanceController {
         const [userLat, userLon] = meta.split(',').map(Number);
 
         // Calculate the distance between user and office
-        const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
-        if (distance > 500) {
-          return sendResponse(400, 'Anda berada di luar kantor', res);
-        }
+        // const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
+        // if (distance > 500) {
+        //   return sendResponse(400, 'Anda berada di luar kantor', res);
+        // }
       } else {
         //check if user already have registered an approved overtime
         const overtime = await Overtime.findOne({ 
