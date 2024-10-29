@@ -78,10 +78,10 @@ class AttendanceController {
         //check if user already have registered an approved overtime
         const overtime = await Overtime.findOne({ 
           where: {
-            start_date: {
+            start_time: {
               [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
             },
-            end_date: {
+            end_time: {
               [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
             },
             type: 'WFA',
