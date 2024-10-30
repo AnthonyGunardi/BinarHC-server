@@ -1,5 +1,5 @@
 const {
-  User, Point, Biodata, Office, Position, Echelon, Point_Log, Reward_Log, Reward, Family, User_Address, Family_Address, Office_Address, Address, 
+  User, Biodata, Office, Position, Echelon, Attendance, Overtime, Point, Point_Log, Reward_Log, Reward, Family, User_Address, Family_Address, Office_Address, Address, 
   Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Family_Phone, Office_Phone, Phone
 } = require('../models');
 const Sequelize = require('sequelize');
@@ -278,11 +278,14 @@ class UserController {
   };
 
   static async getEmployee(req, res, next) {
-    const nip = req.params.nip
+    const nip = req.params.nip;
+    const today = new Date().toISOString().slice(0, 10);
+    const parsedToday = new Date(today);
+    let isWFA;
     try {
       const user = await User.findOne({
         where: { nip, is_admin: 'employee' },
-        attributes:['fullname', 'nip', 'email', 'id_card', 'photo', 'is_active'],
+        attributes:['id', 'fullname', 'nip', 'email', 'id_card', 'photo', 'is_active'],
         include: [
           {
             model: Biodata,
@@ -360,6 +363,16 @@ class UserController {
             },
             attributes: {
               exclude: ['id']
+            }
+          },
+          {
+            model: Attendance,
+            required: false, // LEFT JOIN
+            where: {
+              date: today
+            },
+            attributes: {
+              exclude: ['user_id']
             }
           },
           {
@@ -507,7 +520,31 @@ class UserController {
         ]
       })
       if (!user) return sendResponse(404, "User not found", res)
-      sendData(200, user, "Success Get Detail User", res)
+
+      // get WFA permission status
+      const overtime = await Overtime.findOne({ 
+        where: {
+          start_time: {
+            [Op.lte]: parsedToday, // start_date should be less than or equal to today
+          },
+          end_time: {
+            [Op.gte]: parsedToday, // end_date should be greater than or equal to today
+          },
+          type: 'WFA',
+          employee_id: user.id, 
+          status: 'success' 
+        } 
+      });
+      if (!overtime) {
+        isWFA = false
+      } else {
+        isWFA = true
+      };
+
+      // convert user, from sequelize instance to plain JavaScript object, and then destructure it
+      const data = {...user.get({ plain: true }), isWFA};
+
+      sendData(200, data, "Success Get Detail User", res)
     } 
     catch (error) {
       next(error)
