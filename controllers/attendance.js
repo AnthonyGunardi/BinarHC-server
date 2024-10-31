@@ -14,7 +14,6 @@ class AttendanceController {
 
       // Parse and format the date for UTC+7 timezone
       const parsedDate = moment(date).add(7, 'hours').format("YYYY-MM-DD HH:mm:ss");
-      console.log(parsedDate)
 
       //check if user is exist and is login
       const user = await User.findOne({ 
