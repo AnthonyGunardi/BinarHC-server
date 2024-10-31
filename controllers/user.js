@@ -1,7 +1,7 @@
 const {
   User, Biodata, Office, Position, Echelon, Attendance, Absence, Overtime, Point, Point_Log, Reward_Log, Reward, 
   Family, User_Address, Family_Address, Office_Address, Address, Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province,
-  User_Phone, Family_Phone, Office_Phone, Phone
+  User_Phone, Family_Phone, Office_Phone, Phone, Master_Data
 } = require('../models');
 const Sequelize = require('sequelize');
 let sequelize;
@@ -560,10 +560,21 @@ class UserController {
         isWFA = true
       };
 
-      // get annual leave value
+      // Get annual leave
+      const master_data = await Master_Data.findOne( { where: {id: 1} });
+
+      // Calculate remaining annual leave
+      let totalAbsenceDays = 0;
+      user.Absence_Request.forEach(absence => {
+        const startDate = new Date(absence.start_date);
+        const endDate = new Date(absence.end_date);
+        const duration = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1; // Include the start day
+        totalAbsenceDays += duration;
+      });
+      const remainingAnnualLeave = master_data.annual_leave - totalAbsenceDays;
 
       // convert user, from sequelize instance to plain JavaScript object, and then destructure it
-      const data = {...user.get({ plain: true }), isWFA};
+      const data = {...user.get({ plain: true }), isWFA, remainingAnnualLeave};
 
       sendData(200, data, "Success Get Detail User", res)
     } 
