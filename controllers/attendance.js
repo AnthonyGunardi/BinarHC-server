@@ -160,23 +160,38 @@ class AttendanceController {
     }
   };
 
-  static async getAllAbsences(req, res, next) {
+  static async getAllAttendances(req, res, next) {
     try {
-      const { division_slug, start_date, end_date } = req.query;
-      const absences = await Absence.findAll({
-        where: {
-          start_date: {
-            [Op.gte]: start_date,
-            [Op.lte]: end_date  
-          }
-        },
+      const { start_date, end_date, division_slug, status, nip } = req.query;
+      const attendanceFilters = {};
+      const userFilters = {};
+    
+      // Apply date range filter only if both start_date and end_date are provided
+      if (start_date && end_date) {
+        attendanceFilters.date = {
+          [Op.gte]: start_date,
+          [Op.lte]: end_date
+        };
+      }
+      // Apply status filter only if status is provided
+      if (status) {
+        attendanceFilters.status = status;
+      }
+
+      // Apply nip filter only if nip is provided
+      if (nip) {
+        userFilters.nip = nip;
+      }
+
+      const attendances = await Attendance.findAll({
+        where: attendanceFilters,
         attributes: {
-          exclude: ['employee_id', 'admin_id']
+          exclude: ['is_present', 'user_id']
         },
         include: [
           {
             model: User,
-            as: 'Absence_Requester',
+            where: userFilters,
             attributes: {
               exclude: ['createdAt', 'updatedAt']
             },
@@ -217,18 +232,11 @@ class AttendanceController {
                 ]
               }
             ]
-          },
-          {
-            model: User,
-            as: 'Absence_Approver',
-            attributes: {
-              exclude: ['id', 'email', 'password', 'id_card', 'createdAt', 'updatedAt']
-            }
-          },
+          }
         ],
         order: [['id', 'ASC']]
       });
-      sendData(200, absences, "Success get all absences", res);
+      sendData(200, attendances, "Success get all attendances", res);
     } 
     catch (err) {
         next(err)
@@ -291,6 +299,54 @@ class AttendanceController {
     catch (err) {
         next(err)
     };
+  };
+
+  static async update(req, res, next) {
+    const id = req.params.id;
+    const { date, clock_in, clock_out, status, note } = req.body;
+    try {
+      //check if attendance is exist
+      const attendance = await Attendance.findOne({
+        where: { id }
+      })
+      if (!attendance) return sendResponse(404, "Attendance is not found", res)
+
+      //upload file if req.files isn't null
+      let url;
+      if(!req.files) {
+        url = attendance.photo;
+      } else {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `attendances/${fileName}`;
+    
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/attendances/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+        //delete previous file on server
+        if (attendance.photo !== null) {
+          const filePath = `./public/images/${attendance.photo}`;
+          fs.unlinkSync(filePath);
+        }
+      }
+
+      const updatedAttendance = await Attendance.update(
+        { date, clock_in, clock_out, status, note }, 
+        { where: { id: attendance.id }, returning: true }
+      )
+      sendResponse(200, "Success update Attendance", res)
+    }
+    catch (err) {
+      next(err)
+    }
   };
 };
 
