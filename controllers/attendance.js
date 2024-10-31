@@ -125,6 +125,124 @@ class AttendanceController {
     };
   };
 
+  static async clockInByAdmin(req, res, next) {
+    try {
+      const nip = req.params.nip;
+      const { date, clock_in, status, photo, meta, note } = req.body;
+
+      // Parse and format the date for UTC+7 timezone
+      const parsedDate = moment(date).add(7, 'hours').format("YYYY-MM-DD HH:mm:ss");
+
+      //check if user is exist
+      const user = await User.findOne({ 
+        where: { nip },
+        include: [
+          {
+            model: Biodata,
+            as: 'Biodata',
+            attributes:[ 'id' ],
+            include: {
+              model: Office,
+              attributes: [ 'name', 'slug'],
+              include: {
+                model: Office_Address,
+                attributes: [ 'id'],
+                include: {
+                  model: Address,
+                  attributes: [ 'name', 'postal_code', 'meta' ]
+                }
+              }
+            }
+          }
+        ]
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      //check if user already have registered an approved absence
+      const absence = await Absence.findOne({ 
+        where: {
+          start_date: {
+            [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
+          },
+          end_date: {
+            [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
+          },
+          employee_id: user.id, 
+          status: 'success' 
+        } 
+      });
+      if (Boolean(absence)) return sendResponse(400, 'Sedang dalam ijin tidak bekerja', res);
+
+      //check if attendance already exist
+      const attendance = await Attendance.findOne({ 
+        where: { date, user_id: user.id } 
+      });
+      if (Boolean(attendance)) return sendResponse(400, 'Anda sudah melakukan absen', res);
+
+      if (status == 'WFO') {
+        // Extract the office's meta from the nested user structure
+        const officeMeta = user.Biodata?.Office?.Office_Addresses?.[0]?.Address?.meta;
+        if (!officeMeta) return sendResponse(400, 'Office location not found', res);
+
+        // Parse office's latitude and longitude
+        const [officeLat, officeLon] = officeMeta.split(',').map(Number);
+
+        // Parse the user's latitude and longitude
+        const [userLat, userLon] = meta.split(',').map(Number);
+
+        // Calculate the distance between user and office
+        // const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
+        // if (distance > 500) {
+        //   return sendResponse(400, 'Anda berada di luar kantor', res);
+        // }
+      } else {
+        //check if user already have registered an approved overtime
+        const overtime = await Overtime.findOne({ 
+          where: {
+            start_time: {
+              [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
+            },
+            end_time: {
+              [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
+            },
+            type: 'WFA',
+            employee_id: user.id, 
+            status: 'success' 
+          } 
+        });
+        if (!Boolean(overtime)) return sendResponse(400, 'Belum mendapatkan ijin untuk WFA', res);
+      }
+
+      //upload file if req.files isn't null
+      let url = null
+      if (req.files != null) {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `attendances/${fileName}`;
+
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/attendances/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
+
+      const newAttendance = await Attendance.create(
+        { date, is_present: true, clock_in, status, photo, meta, note, user_id: user.id }
+      );
+      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
+    }
+    catch (err) {
+      next(err.message)
+    };
+  };
+
   static async clockOut(req, res, next) {
     const nip = req.params.nip;
     const userEmail = req.user.email;
