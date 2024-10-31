@@ -1,6 +1,7 @@
 const {
-  User, Biodata, Office, Position, Echelon, Attendance, Overtime, Point, Point_Log, Reward_Log, Reward, Family, User_Address, Family_Address, Office_Address, Address, 
-  Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province, User_Phone, Family_Phone, Office_Phone, Phone
+  User, Biodata, Office, Position, Echelon, Attendance, Absence, Overtime, Point, Point_Log, Reward_Log, Reward, 
+  Family, User_Address, Family_Address, Office_Address, Address, Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province,
+  User_Phone, Family_Phone, Office_Phone, Phone
 } = require('../models');
 const Sequelize = require('sequelize');
 let sequelize;
@@ -376,6 +377,24 @@ class UserController {
             }
           },
           {
+            model: Absence,
+            as: 'Absence_Request',
+            required: false, // LEFT JOIN
+            where: {
+              start_date: {
+                [Op.between]: [
+                  new Date(new Date().getFullYear(), 0, 1), // January 1st of the current year
+                  new Date(new Date().getFullYear(), 11, 31) // December 31st of the current year
+                ]
+              },
+              type: 'Cuti',
+              status: 'success'
+            },
+            attributes: {
+              exclude: ['user_id']
+            }
+          },
+          {
             model: Point,
             attributes: ['balance']
           },
@@ -540,6 +559,8 @@ class UserController {
       } else {
         isWFA = true
       };
+
+      // get annual leave value
 
       // convert user, from sequelize instance to plain JavaScript object, and then destructure it
       const data = {...user.get({ plain: true }), isWFA};

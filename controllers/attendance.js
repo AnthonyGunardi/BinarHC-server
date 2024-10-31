@@ -1,5 +1,6 @@
 const { Attendance, User, Biodata, Office, Office_Address, Address, Echelon, Absence, Overtime } = require('../models/index.js');
 const { Op } = require('sequelize');
+const moment = require('moment-timezone');
 const fs = require('fs')
 const path = require('node:path');
 const { sendResponse, sendData } = require('../helpers/response.js');
@@ -10,7 +11,10 @@ class AttendanceController {
     try {
       const userEmail = req.user.email
       const { date, clock_in, status, photo, meta, note } = req.body;
-      const parsedDate = new Date(date);
+
+      // Parse and format the date for UTC+7 timezone
+      const parsedDate = moment(date).add(7, 'hours').format("YYYY-MM-DD HH:mm:ss");
+      console.log(parsedDate)
 
       //check if user is exist and is login
       const user = await User.findOne({ 
