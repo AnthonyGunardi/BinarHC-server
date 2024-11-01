@@ -127,8 +127,7 @@ class AttendanceController {
 
   static async clockInByAdmin(req, res, next) {
     try {
-      const nip = req.params.nip;
-      const { date, clock_in, status, photo, meta, note } = req.body;
+      const { nip, date, clock_in, clock_out, status, photo, meta, note } = req.body;
 
       // Parse and format the date for UTC+7 timezone
       const parsedDate = moment(date).add(7, 'hours').format("YYYY-MM-DD HH:mm:ss");
@@ -234,7 +233,7 @@ class AttendanceController {
       }
 
       const newAttendance = await Attendance.create(
-        { date, is_present: true, clock_in, status, photo, meta, note, user_id: user.id }
+        { date, is_present: true, clock_in, clock_out, status, photo, meta, note, user_id: user.id }
       );
       sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
