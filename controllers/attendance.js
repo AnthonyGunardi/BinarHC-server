@@ -183,18 +183,6 @@ class AttendanceController {
 
       if (status == 'WFO') {
         if (!officeMeta) return sendResponse(400, 'Office location not found', res);
-
-        // Parse office's latitude and longitude
-        const [officeLat, officeLon] = officeMeta.split(',').map(Number);
-
-        // Parse the user's latitude and longitude
-        const [userLat, userLon] = officeMeta.split(',').map(Number);
-
-        // Calculate the distance between user and office
-        // const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
-        // if (distance > 500) {
-        //   return sendResponse(400, 'Anda berada di luar kantor', res);
-        // }
       } else {
         //check if user already have registered an approved overtime
         const overtime = await Overtime.findOne({ 
@@ -311,7 +299,7 @@ class AttendanceController {
             model: User,
             where: userFilters,
             attributes: {
-              exclude: ['createdAt', 'updatedAt']
+              exclude: ['password', 'createdAt', 'updatedAt']
             },
             required: true,
             include: [
@@ -413,6 +401,130 @@ class AttendanceController {
         hasMore: result.length >= limit ? true : false
       };
       sendData(200, payload, "Success get user attendances data", res)
+    } 
+    catch (err) {
+        next(err)
+    };
+  };
+
+  static async getAttendancesReport(req, res, next) {
+    try {
+      const { start_date, end_date, division_slug, status, nip } = req.query;
+      const attendanceFilters = {};
+      const userFilters = {};
+    
+      // Apply date range filter only if both start_date and end_date are provided
+      if (start_date && end_date) {
+        attendanceFilters.date = {
+          [Op.gte]: start_date,
+          [Op.lte]: end_date
+        };
+      }
+      // Apply status filter only if status is provided
+      if (status) {
+        attendanceFilters.status = status;
+      }
+
+      // Apply nip filter only if nip is provided
+      if (nip) {
+        userFilters.nip = nip;
+      }
+
+      const attendances = await Attendance.findAll({
+        where: attendanceFilters,
+        attributes: {
+          exclude: ['is_present', 'user_id']
+        },
+        include: [
+          {
+            model: User,
+            where: userFilters,
+            attributes: {
+              exclude: ['password', 'createdAt', 'updatedAt']
+            },
+            required: true,
+            include: [
+              {
+                model: Biodata,
+                as: 'Biodata',
+                required: true,
+                attributes: {
+                  exclude: [
+                    'id', 
+                    'birthday', 
+                    'hometown', 
+                    'hire_date', 
+                    'religion', 
+                    'gender', 
+                    'last_education', 
+                    'marital_status',
+                    'user_id',
+                    'createdAt', 
+                    'updatedAt'
+                  ]
+                },
+                include: [
+                  {
+                    model: Echelon,
+                    required: false,
+                    attributes: ['title']
+                  },
+                  {
+                    model: Office,
+                    as: 'Office',
+                    where: division_slug ? { slug: division_slug } : {}, // Apply filter only if division_slug is provided
+                    required: !!division_slug, // If division_slug is provided, make it required
+                    attributes: ['name']
+                  }
+                ]
+              },
+              {
+                model: Overtime,
+                as: 'Overtime_Request',
+                required: false, // LEFT JOIN
+                where: { type: 'OVT', status: 'success' },
+                attributes: {
+                  exclude: [ 'employee_id', 'admin_id', 'createdAt', 'updatedAt' ]
+                }
+              },
+              {
+                model: Absence,
+                as: 'Absence_Request',
+                required: false, // LEFT JOIN
+                where: { status: 'success' },
+                attributes: {
+                  exclude: [ 'employee_id', 'admin_id', 'createdAt', 'updatedAt' ]
+                }
+              }
+            ]
+          }
+        ],
+        order: [
+          [{ model: User, as: 'User' }, { model: Biodata, as: 'Biodata' }, { model: Office, as: 'Office' }, 'name', 'ASC'],
+          [{ model: User, as: 'User' }, 'fullname', 'ASC'],
+          [ 'date', 'ASC']
+        ]
+      });
+
+      const results = attendances.map(attendance => ({
+        id: attendance.id,
+        office_name: attendance.User.Biodata.Office.name,
+        fullname: attendance.User.fullname,
+        nip: attendance.User.nip,
+        date: attendance.date,
+        clock_in: attendance.clock_in,
+        clock_out: attendance.clock_out,
+        status: attendance.status,
+        photo: attendance.photo,
+        meta: attendance.meta,
+        note: attendance.note,
+        overtime: attendance.User.Overtime_Request.length > 0 ? attendance.User.Overtime_Request[0] : null,
+        absence: attendance.User.Absence_Request.length > 0 ? attendance.User.Absence_Request[0] : null,
+        createdAt: attendance.createdAt,
+        updatedAt: attendance.updatedAt
+      }));
+
+      sendData(200, results, "Success get attendances report", res);
     } 
     catch (err) {
         next(err)
