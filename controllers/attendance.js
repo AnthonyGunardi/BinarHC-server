@@ -157,8 +157,8 @@ class AttendanceController {
       });
       if (!user) return sendResponse(404, "User is not found", res);
 
-      // Extract the office's meta from the nested user structure
-      const officeMeta = user.Biodata?.Office?.Office_Addresses?.[0]?.Address?.meta;
+      // Extract the office's meta from the nested user structure 
+      const officeMeta = user.Biodata?.Office?.Office_Addresses[0].Address?.meta;
 
       //check if user already have registered an approved absence
       const absence = await Absence.findOne({ 
@@ -188,7 +188,7 @@ class AttendanceController {
         const [officeLat, officeLon] = officeMeta.split(',').map(Number);
 
         // Parse the user's latitude and longitude
-        const [userLat, userLon] = meta.split(',').map(Number);
+        const [userLat, userLon] = officeMeta.split(',').map(Number);
 
         // Calculate the distance between user and office
         // const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
