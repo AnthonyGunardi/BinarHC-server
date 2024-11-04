@@ -482,7 +482,10 @@ class AttendanceController {
                 model: Overtime,
                 as: 'Overtime_Request',
                 required: false, // LEFT JOIN
-                where: { type: 'OVT', status: 'success' },
+                where: { 
+                  type: 'OVT', 
+                  status: 'success'
+                },
                 attributes: {
                   exclude: [ 'employee_id', 'admin_id', 'createdAt', 'updatedAt' ]
                 }
@@ -491,7 +494,9 @@ class AttendanceController {
                 model: Absence,
                 as: 'Absence_Request',
                 required: false, // LEFT JOIN
-                where: { status: 'success' },
+                where: { 
+                  status: 'success'
+                },
                 attributes: {
                   exclude: [ 'employee_id', 'admin_id', 'createdAt', 'updatedAt' ]
                 }
@@ -524,57 +529,64 @@ class AttendanceController {
 
       // Group attendances by office and user
       const groupedAttendances = attendances.reduce((result, attendance) => {
-          const officeName = attendance?.User?.Biodata?.Office.name;
-          const userFullName = attendance?.User?.fullname;
-          const userNip = attendance?.User?.nip;
+        const officeName = attendance.User.Biodata.Office.name;
+        const userFullName = attendance.User.fullname;
+        const userNip = attendance.User.nip;
 
-          // Find or create user entry in result
-          let userEntry = result.find(
-              item => item.office_name === officeName && item.fullname === userFullName && item.nip === userNip
-          );
+        // Find or create user entry in result
+        let userEntry = result.find(
+            item => item.office_name === officeName && item.fullname === userFullName && item.nip === userNip
+        );
 
-          if (!userEntry) {
-              userEntry = {
-                  office_name: officeName,
-                  fullname: userFullName,
-                  nip: userNip,
-                  dates: []
-              };
-              result.push(userEntry);
-          }
+        if (!userEntry) {
+            userEntry = {
+                office_name: officeName,
+                fullname: userFullName,
+                nip: userNip,
+                dates: []
+            };
+            result.push(userEntry);
+        }
 
-          // Map existing attendance data by date for easy lookup
-          const attendanceByDate = allDates.map(date => {
-              if (date === attendance.date) {
-                  return {
+          // Map attendance, overtime, and absence data by date
+          const overtimeRequests = attendance.User.Overtime_Request;
+          const absenceRequests = attendance.User.Absence_Request;
+
+          allDates.forEach(date => {
+            // Check for an attendance record on this date
+            const isAttendanceDate = date === attendance.date;
+
+            // Find any overtime and absence that apply to the current date
+            const overtime = overtimeRequests.find(
+                ot => moment(date).isBetween(moment(ot.start_time).format('YYYY-MM-DD'), moment(ot.end_time).format('YYYY-MM-DD'), 'day', '[]')
+            );
+            const absence = absenceRequests.find(
+                ab => moment(date).isBetween(moment(ab.start_date).format('YYYY-MM-DD'), moment(ab.end_date).format('YYYY-MM-DD'), 'day', '[]')
+            );
+
+            // Add the entry for each date
+            userEntry.dates.push({
+                date,
+                attendance: isAttendanceDate
+                  ? {
                       date: attendance.date,
-                      attendance: {
-                          date: attendance.date,
-                          clock_in: attendance.clock_in,
-                          clock_out: attendance.clock_out,
-                          status: attendance.status,
-                          photo: attendance.photo,
-                          meta: attendance.meta,
-                          note: attendance.note,
-                          createdAt: attendance.createdAt,
-                          updatedAt: attendance.updatedAt
-                      },
-                      overtime: attendance.User.Overtime_Request.length > 0 ? attendance.User.Overtime_Request[0] : null,
-                      absence: attendance.User.Absence_Request.length > 0 ? attendance.User.Absence_Request[0] : null
-                  };
-              } else {
-                  return {
-                      date: date,
-                      attendance: null,
-                      overtime: null,
-                      absence: null
-                  };
-              }
+                      clock_in: attendance.clock_in,
+                      clock_out: attendance.clock_out,
+                      status: attendance.status,
+                      photo: attendance.photo,
+                      meta: attendance.meta,
+                      note: attendance.note,
+                      createdAt: attendance.createdAt,
+                      updatedAt: attendance.updatedAt
+                    }
+                  : null,
+                overtime: overtime || null,
+                absence: absence || null
+            });
           });
 
-          userEntry.dates.push(...attendanceByDate);
           return result;
-        }, []);
+      }, []);
 
       sendData(200, groupedAttendances, "Success get all attendances", res);
     } 
