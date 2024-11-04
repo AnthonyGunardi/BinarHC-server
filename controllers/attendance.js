@@ -506,25 +506,77 @@ class AttendanceController {
         ]
       });
 
-      const results = attendances.map(attendance => ({
-        id: attendance.id,
-        office_name: attendance.User.Biodata.Office.name,
-        fullname: attendance.User.fullname,
-        nip: attendance.User.nip,
-        date: attendance.date,
-        clock_in: attendance.clock_in,
-        clock_out: attendance.clock_out,
-        status: attendance.status,
-        photo: attendance.photo,
-        meta: attendance.meta,
-        note: attendance.note,
-        overtime: attendance.User.Overtime_Request.length > 0 ? attendance.User.Overtime_Request[0] : null,
-        absence: attendance.User.Absence_Request.length > 0 ? attendance.User.Absence_Request[0] : null,
-        createdAt: attendance.createdAt,
-        updatedAt: attendance.updatedAt
-      }));
+      // Helper function to generate an array of all dates in the specified range
+      const generateDateRange = (startDate, endDate) => {
+        const dates = [];
+        let currentDate = moment(startDate);
+        const lastDate = moment(endDate);
 
-      sendData(200, results, "Success get attendances report", res);
+        while (currentDate.isSameOrBefore(lastDate)) {
+            dates.push(currentDate.format('YYYY-MM-DD'));
+            currentDate = currentDate.add(1, 'days');
+        }
+        return dates;
+      };
+
+      // Generate the full list of dates in the range
+      const allDates = generateDateRange(start_date, end_date);
+
+      // Group attendances by office and user
+      const groupedAttendances = attendances.reduce((result, attendance) => {
+          const officeName = attendance?.User?.Biodata?.Office.name;
+          const userFullName = attendance?.User?.fullname;
+          const userNip = attendance?.User?.nip;
+
+          // Find or create user entry in result
+          let userEntry = result.find(
+              item => item.office_name === officeName && item.fullname === userFullName && item.nip === userNip
+          );
+
+          if (!userEntry) {
+              userEntry = {
+                  office_name: officeName,
+                  fullname: userFullName,
+                  nip: userNip,
+                  dates: []
+              };
+              result.push(userEntry);
+          }
+
+          // Map existing attendance data by date for easy lookup
+          const attendanceByDate = allDates.map(date => {
+              if (date === attendance.date) {
+                  return {
+                      date: attendance.date,
+                      attendance: {
+                          date: attendance.date,
+                          clock_in: attendance.clock_in,
+                          clock_out: attendance.clock_out,
+                          status: attendance.status,
+                          photo: attendance.photo,
+                          meta: attendance.meta,
+                          note: attendance.note,
+                          createdAt: attendance.createdAt,
+                          updatedAt: attendance.updatedAt
+                      },
+                      overtime: attendance.User.Overtime_Request.length > 0 ? attendance.User.Overtime_Request[0] : null,
+                      absence: attendance.User.Absence_Request.length > 0 ? attendance.User.Absence_Request[0] : null
+                  };
+              } else {
+                  return {
+                      date: date,
+                      attendance: null,
+                      overtime: null,
+                      absence: null
+                  };
+              }
+          });
+
+          userEntry.dates.push(...attendanceByDate);
+          return result;
+        }, []);
+
+      sendData(200, groupedAttendances, "Success get all attendances", res);
     } 
     catch (err) {
         next(err)
