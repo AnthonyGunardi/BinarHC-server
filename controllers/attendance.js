@@ -575,15 +575,15 @@ class AttendanceController {
               date,
               attendance: isAttendanceDate
                 ? {
-                    date: attendance.date,
-                    clock_in: attendance.clock_in,
-                    clock_out: attendance.clock_out,
-                    status: attendance.status,
-                    photo: attendance.photo,
-                    meta: attendance.meta,
-                    note: attendance.note,
-                    createdAt: attendance.createdAt,
-                    updatedAt: attendance.updatedAt
+                    date: matchingAttendance.date,
+                    clock_in: matchingAttendance.clock_in,
+                    clock_out: matchingAttendance.clock_out,
+                    status: matchingAttendance.status,
+                    photo: matchingAttendance.photo,
+                    meta: matchingAttendance.meta,
+                    note: matchingAttendance.note,
+                    createdAt: matchingAttendance.createdAt,
+                    updatedAt: matchingAttendance.updatedAt
                   }
                 : null,
               overtime: overtime || null,
