@@ -107,15 +107,23 @@ class OvertimeController {
 
   static async getAllOvertimes(req, res, next) {
     try {
-      const { division_slug, start_date, end_date } = req.query;
+      const { division_slug, start_date, end_date, status } = req.query;
+      const overtimeFilters = {};
+    
+      // Apply date range filter only if both start_date and end_date are provided
+      if (start_date && end_date) {
+        overtimeFilters.start_time = {
+          [Op.gte]: start_date,
+          [Op.lte]: end_date
+        };
+      }
+      // Apply status filter only if status is provided
+      if (status) {
+        overtimeFilters.status = status;
+      }
       
       const overtimes = await Overtime.findAll({
-        where: {
-          start_time: {
-            [Op.gte]: start_date,
-            [Op.lte]: end_date  
-          }
-        },
+        where: overtimeFilters,
         attributes: {
           exclude: ['employee_id', 'admin_id']
         },

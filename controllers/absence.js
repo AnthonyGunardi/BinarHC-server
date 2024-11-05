@@ -107,14 +107,23 @@ class OvertimeController {
 
   static async getAllAbsences(req, res, next) {
     try {
-      const { division_slug, start_date, end_date } = req.query;
+      const { division_slug, start_date, end_date, status } = req.query;
+      const absenceFilters = {};
+    
+      // Apply date range filter only if both start_date and end_date are provided
+      if (start_date && end_date) {
+        absenceFilters.start_date = {
+          [Op.gte]: start_date,
+          [Op.lte]: end_date
+        };
+      }
+      // Apply status filter only if status is provided
+      if (status) {
+        absenceFilters.status = status;
+      }
+
       const absences = await Absence.findAll({
-        where: {
-          start_date: {
-            [Op.gte]: start_date,
-            [Op.lte]: end_date  
-          }
-        },
+        where: absenceFilters,
         attributes: {
           exclude: ['employee_id', 'admin_id']
         },
