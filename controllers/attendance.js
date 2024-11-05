@@ -13,7 +13,8 @@ class AttendanceController {
       const { date, clock_in, status, photo, meta, note } = req.body;
 
       // Parse and format the date for UTC+7 timezone
-      const parsedDate = moment(date).add(7, 'hours').format("YYYY-MM-DD HH:mm:ss");
+      const combinedDateTime = `${date} ${clock_in}`;
+      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -92,6 +93,7 @@ class AttendanceController {
             status: 'success' 
           } 
         });
+        console.log('ini overtime -->', overtime, 'ini parsedDate -->', parsedDate, 'apa start_time < parsedDate?', overtime.start_time<=parsedDate)
         if (!Boolean(overtime)) return sendResponse(400, 'Anda belum mendapatkan ijin untuk WFA', res);
       }
 
@@ -130,7 +132,8 @@ class AttendanceController {
       const { nip, date, clock_in, clock_out, status, photo, note } = req.body;
 
       // Parse and format the date for UTC+7 timezone
-      const parsedDate = moment(date).add(7, 'hours').format("YYYY-MM-DD HH:mm:ss");
+      const combinedDateTime = `${date} ${clock_in}`;
+      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
 
       //check if user is exist
       const user = await User.findOne({ 
@@ -539,59 +542,59 @@ class AttendanceController {
         );
 
         if (!userEntry) {
-            userEntry = {
-                office_name: officeName,
-                fullname: userFullName,
-                nip: userNip,
-                dates: []
-            };
-            result.push(userEntry);
+          userEntry = {
+            office_name: officeName,
+            fullname: userFullName,
+            nip: userNip,
+            dates: []
+          };
+          result.push(userEntry);
         }
 
-          // Map attendance, overtime, and absence data by date
-          const overtimeRequests = attendance.User.Overtime_Request;
-          const absenceRequests = attendance.User.Absence_Request;
+        // Map attendance, overtime, and absence data by date
+        const overtimeRequests = attendance.User.Overtime_Request;
+        const absenceRequests = attendance.User.Absence_Request;
 
-          allDates.forEach(date => {
-            // Check for an attendance record on this date
-            const isAttendanceDate = date === attendance.date;
+        allDates.forEach(date => {
+          // Check for an attendance record on this date
+          const isAttendanceDate = date === attendance.date;
 
-            // Find any overtime and absence that apply to the current date
-            const overtime = overtimeRequests.find(
-                ot => moment(date).isBetween(moment(ot.start_time).format('YYYY-MM-DD'), moment(ot.end_time).format('YYYY-MM-DD'), 'day', '[]')
-            );
-            const absence = absenceRequests.find(
-                ab => moment(date).isBetween(moment(ab.start_date).format('YYYY-MM-DD'), moment(ab.end_date).format('YYYY-MM-DD'), 'day', '[]')
-            );
+          // Find any overtime and absence that apply to the current date
+          const overtime = overtimeRequests.find(
+              ot => moment(date).isBetween(moment(ot.start_time).format('YYYY-MM-DD'), moment(ot.end_time).format('YYYY-MM-DD'), 'day', '[]')
+          );
+          const absence = absenceRequests.find(
+              ab => moment(date).isBetween(moment(ab.start_date).format('YYYY-MM-DD'), moment(ab.end_date).format('YYYY-MM-DD'), 'day', '[]')
+          );
 
-            // Add the entry for each date
-            userEntry.dates.push({
-                date,
-                attendance: isAttendanceDate
-                  ? {
-                      date: attendance.date,
-                      clock_in: attendance.clock_in,
-                      clock_out: attendance.clock_out,
-                      status: attendance.status,
-                      photo: attendance.photo,
-                      meta: attendance.meta,
-                      note: attendance.note,
-                      createdAt: attendance.createdAt,
-                      updatedAt: attendance.updatedAt
-                    }
-                  : null,
-                overtime: overtime || null,
-                absence: absence || null
-            });
+          // Add the entry for each date
+          userEntry.dates.push({
+            date,
+            attendance: isAttendanceDate
+              ? {
+                  date: attendance.date,
+                  clock_in: attendance.clock_in,
+                  clock_out: attendance.clock_out,
+                  status: attendance.status,
+                  photo: attendance.photo,
+                  meta: attendance.meta,
+                  note: attendance.note,
+                  createdAt: attendance.createdAt,
+                  updatedAt: attendance.updatedAt
+                }
+              : null,
+            overtime: overtime || null,
+            absence: absence || null
           });
+        });
 
-          return result;
+        return result;
       }, []);
 
       sendData(200, groupedAttendances, "Success get all attendances", res);
     } 
     catch (err) {
-        next(err)
+      next(err)
     };
   };
 
