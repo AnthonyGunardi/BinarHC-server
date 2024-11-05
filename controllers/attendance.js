@@ -556,36 +556,40 @@ class AttendanceController {
         const absenceRequests = attendance.User.Absence_Request;
 
         allDates.forEach(date => {
-          // Check for an attendance record on this date
-          const isAttendanceDate = date === attendance.date;
+          const existingDateEntry = userEntry.dates.find(entry => entry.date === date);
+          if (!existingDateEntry) {
+            // Check for an attendance record on this date
+            const matchingAttendance = attendances.find(att => att.date === date && att.User.nip === userNip);
+            const isAttendanceDate = Boolean(matchingAttendance);
 
-          // Find any overtime and absence that apply to the current date
-          const overtime = overtimeRequests.find(
-              ot => moment(date).isBetween(moment(ot.start_time).format('YYYY-MM-DD'), moment(ot.end_time).format('YYYY-MM-DD'), 'day', '[]')
-          );
-          const absence = absenceRequests.find(
-              ab => moment(date).isBetween(moment(ab.start_date).format('YYYY-MM-DD'), moment(ab.end_date).format('YYYY-MM-DD'), 'day', '[]')
-          );
+            // Find any overtime and absence that apply to the current date
+            const overtime = overtimeRequests.find(
+                ot => moment(date).isBetween(moment(ot.start_time).format('YYYY-MM-DD'), moment(ot.end_time).format('YYYY-MM-DD'), 'day', '[]')
+            );
+            const absence = absenceRequests.find(
+                ab => moment(date).isBetween(moment(ab.start_date).format('YYYY-MM-DD'), moment(ab.end_date).format('YYYY-MM-DD'), 'day', '[]')
+            );
 
-          // Add the entry for each date
-          userEntry.dates.push({
-            date,
-            attendance: isAttendanceDate
-              ? {
-                  date: attendance.date,
-                  clock_in: attendance.clock_in,
-                  clock_out: attendance.clock_out,
-                  status: attendance.status,
-                  photo: attendance.photo,
-                  meta: attendance.meta,
-                  note: attendance.note,
-                  createdAt: attendance.createdAt,
-                  updatedAt: attendance.updatedAt
-                }
-              : null,
-            overtime: overtime || null,
-            absence: absence || null
-          });
+            // Add the entry for each date
+            userEntry.dates.push({
+              date,
+              attendance: isAttendanceDate
+                ? {
+                    date: attendance.date,
+                    clock_in: attendance.clock_in,
+                    clock_out: attendance.clock_out,
+                    status: attendance.status,
+                    photo: attendance.photo,
+                    meta: attendance.meta,
+                    note: attendance.note,
+                    createdAt: attendance.createdAt,
+                    updatedAt: attendance.updatedAt
+                  }
+                : null,
+              overtime: overtime || null,
+              absence: absence || null
+            });
+          }
         });
 
         return result;
