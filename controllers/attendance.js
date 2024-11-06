@@ -62,38 +62,43 @@ class AttendanceController {
       });
       if (Boolean(attendance)) return sendResponse(400, 'Anda sudah melakukan absen', res);
 
+      //check if user already have registered an approved overtime (WFA)
+      const overtime = await Overtime.findOne({ 
+        where: {
+          start_time: {
+            [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
+          },
+          end_time: {
+            [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
+          },
+          type: 'WFA',
+          employee_id: user.id, 
+          status: 'success' 
+        } 
+      });
+
       if (status == 'WFO') {
+        if (Boolean(overtime)) return sendResponse(400, 'Anda terdaftar untuk WFA hari ini', res);
+
         // Extract the office's meta from the nested user structure
-        const officeMeta = user.Biodata?.Office?.Office_Addresses?.[0]?.Address?.meta;
-        if (!officeMeta) return sendResponse(400, 'Office location not found', res);
-
-        // Parse office's latitude and longitude
-        const [officeLat, officeLon] = officeMeta.split(',').map(Number);
-
-        // Parse the user's latitude and longitude
+        const officeAddresses = user.Biodata?.Office?.Office_Addresses || [];
+        if (officeAddresses.length === 0) {
+          return sendResponse(400, 'Office location not found', res);
+        }
+    
+        // Parse user's latitude and longitude
         const [userLat, userLon] = meta.split(',').map(Number);
-
-        // Calculate the distance between user and office
-        // const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
-        // if (distance > 500) {
-        //   return sendResponse(400, 'Anda berada di luar kantor', res);
-        // }
-      } else {
-        //check if user already have registered an approved overtime
-        const overtime = await Overtime.findOne({ 
-          where: {
-            start_time: {
-              [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
-            },
-            end_time: {
-              [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
-            },
-            type: 'WFA',
-            employee_id: user.id, 
-            status: 'success' 
-          } 
+    
+        // Check if any office address is within 500 meters of the user's location
+        const isWithinRange = officeAddresses.some((officeAddress) => {
+          const officeMeta = officeAddress.Address.meta;
+          const [officeLat, officeLon] = officeMeta.split(',').map(Number);
+          const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
+          return distance <= 500;
         });
-        console.log('ini overtime -->', overtime, 'ini parsedDate -->', parsedDate, 'apa start_time < parsedDate?', overtime.start_time<=parsedDate)
+    
+        if (!isWithinRange) return sendResponse(400, 'Anda berada di luar kantor', res);    
+      } else {
         if (!Boolean(overtime)) return sendResponse(400, 'Anda belum mendapatkan ijin untuk WFA', res);
       }
 
@@ -123,7 +128,7 @@ class AttendanceController {
       sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
     catch (err) {
-      next(err.message)
+      next(err)
     };
   };
 
@@ -184,23 +189,25 @@ class AttendanceController {
       });
       if (Boolean(attendance)) return sendResponse(400, 'Anda sudah melakukan absen', res);
 
+      //check if user already have registered an approved overtime (WFA)
+      const overtime = await Overtime.findOne({ 
+        where: {
+          start_time: {
+            [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
+          },
+          end_time: {
+            [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
+          },
+          type: 'WFA',
+          employee_id: user.id, 
+          status: 'success' 
+        } 
+      });
+
       if (status == 'WFO') {
+        if (Boolean(overtime)) return sendResponse(400, 'Anda terdaftar untuk WFA hari ini', res);
         if (!officeMeta) return sendResponse(400, 'Office location not found', res);
       } else {
-        //check if user already have registered an approved overtime
-        const overtime = await Overtime.findOne({ 
-          where: {
-            start_time: {
-              [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
-            },
-            end_time: {
-              [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
-            },
-            type: 'WFA',
-            employee_id: user.id, 
-            status: 'success' 
-          } 
-        });
         if (!Boolean(overtime)) return sendResponse(400, 'Belum mendapatkan ijin untuk WFA', res);
       }
 
