@@ -601,7 +601,7 @@ class UserController {
       sendData(200, data, "Success Get Detail User", res)
     } 
     catch (error) {
-      next(error)
+      next(error.message)
     }
   }
 

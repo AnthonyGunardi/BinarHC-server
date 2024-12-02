@@ -590,8 +590,8 @@ class AttendanceController {
                     photo: matchingAttendance.photo,
                     meta: matchingAttendance.meta,
                     location_in: matchingAttendance.location_in,
-                    meta_out: matchingAttendance.meta,
-                    location_out: matchingAttendance.location_in,
+                    meta_out: matchingAttendance.meta_out,
+                    location_out: matchingAttendance.location_out,
                     note: matchingAttendance.note,
                     createdAt: matchingAttendance.createdAt,
                     updatedAt: matchingAttendance.updatedAt
