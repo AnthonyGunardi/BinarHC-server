@@ -221,12 +221,34 @@ class UserController {
         where: { is_admin: 'employee' },
         attributes:['fullname', 'nip', 'email', 'id_card', 'photo', 'is_active', 'createdAt', 'updatedAt'],
         order: [['fullname', 'asc']],
-        include: {
+        include: [
+          {
           model: Point,
           attributes:['balance']
+          },
+          {
+            model: Biodata,
+            as: 'Biodata',
+            attributes:['id'],
+            include: {
+              model: Office,
+              attributes: ['name'],
+            }
+          }
+        ]
+      });
+      const results = users.map(user => {
+        let officeName;
+        if (user.Biodata && user.Biodata.Office) {
+          officeName = user.Biodata.Office.name;
+        }
+        return {
+          ...user.toJSON(),
+          office: officeName,
+          Biodata: undefined // Remove Biodata
         }
       });
-      sendData(200, users, "Success get all employees", res)
+      sendData(200, results, "Success get all employees", res)
     }
     catch (err) {
       next(err);
