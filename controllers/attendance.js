@@ -125,7 +125,7 @@ class AttendanceController {
       const newAttendance = await Attendance.create(
         { date, is_present: true, clock_in, status, photo, meta, location_in, note, user_id: user.id }
       );
-      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_detail: newAttendance.location_detail, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
+      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_in: newAttendance.location_in, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
     catch (err) {
       next(err)
@@ -589,7 +589,9 @@ class AttendanceController {
                     status: matchingAttendance.status,
                     photo: matchingAttendance.photo,
                     meta: matchingAttendance.meta,
-                    location_detail: matchingAttendance.location_detail,
+                    location_in: matchingAttendance.location_in,
+                    meta_out: matchingAttendance.meta,
+                    location_out: matchingAttendance.location_in,
                     note: matchingAttendance.note,
                     createdAt: matchingAttendance.createdAt,
                     updatedAt: matchingAttendance.updatedAt
