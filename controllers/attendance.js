@@ -10,7 +10,7 @@ class AttendanceController {
   static async clockIn(req, res, next) {
     try {
       const userEmail = req.user.email
-      const { date, clock_in, status, photo, meta, location_detail, note } = req.body;
+      const { date, clock_in, status, photo, meta, location_in, note } = req.body;
 
       // Parse and format the date for UTC+7 timezone
       const combinedDateTime = `${date} ${clock_in}`;
@@ -123,7 +123,7 @@ class AttendanceController {
       }
 
       const newAttendance = await Attendance.create(
-        { date, is_present: true, clock_in, status, photo, meta, location_detail,note, user_id: user.id }
+        { date, is_present: true, clock_in, status, photo, meta, location_in, note, user_id: user.id }
       );
       sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_detail: newAttendance.location_detail, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
@@ -233,7 +233,7 @@ class AttendanceController {
       }
 
       const newAttendance = await Attendance.create(
-        { date, is_present: true, clock_in, clock_out, status, photo, meta: officeMeta, detail_location: officeAddress, note, user_id: user.id }
+        { date, is_present: true, clock_in, clock_out, status, photo, meta: officeMeta, location_in: officeAddress, note, user_id: user.id }
       );
       sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
@@ -245,7 +245,7 @@ class AttendanceController {
   static async clockOut(req, res, next) {
     const nip = req.params.nip;
     const userEmail = req.user.email;
-    const { clock_out } = req.body;
+    const { clock_out, meta_out, location_out } = req.body;
     const today = new Date().toISOString().slice(0, 10);
     try {
       //get user_id
@@ -262,7 +262,7 @@ class AttendanceController {
       if (attendance.clock_out) return sendResponse(400, "Anda sudah absen pulang", res)
 
       const updatedAttendance = await Attendance.update(
-        { clock_out }, 
+        { clock_out, meta_out, location_out }, 
         { where: { 
             date: today, 
             user_id: user.id 

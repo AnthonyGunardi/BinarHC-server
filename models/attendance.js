@@ -55,7 +55,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     photo: DataTypes.STRING,
     meta: DataTypes.STRING,
-    location_detail: DataTypes.STRING,
+    location_in: DataTypes.STRING,
+    meta_out: DataTypes.STRING,
+    location_out: DataTypes.STRING,
     note: DataTypes.TEXT,
     user_id: DataTypes.INTEGER
   }, {
