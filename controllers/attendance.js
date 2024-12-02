@@ -589,6 +589,7 @@ class AttendanceController {
                     status: matchingAttendance.status,
                     photo: matchingAttendance.photo,
                     meta: matchingAttendance.meta,
+                    location_detail: matchingAttendance.location_detail,
                     note: matchingAttendance.note,
                     createdAt: matchingAttendance.createdAt,
                     updatedAt: matchingAttendance.updatedAt
