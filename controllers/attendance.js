@@ -10,7 +10,7 @@ class AttendanceController {
   static async clockIn(req, res, next) {
     try {
       const userEmail = req.user.email
-      const { date, clock_in, status, photo, meta, note } = req.body;
+      const { date, clock_in, status, photo, meta, location_detail, note } = req.body;
 
       // Parse and format the date for UTC+7 timezone
       const combinedDateTime = `${date} ${clock_in}`;
@@ -123,9 +123,9 @@ class AttendanceController {
       }
 
       const newAttendance = await Attendance.create(
-        { date, is_present: true, clock_in, status, photo, meta, note, user_id: user.id }
+        { date, is_present: true, clock_in, status, photo, meta, location_detail,note, user_id: user.id }
       );
-      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
+      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_detail: newAttendance.location_detail, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
     catch (err) {
       next(err)
@@ -165,8 +165,9 @@ class AttendanceController {
       });
       if (!user) return sendResponse(404, "User is not found", res);
 
-      // Extract the office's meta from the nested user structure 
+      // Extract the office's meta & address from the nested user structure 
       const officeMeta = user.Biodata?.Office?.Office_Addresses[0].Address?.meta;
+      const officeAddress = user.Biodata?.Office?.Office_Addresses[0].Address?.name;
 
       //check if user already have registered an approved absence
       const absence = await Absence.findOne({ 
@@ -232,7 +233,7 @@ class AttendanceController {
       }
 
       const newAttendance = await Attendance.create(
-        { date, is_present: true, clock_in, clock_out, status, photo, meta: officeMeta, note, user_id: user.id }
+        { date, is_present: true, clock_in, clock_out, status, photo, meta: officeMeta, detail_location: officeAddress, note, user_id: user.id }
       );
       sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
