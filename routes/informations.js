@@ -6,7 +6,7 @@ route.post('/', authentication, InformationController.create);
 route.get('/', authentication, InformationController.getAllInformations);
 route.get('/type/:type', authentication, InformationController.getInformationByType);
 route.get('/:id', authentication, InformationController.getInformation);
-// route.put('/toggle/:id', authentication, RewardController.toggleReward);
-// route.put('/:id', authentication, RewardController.update);
+route.put('/:id', authentication, InformationController.update);
+route.delete('/:id', authentication, InformationController.delete);
 
 module.exports = route;

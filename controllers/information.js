@@ -65,76 +65,18 @@ class InformationController {
     }
   }
 
-  static async toggleReward(req, res, next) {
-    const id = req.params.id
-    let rewardData = {
-      is_active: false
-    };
-    try {
-      const reward = await Reward.findOne({
-        where: { id }
-      })
-      if (!reward) return sendResponse(404, "Reward is not found", res)
-      if (reward.is_active == false) {
-        rewardData.is_active = true
-      }
-      const updated = await Reward.update(rewardData, {
-        where: { id },
-        returning: true
-      })
-      sendResponse(200, "Success update reward", res)
-    }
-    catch (err) {
-      next(err)
-    }
-  };
-
   static async update(req, res, next) {
     const id = req.params.id
-    const userEmail = req.user.email
-    const { email, title, description, point, published_at, expired_at, is_active } = req.body;
+    const { title, type, description } = req.body;
     try {
-      //check if user is exist and is login
-      const user = await User.findOne({ 
-        where: { email } 
-      });
-      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
-
-      //check if reward is exist
-      const reward = await Reward.findOne({
+      //check if information is exist
+      const info = await Information.findOne({
         where: { id }
       })
-      if (!reward) return sendResponse(404, "Reward is not found", res)
+      if (!info) return sendResponse(404, "Information is not found", res)
 
-      //upload file if req.files isn't null
-      let url;
-      if(!req.files) {
-        url = reward.photo;
-      } else {
-        const file = req.files.photo;
-        const fileSize = file.data.length;
-        const ext = path.extname(file.name);
-        const fileName = file.md5 + ext;
-        const allowedType = ['.png', '.jpg', '.jpeg'];
-        url = `reward-photos/${fileName}`;
-    
-        //validate file type
-        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
-        //validate file size max 5mb
-        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-        //place the file on server
-        file.mv(`./public/images/reward-photos/${fileName}`, async (err) => {
-          if(err) return sendResponse(502, err.message, res)
-        })
-        //delete previous file on server
-        if (reward.photo !== null) {
-          const filePath = `./public/images/${reward.photo}`;
-          fs.unlinkSync(filePath);
-        }
-      }
-
-      //check if new post title is already used
-      const rewardWithNewTitle = await Reward.findOne({
+      //check if new information type is already used
+      const infoWithNewType = await Information.findOne({
         where: { 
           [Op.and]: [
             { 
@@ -142,22 +84,39 @@ class InformationController {
                 [Op.ne]: id, 
               } 
             },
-            { title: reward.title }
+            { type: info.title }
           ]
         }
       })
-      if (rewardWithNewTitle) return sendResponse(403, "Title already used", res)
+      if (infoWithNewType) return sendResponse(403, "Information Type already exist", res)
 
-      const updatedReward = await Reward.update(
-        { email, title, description, point, photo: url, published_at, expired_at, user_id: user.id, is_active }, 
-        { where: { id: reward.id }, returning: true }
+      const updatedInfo = await Information.update(
+        { title, type, description }, 
+        { where: { id: info.id }, returning: true }
       )
-      sendResponse(200, "Success update reward", res)
+      sendResponse(200, "Success update information", res)
     }
     catch (err) {
       next(err)
     }
   };
+
+  static async delete(req, res, next) {
+    const id = req.params.id
+    try {
+      //Check if information is exist
+      const info = await Information.findOne({
+        where: { id }
+      })
+      if (!info) return sendResponse(404, "Information is not found", res)
+
+      const deleted = await Information.destroy({ where: { id } })
+      sendResponse(200, "Success delete information", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = InformationController;
