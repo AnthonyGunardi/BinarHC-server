@@ -25,6 +25,7 @@ const AbsenceController = require('./absence');
 const AttendanceController = require('./attendance');
 const MasterDataController = require('./master_data');
 const InformationController = require('./information');
+const EmploymentStatusController = require('./employment_status');
 
 module.exports = { 
   UserController, 
@@ -53,5 +54,6 @@ module.exports = {
   AbsenceController,
   AttendanceController,
   MasterDataController,
-  InformationController
+  InformationController,
+  EmploymentStatusController
 };

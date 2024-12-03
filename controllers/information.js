@@ -28,7 +28,7 @@ class InformationController {
   static async getAllInformations(req, res, next) {
     try {
       const infos = await Information.findAll({
-        order: [['id', 'desc']]
+        order: [['id', 'asc']]
       });
       sendData(200, infos, "Success get all informations", res);
     } 
