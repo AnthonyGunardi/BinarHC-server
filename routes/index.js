@@ -25,6 +25,7 @@ const overtimeRoute = require('./overtime');
 const absenceRoute = require('./absence');
 const attendanceRoute = require('./attendance');
 const masterDataRoute = require('./master_data');
+const informationRoute = require('./informations');
 
 route.use('/v1/users', userRoute);
 route.use('/v1/offices', officeRoute);
@@ -52,5 +53,6 @@ route.use('/v1/overtimes', overtimeRoute);
 route.use('/v1/absences', absenceRoute);
 route.use('/v1/attendances', attendanceRoute);
 route.use('/v1/master_data', masterDataRoute);
+route.use('/v1/informations', informationRoute);
 
 module.exports = route;

@@ -24,6 +24,7 @@ const OvertimeController = require('./overtime');
 const AbsenceController = require('./absence');
 const AttendanceController = require('./attendance');
 const MasterDataController = require('./master_data');
+const InformationController = require('./information');
 
 module.exports = { 
   UserController, 
@@ -51,5 +52,6 @@ module.exports = {
   OvertimeController,
   AbsenceController,
   AttendanceController,
-  MasterDataController
+  MasterDataController,
+  InformationController
 };
