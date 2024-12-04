@@ -812,6 +812,9 @@ class UserController {
           returning: true
           }
         )
+        if (!updated_period) {
+          const newPeriod = await Employment_Periode.create({ status_id: status_employee, period: expired, user_id: user.id });
+        }
       }
 
       const updatedUser = await User.update(
