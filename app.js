@@ -18,7 +18,7 @@ app.use(cors());
 
 //routes
 app.get('/', (req, res) => {
-  res.send('Welcome to Binar HC API v7'); 
+  res.send('Welcome to Binar HC API v8'); 
 })
 app.use(routes);
 
