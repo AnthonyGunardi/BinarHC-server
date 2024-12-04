@@ -17,7 +17,7 @@ app.use(express.static('public'));
 app.use(cors());
 //routes
 app.get('/', (req, res) => {
-  res.send('Welcome to Binar HC API');
+  res.send('Welcome to Binar HC API v3');
 })
 app.use(routes);
 
