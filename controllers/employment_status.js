@@ -75,6 +75,42 @@ class EmploymentStatusController {
     }
   };
 
+  static async update(req, res, next) {
+    const id = req.params.id
+    const { name, is_active } = req.body;
+    try {
+      //check if rmployment status is exist
+      const status = await Employment_Status.findOne({
+        where: { id }
+      })
+      if (!status) return sendResponse(404, "Employment status is not found", res)
+
+      //check if new employment status name is already used
+      const statusWithNewName = await Employment_Status.findOne({
+        where: { 
+          [Op.and]: [
+            { 
+              id: {
+                [Op.ne]: id, 
+              } 
+            },
+            { name: status.name }
+          ]
+        }
+      })
+      if (statusWithNewName) return sendResponse(403, "Employment status name already exist", res)
+
+      const updatedStatus = await Employment_Status.update(
+        { name, is_active }, 
+        { where: { id: status.id }, returning: true }
+      )
+      sendResponse(200, "Success update employment status", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  };
+
   static async delete(req, res, next) {
     const id = req.params.id
     try {

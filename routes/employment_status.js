@@ -6,6 +6,7 @@ route.post('/', authentication, EmploymentStatusController.create);
 route.get('/', authentication, EmploymentStatusController.getAllStatuses);
 route.get('/:id', authentication, EmploymentStatusController.getStatus);
 route.put('/toggle/:id', authentication, EmploymentStatusController.toggleStatus);
+route.put('/:id', authentication, EmploymentStatusController.update);
 route.delete('/:id', authentication, EmploymentStatusController.delete);
 
 module.exports = route;
