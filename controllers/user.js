@@ -1,7 +1,7 @@
 const {
   User, Biodata, Office, Position, Echelon, Attendance, Absence, Overtime, Point, Point_Log, Reward_Log, Reward, 
   Family, User_Address, Family_Address, Office_Address, Address, Indonesia_Village, Indonesia_District, Indonesia_City, Indonesia_Province,
-  User_Phone, Family_Phone, Office_Phone, Phone, Master_Data
+  User_Phone, Family_Phone, Office_Phone, Phone, Master_Data, Employment_Status, Employment_Periode
 } = require('../models');
 const Sequelize = require('sequelize');
 let sequelize;
@@ -65,6 +65,7 @@ class UserController {
         birthday, hometown, hire_date, religion, gender, last_education, marital_status 
       } = req.body;
       const password = formatDate(birthday);
+      let employment_status;
 
       //check if the office_slug & echelon_code are valid
       const office = await Office.findOne({
@@ -97,8 +98,11 @@ class UserController {
       if (Boolean(user)) return sendResponse(400, 'Email or NIP already exist', res)
 
       if (is_permanent === false) {
+        //check if expired is provided
         if (!expired) return sendResponse(400, 'Expired is required', res)
-        const employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
+
+        //check if employment status is exist
+        employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
         if (Boolean(employment_status)) return sendResponse(404, 'Employment status is not found', res)
       }
 
@@ -131,11 +135,9 @@ class UserController {
         }
       );
       if (is_permanent === false) {
-        //create employment periode
         const newEmploymentPeriode = await Employment_Periode.create(
           { user_id: newUser.id, status_id: employment_status.id, period: expired }
         )
-
       }
       sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
     }
