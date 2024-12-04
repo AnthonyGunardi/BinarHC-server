@@ -250,7 +250,15 @@ class UserController {
               model: Office,
               attributes: ['name'],
             }
-          }
+          },
+          {
+            model: Employment_Periode,
+            attributes: ['id', 'status_id', 'period'],
+            include: {
+              model: Employment_Status,
+              attributes: ['id', 'name']
+            }
+          },
         ]
       });
       const results = users.map(user => {
