@@ -328,6 +328,10 @@ class UserController {
         attributes:['id', 'fullname', 'nip', 'email', 'id_card', 'photo', 'is_permanent', 'is_active'],
         include: [
           {
+            model: Employment_Periode,
+            attributes: ['id', 'status_id', 'period'],
+          },
+          {
             model: Biodata,
             as: 'Biodata',
             attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status' ],
@@ -696,7 +700,7 @@ class UserController {
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
     const { 
-      fullname, nip, id_card, email, is_active, 
+      fullname, nip, id_card, email, is_permanent, is_active, 
       office_slug, echelon_code, 
       birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
@@ -771,7 +775,7 @@ class UserController {
 
       const updatedUser = await User.update(
         { 
-          fullname, nip, id_card, email, photo: url, is_active 
+          fullname, nip, id_card, email, photo: url, is_permanent, is_active 
         }, 
         {
         where: { id: user.id },
