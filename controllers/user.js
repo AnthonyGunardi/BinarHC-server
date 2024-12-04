@@ -98,7 +98,7 @@ class UserController {
       if (Boolean(user)) return sendResponse(400, 'Email or NIP already exist', res)
 
       //checking before creating any input data into db
-      if (is_permanent === false) {
+      if (is_permanent === false || is_permanent === "false") {
         //check if expired is provided
         if (!expired) return sendResponse(400, 'Expired is required', res)
 
