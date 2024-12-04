@@ -803,16 +803,18 @@ class UserController {
       }
 
       if (is_permanent === false || is_permanent === "false") {
-        const updated_period = await Employment_Periode.update(
-          { 
-            status_id: status_employee, period: expired
-          }, 
-          {
-          where: { user_id: user.id },
-          returning: true
-          }
-        )
-        if (!updated_period) {
+        const periodCheck = await Employment_Periode.findOne({ where: { user_id: user.id } });
+        if(periodCheck) {
+          const updated_period = await Employment_Periode.update(
+            { 
+              status_id: status_employee, period: expired
+            }, 
+            {
+            where: { user_id: user.id },
+            returning: true
+            }
+          )
+        } else {
           const newPeriod = await Employment_Periode.create({ status_id: status_employee, period: expired, user_id: user.id });
         }
       }
