@@ -270,7 +270,7 @@ class UserController {
         if (user.is_permanent === true) {
           employmentStatus = "Karyawan Tetap";
         } else {
-          employmentStatus = user.Employment_Periodes.Employment_Status.name;
+          employmentStatus = user.Employment_Periodes?.Employment_Status?.name;
         }
         return {
           ...user.toJSON(),
