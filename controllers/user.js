@@ -135,7 +135,7 @@ class UserController {
           office_id: office.id, echelon_id: echelon.id, user_id: newUser.id
         }
       );
-      if (is_permanent === false) {
+      if (is_permanent === false || is_permanent === "false") {
         const newEmploymentPeriode = await Employment_Periode.create(
           { user_id: newUser.id, status_id: status_employee, period: expired }
         )
