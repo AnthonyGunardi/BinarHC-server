@@ -274,7 +274,7 @@ class UserController {
         }
         return {
           ...user.toJSON(),
-          type: employmentStatus,
+          type: "Karyawan Tetap",
           office: officeName,
           Biodata: undefined // Remove Biodata
         }
