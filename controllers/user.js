@@ -60,7 +60,7 @@ class UserController {
   static async registerEmployee(req, res, next) {    
     try {
       const { 
-        fullname, nip, id_card, email, is_active, 
+        fullname, nip, id_card, email, is_permanent, status_employee, expired, is_active, 
         office_slug, echelon_code, 
         birthday, hometown, hire_date, religion, gender, last_education, marital_status 
       } = req.body;
@@ -96,6 +96,12 @@ class UserController {
       });
       if (Boolean(user)) return sendResponse(400, 'Email or NIP already exist', res)
 
+      if (is_permanent === false) {
+        if (!expired) return sendResponse(400, 'Expired is required', res)
+        const employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
+        if (Boolean(employment_status)) return sendResponse(404, 'Employment status is not found', res)
+      }
+
       //upload file if req.files isn't null
       let url = null;
       if (req.files !== null) {
@@ -116,7 +122,7 @@ class UserController {
         })
       }
 
-      const newUser = await User.create({ fullname, nip, id_card, email, password, photo: url, is_admin: 'employee', is_active });
+      const newUser = await User.create({ fullname, nip, id_card, email, password, photo: url, is_permanent,is_admin: 'employee', is_active });
       const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
       const newBiodata = await Biodata.create(
         { 
@@ -124,6 +130,13 @@ class UserController {
           office_id: office.id, echelon_id: echelon.id, user_id: newUser.id
         }
       );
+      if (is_permanent === false) {
+        //create employment periode
+        const newEmploymentPeriode = await Employment_Periode.create(
+          { user_id: newUser.id, status_id: employment_status.id, period: expired }
+        )
+
+      }
       sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
     }
     catch (err) {
@@ -219,7 +232,7 @@ class UserController {
     try {
       const users = await User.findAll({
         where: { is_admin: 'employee' },
-        attributes:['fullname', 'nip', 'email', 'id_card', 'photo', 'is_active', 'createdAt', 'updatedAt'],
+        attributes:['fullname', 'nip', 'email', 'id_card', 'photo', 'is_permanent', 'is_active', 'createdAt', 'updatedAt'],
         order: [['fullname', 'asc']],
         include: [
           {
@@ -308,7 +321,7 @@ class UserController {
     try {
       const user = await User.findOne({
         where: { nip, is_admin: 'employee' },
-        attributes:['id', 'fullname', 'nip', 'email', 'id_card', 'photo', 'is_active'],
+        attributes:['id', 'fullname', 'nip', 'email', 'id_card', 'photo', 'is_permanent', 'is_active'],
         include: [
           {
             model: Biodata,

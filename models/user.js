@@ -88,9 +88,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     id_card: DataTypes.STRING,
     photo: DataTypes.STRING,
+    is_permanent: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     is_admin: {
       type: DataTypes.ENUM,
-      values: ['active', 'pending', 'deleted'],
+      values: ['superadmin', 'admin', 'employee'],
       defaultValue: false
     },
     is_active: {
