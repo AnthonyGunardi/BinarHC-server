@@ -267,14 +267,14 @@ class UserController {
         if (user.Biodata && user.Biodata.Office) {
           officeName = user.Biodata.Office.name;
         }
-        if (user.is_permanent) {
+        if (user.is_permanent || user.is_permanent === null) {
           employmentStatus = "Karyawan Tetap";
         } else {
           employmentStatus = user.Employment_Periodes?.Employment_Status?.name;
         }
         return {
           ...user.toJSON(),
-          type: "Karyawan Tetap",
+          type: employmentStatus,
           office: officeName,
           Biodata: undefined // Remove Biodata
         }
