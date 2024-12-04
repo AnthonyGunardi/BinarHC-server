@@ -94,7 +94,7 @@ class EmploymentStatusController {
                 [Op.ne]: id, 
               } 
             },
-            { name: status.name }
+            { name }
           ]
         }
       })

@@ -1,12 +1,13 @@
 const route = require('express').Router();
 const { EmploymentStatusController } = require('../controllers');
 const authentication = require('../middlewares/userAuthentication');
+const adminAuthorization = require('../middlewares/adminAuthorization');
 
-route.post('/', authentication, EmploymentStatusController.create);
-route.get('/', authentication, EmploymentStatusController.getAllStatuses);
+route.post('/', authentication, adminAuthorization,EmploymentStatusController.create);
+route.get('/', authentication, adminAuthorization, EmploymentStatusController.getAllStatuses);
 route.get('/:id', authentication, EmploymentStatusController.getStatus);
-route.put('/toggle/:id', authentication, EmploymentStatusController.toggleStatus);
-route.put('/:id', authentication, EmploymentStatusController.update);
-route.delete('/:id', authentication, EmploymentStatusController.delete);
+route.put('/toggle/:id', authentication, adminAuthorization, EmploymentStatusController.toggleStatus);
+route.put('/:id', authentication, adminAuthorization,EmploymentStatusController.update);
+route.delete('/:id', authentication, adminAuthorization,EmploymentStatusController.delete);
 
 module.exports = route;

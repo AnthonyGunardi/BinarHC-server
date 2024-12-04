@@ -84,7 +84,7 @@ class InformationController {
                 [Op.ne]: id, 
               } 
             },
-            { type: info.title }
+            { type }
           ]
         }
       })
