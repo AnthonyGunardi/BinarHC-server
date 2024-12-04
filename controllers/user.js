@@ -267,7 +267,7 @@ class UserController {
         if (user.Biodata && user.Biodata.Office) {
           officeName = user.Biodata.Office.name;
         }
-        if (user.is_permanent === true) {
+        if (user.is_permanent) {
           employmentStatus = "Karyawan Tetap";
         } else {
           employmentStatus = user.Employment_Periodes?.Employment_Status?.name;
