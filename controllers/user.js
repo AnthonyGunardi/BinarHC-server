@@ -707,6 +707,7 @@ class UserController {
       office_slug, echelon_code, 
       birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
+    let employment_status;
     try {
       //check if user is exist
       const user = await User.findOne({
