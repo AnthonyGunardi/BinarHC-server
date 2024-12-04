@@ -140,7 +140,7 @@ class UserController {
           { user_id: newUser.id, status_id: employment_status.id, period: expired }
         )
       // }
-      sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
+      sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created nhy", res);  
     }
     catch (err) {
       next(err)
