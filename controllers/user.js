@@ -703,7 +703,7 @@ class UserController {
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
     const { 
-      fullname, nip, id_card, email, is_permanent, is_active, 
+      fullname, nip, id_card, email, is_permanent, status_employee, expired, is_active, 
       office_slug, echelon_code, 
       birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
@@ -749,6 +749,16 @@ class UserController {
       })
       if (userWithNewNip) return sendResponse(403, "Email or NIP is already used", res)
 
+      //checking before creating any input data into db
+      if (is_permanent === false || is_permanent === "false") {
+        //check if expired is provided
+        if (!expired) return sendResponse(400, 'Expired is required', res)
+
+        //check if employment status is exist
+        employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
+        if (!employment_status) return sendResponse(404, `Employment status is not found`, res)
+      }
+
       //upload file if req.files isn't null
       let url;
       if(!req.files) {
@@ -774,6 +784,18 @@ class UserController {
           const filePath = `./public/images/${user.photo}`;
           fs.unlinkSync(filePath);
         }
+      }
+
+      if (is_permanent === false || is_permanent === "false") {
+        const updated_period = await Employment_Periode.update(
+          { 
+            status_id: status_employee, period: expired
+          }, 
+          {
+          where: { user_id: user.id },
+          returning: true
+          }
+        )
       }
 
       const updatedUser = await User.update(
