@@ -104,7 +104,7 @@ class UserController {
 
         //check if employment status is exist
         employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
-        if (!employment_status) return sendResponse(404, `Employment status is not found ${status_employee}`, res)
+        if (!employment_status) return sendResponse(404, `Employment status is not found`, res)
       }
 
       //upload file if req.files isn't null
@@ -141,7 +141,6 @@ class UserController {
         )
       }
       sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
-      // sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email }, "User is created nhy", res); 
     }
     catch (err) {
       next(err)
@@ -328,10 +327,6 @@ class UserController {
         attributes:['id', 'fullname', 'nip', 'email', 'id_card', 'photo', 'is_permanent', 'is_active'],
         include: [
           {
-            model: Employment_Periode,
-            attributes: ['id', 'status_id', 'period'],
-          },
-          {
             model: Biodata,
             as: 'Biodata',
             attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status' ],
@@ -399,6 +394,14 @@ class UserController {
                 }
               }
             ]
+          },
+          {
+            model: Employment_Periode,
+            attributes: ['id', 'status_id', 'period'],
+            include: {
+              model: Employment_Status,
+              attributes: ['name']
+            }
           },
           {
             model: Position,
