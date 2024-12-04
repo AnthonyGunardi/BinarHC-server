@@ -104,7 +104,7 @@ class UserController {
 
         //check if employment status is exist
         employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
-        if (Boolean(employment_status)) return sendResponse(404, 'Employment status is not found', res)
+        if (!employment_status) return sendResponse(404, `Employment status is not found ${status_employee}`, res)
       }
 
       //upload file if req.files isn't null
