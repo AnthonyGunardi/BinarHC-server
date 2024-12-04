@@ -98,14 +98,14 @@ class UserController {
       if (Boolean(user)) return sendResponse(400, 'Email or NIP already exist', res)
 
       //checking before creating any input data into db
-      // if (is_permanent === false) {
-      //   //check if expired is provided
-      //   if (!expired) return sendResponse(400, 'Expired is required', res)
+      if (is_permanent === false) {
+        //check if expired is provided
+        if (!expired) return sendResponse(400, 'Expired is required', res)
 
-      //   //check if employment status is exist
-      //   employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
-      //   if (Boolean(employment_status)) return sendResponse(404, 'Employment status is not found', res)
-      // }
+        //check if employment status is exist
+        employment_status = await Employment_Status.findOne({ where: { id: status_employee } });
+        if (Boolean(employment_status)) return sendResponse(404, 'Employment status is not found', res)
+      }
 
       //upload file if req.files isn't null
       let url = null;
@@ -135,12 +135,12 @@ class UserController {
           office_id: office.id, echelon_id: echelon.id, user_id: newUser.id
         }
       );
-      // if (is_permanent === false) {
+      if (is_permanent === false) {
         const newEmploymentPeriode = await Employment_Periode.create(
           { user_id: newUser.id, status_id: status_employee, period: expired }
         )
-      // }
-      sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created tes03", res);  
+      }
+      sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
       // sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email }, "User is created nhy", res); 
     }
     catch (err) {
