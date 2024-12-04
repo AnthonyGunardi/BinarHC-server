@@ -400,7 +400,7 @@ class UserController {
             attributes: ['id', 'status_id', 'period'],
             include: {
               model: Employment_Status,
-              attributes: ['name']
+              attributes: ['id', 'name']
             }
           },
           {

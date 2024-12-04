@@ -15,10 +15,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 app.use(cors());
+
 //routes
 app.get('/', (req, res) => {
-  res.send('Welcome to Binar HC API');
-//pm2 reload all  
+  res.send('Welcome to Binar HC API'); 
 })
 app.use(routes);
 
