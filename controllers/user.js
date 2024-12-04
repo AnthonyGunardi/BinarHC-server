@@ -128,7 +128,7 @@ class UserController {
       }
 
       const newUser = await User.create({ fullname, nip, id_card, email, password, photo: url, is_permanent,is_admin: 'employee', is_active });
-      // const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
+      const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
       // const newBiodata = await Biodata.create(
       //   { 
       //     birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
@@ -140,8 +140,8 @@ class UserController {
           { user_id: newUser.id, status_id: status_employee, period: expired }
         )
       // }
-      // sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created nhy", res);  
-      sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email }, "User is created nhy", res); 
+      sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created tes02", res);  
+      // sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email }, "User is created nhy", res); 
     }
     catch (err) {
       next(err)
