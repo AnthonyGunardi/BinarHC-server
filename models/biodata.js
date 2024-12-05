@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     marital_status: DataTypes.STRING,
     user_id: DataTypes.INTEGER,
     office_id: DataTypes.INTEGER,
-    echelon_id: DataTypes.INTEGER
+    echelon_id: DataTypes.INTEGER,
+    annual: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Biodata',

@@ -129,10 +129,11 @@ class UserController {
 
       const newUser = await User.create({ fullname, nip, id_card, email, password, photo: url, is_permanent,is_admin: 'employee', is_active });
       const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
+      const masterData = await Master_Data.findOne({ where: { id: 1 } });
       const newBiodata = await Biodata.create(
         { 
           birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
-          office_id: office.id, echelon_id: echelon.id, user_id: newUser.id
+          office_id: office.id, echelon_id: echelon.id, user_id: newUser.id, annual: masterData.annual_leave
         }
       );
       if (is_permanent === false || is_permanent === "false") {
@@ -418,7 +419,7 @@ class UserController {
           {
             model: Biodata,
             as: 'Biodata',
-            attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status' ],
+            attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status', 'annual' ],
             include: [
               {
                 model: Office,
@@ -696,17 +697,50 @@ class UserController {
       };
 
       // Get annual leave
-      const master_data = await Master_Data.findOne( { where: {id: 1} });
-
       // Calculate remaining annual leave
       let totalAbsenceDays = 0;
+      let remainingAnnualLeave = 0;
       user.Absence_Request.forEach(absence => {
         const startDate = new Date(absence.start_date);
         const endDate = new Date(absence.end_date);
         const duration = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1; // Include the start day
         totalAbsenceDays += duration;
       });
-      const remainingAnnualLeave = master_data.annual_leave - totalAbsenceDays;
+
+      //check if employee worktime is already 1 year or not
+        const hireDateObject = new Date(user.Biodata.hire_date);
+        const currentDate = new Date();
+    
+        // Hitung perbedaan waktu dalam milidetik
+        const differenceInTime = currentDate - hireDateObject;
+    
+        // Konversi milidetik ke tahun
+        const differenceInYears = differenceInTime / (1000 * 60 * 60 * 24 * 365);
+    
+        if (differenceInYears > 1) {
+            // Jika lebih dari 1 tahun
+            remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays;
+        } else if (differenceInYears === 1) {
+            // Jika tepat 1 tahun
+            if (hireDateObject.getDate() > 15) {
+                // Jika tanggal hire lebih dari 15
+                remainingAnnualLeave = 0;
+            } else {
+                // Jika tanggal hire 15 atau kurang
+                let monthHire = hireDateObject.getMonth();
+                let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
+
+                if (tempAnnual < 0) {
+                  remainingAnnualLeave = 0;
+                } else {
+                  remainingAnnualLeave = tempAnnual;
+                }
+            }
+        } else {
+            // Jika kurang dari 1 tahun
+            remainingAnnualLeave = 0;
+        }
+
 
       // convert user, from sequelize instance to plain JavaScript object, and then destructure it
       const data = {...user.get({ plain: true }), isWFA, remainingAnnualLeave};
@@ -793,7 +827,7 @@ class UserController {
     const currentNip = req.params.nip
     const { 
       fullname, nip, id_card, email, is_permanent, status_employee, expired, is_active, 
-      office_slug, echelon_code, 
+      office_slug, echelon_code, annual,
       birthday, hometown, hire_date, religion, gender, last_education, marital_status 
     } = req.body;
     let employment_status;
@@ -905,7 +939,7 @@ class UserController {
       const updatedBiodata = await Biodata.update(
         { 
           birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
-          office_id: office.id, echelon_id: echelon.id, user_id: user.id
+          annual, office_id: office.id, echelon_id: echelon.id, user_id: user.id
         }, 
         {
         where: { id: user.Biodata.id },
