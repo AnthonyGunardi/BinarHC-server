@@ -331,6 +331,61 @@ class UserController {
     }
   };
 
+  static async findContractEndEmployees(req, res, next) {
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + 30);
+    try {
+      const users = await User.findAll({
+        where: { is_admin: 'employee', is_permanent: false, is_active: true },
+        attributes:['fullname', 'nip', 'photo', 'is_active'],
+        include: [
+          {
+            model: Biodata,
+            as: 'Biodata',
+            attributes:['birthday'],
+            include: {
+              model: Office,
+              attributes: {
+                exclude: ['id', 'createdAt', 'updatedAt']
+              }
+            }
+          },
+          {
+            model: Employment_Periode,
+            attributes: ['period'],
+            where: {
+              [Op.or]: [
+                {
+                  [Op.and]: [
+                    sequelize.literal(`MONTH(period) = ${today.getMonth() + 1}`),
+                    sequelize.literal(`DAY(period) >= ${today.getDate()}`),
+                  ]
+                },
+                {
+                  [Op.and]: [
+                    sequelize.literal(`MONTH(period) = ${futureDate.getMonth() + 1}`),
+                    Sequelize.literal(`DAY(period) <= ${futureDate.getDate()}`),
+                  ]
+                }
+              ]
+            },
+            include: {
+              model: Employment_Status,
+              attributes: ['name']
+            }
+          }
+        ],
+        order: [['Employment_Periode', 'period', 'desc']]
+      });
+      sendData(200, users, "Success get all contract end employees", res)
+    }
+    catch (err) {
+      console.log(err.message)
+      next(err);
+    }
+  };
+
   static async getEmployee(req, res, next) {
     const nip = req.params.nip;
     const today = new Date().toISOString().slice(0, 10);
