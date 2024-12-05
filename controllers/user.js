@@ -737,7 +737,7 @@ class UserController {
                 let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
 
                 if (tempAnnual < 0) {
-                  remainingAnnualLeave = 0;
+                  remainingAnnualLeave = 0 + 2;
                 } else {
                   remainingAnnualLeave = tempAnnual;
                 }
