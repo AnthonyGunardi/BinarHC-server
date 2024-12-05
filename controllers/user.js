@@ -723,10 +723,10 @@ class UserController {
         // Total selisih bulan
         const totalMonthsDifference = yearsDifference * 12 + monthsDifference;
 
-        if (totalMonthsDifference > 12) {
+        if (totalMonthsDifference >= 24) {
             // Jika lebih dari 1 tahun
             remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays  +1;
-        } else if (totalMonthsDifference === 12) {
+        } else if (totalMonthsDifference < 24 && totalMonthsDifference >= 12) {
             // Jika tepat 1 tahun
             if (hireDateObject.getDate() > 15) {
                 // Jika tanggal hire lebih dari 15
