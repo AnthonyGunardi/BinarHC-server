@@ -18,7 +18,7 @@ app.use(cors());
 
 //routes
 app.get('/', (req, res) => {
-  res.send('Welcome to Binar HC API v8'); 
+  res.send('Welcome to Binar HC API v05.12.2024.1544'); 
 })
 app.use(routes);
 
@@ -31,7 +31,7 @@ app.use(function (req, res, next) {
 });
 
 //error handler
-// app.use(errorHandler);
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`App is listening at port: ${port}`)
