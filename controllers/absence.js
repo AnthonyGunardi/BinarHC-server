@@ -31,7 +31,10 @@ class OvertimeController {
                   new Date(new Date().getFullYear(), 11, 31) // December 31st of the current year
                 ]
               },
-              type: 'Cuti'
+              type: 'Cuti',
+              status: {
+                [Op.or]: ['success', 'pending']
+              }
             },
             attributes: {
               exclude: ['user_id']
