@@ -356,6 +356,7 @@ class UserController {
             attributes: ['period'],
             where: {
               [Op.or]: [
+                sequelize.literal(`MONTH(period) <= ${today.getMonth() + 1}`),
                 {
                   [Op.and]: [
                     sequelize.literal(`MONTH(period) = ${today.getMonth() + 1}`),
@@ -378,7 +379,25 @@ class UserController {
         ],
         order: [['Employment_Periode', 'period', 'desc']]
       });
-      sendData(200, users, "Success get all contract end employees", res)
+
+      // Restructure the data to match the required output format
+      const results = users.map(user => {
+        const office = user.Biodata?.Office?.name || null;
+        const employmentPeriod = user.Employment_Periode?.period || null;
+        const employmentStatus = user.Employment_Periode?.Employment_Status?.name || null;
+        
+        return {
+          fullname: user.fullname,
+          nip: user.nip,
+          photo: user.photo,
+          is_active: user.is_active,
+          Office: office,
+          Employment_Periode: employmentPeriod,
+          Employment_Status: employmentStatus
+        };
+      });
+
+      sendData(200, results, "Success get all contract end employees", res)
     }
     catch (err) {
       console.log(err.message)
