@@ -358,7 +358,6 @@ class UserController {
             attributes: ['period'],
             where: {
               [Op.or]: [
-                sequelize.literal(`MONTH(period) <= ${today.getMonth() + 1}`),
                 {
                   [Op.and]: [
                     sequelize.literal(`MONTH(period) = ${today.getMonth() + 1}`),
