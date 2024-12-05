@@ -719,7 +719,7 @@ class UserController {
     
         if (differenceInYears > 1) {
             // Jika lebih dari 1 tahun
-            remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays;
+            remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays  +1;
         } else if (differenceInYears === 1) {
             // Jika tepat 1 tahun
             if (hireDateObject.getDate() > 15) {
