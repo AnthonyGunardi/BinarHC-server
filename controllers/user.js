@@ -711,16 +711,22 @@ class UserController {
         const hireDateObject = new Date(user.Biodata.hire_date);
         const currentDate = new Date();
     
-        // Hitung perbedaan waktu dalam milidetik
-        const differenceInTime = currentDate - hireDateObject;
+        // // Hitung perbedaan waktu dalam milidetik
+        // const differenceInTime = currentDate - hireDateObject;
     
-        // Konversi milidetik ke tahun
-        const differenceInYears = differenceInTime / (1000 * 60 * 60 * 24 * 365);
-    
-        if (differenceInYears > 1) {
+        // // Konversi milidetik ke tahun
+        // const differenceInYears = differenceInTime / (1000 * 60 * 60 * 24 * 365);
+        // Hitung perbedaan tahun dan bulan
+        const yearsDifference = currentDate.getFullYear() - hireDateObject.getFullYear();
+        const monthsDifference = currentDate.getMonth() - hireDateObject.getMonth();
+
+        // Total selisih bulan
+        const totalMonthsDifference = yearsDifference * 12 + monthsDifference;
+
+        if (totalMonthsDifference > 12) {
             // Jika lebih dari 1 tahun
             remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays  +1;
-        } else if (differenceInYears === 1) {
+        } else if (totalMonthsDifference === 12) {
             // Jika tepat 1 tahun
             if (hireDateObject.getDate() > 15) {
                 // Jika tanggal hire lebih dari 15
