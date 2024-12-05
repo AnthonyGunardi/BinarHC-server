@@ -725,7 +725,7 @@ class UserController {
 
         if (totalMonthsDifference >= 24) {
             // Jika lebih dari 1 tahun
-            remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays  +1;
+            remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays;
         } else if (totalMonthsDifference < 24 && totalMonthsDifference > 12) {
             // Jika tepat 1 tahun
 
@@ -737,7 +737,7 @@ class UserController {
             let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
 
             if (tempAnnual < 0) {
-              remainingAnnualLeave = 0 + 2;
+              remainingAnnualLeave = 0;
             } else {
               remainingAnnualLeave = tempAnnual;
             }
