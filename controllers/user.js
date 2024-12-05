@@ -19,6 +19,7 @@ const AccessToken = require('../helpers/accessToken');
 const { sendResponse, sendData } = require('../helpers/response');
 const { generateNIP } = require('../helpers/generateNip');
 const { formatDate } = require('../helpers/formatDate');
+const { calculateRemainingLeave } = require('../helpers/calculateRemaingLeave');
 
 class UserController {
   static async registerAdmin(req, res, next) {
@@ -486,20 +487,20 @@ class UserController {
             ]
           },
           {
-            model: Employment_Periode,
-            attributes: ['id', 'status_id', 'period'],
-            include: {
-              model: Employment_Status,
-              attributes: ['id', 'name']
-            }
-          },
-          {
             model: Position,
             through: {
               attributes: []
             },
             attributes: {
               exclude: ['id']
+            }
+          },
+          {
+            model: Employment_Periode,
+            attributes: ['id', 'period'],
+            include: {
+              model: Employment_Status,
+              attributes: ['id', 'name']
             }
           },
           {
@@ -696,69 +697,8 @@ class UserController {
         isWFA = true
       };
 
-      // Get annual leave
-      // Calculate remaining annual leave
-      let totalAbsenceDays = 0;
-      let remainingAnnualLeave = 0;
-      user.Absence_Request.forEach(absence => {
-        const startDate = new Date(absence.start_date);
-        const endDate = new Date(absence.end_date);
-        const duration = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1; // Include the start day
-        totalAbsenceDays += duration;
-      });
-
-      //check if employee worktime is already 1 year or not
-        const hireDateObject = new Date(user.Biodata.hire_date);
-        const currentDate = new Date();
-    
-        // // Hitung perbedaan waktu dalam milidetik
-        // const differenceInTime = currentDate - hireDateObject;
-    
-        // // Konversi milidetik ke tahun
-        // const differenceInYears = differenceInTime / (1000 * 60 * 60 * 24 * 365);
-        // Hitung perbedaan tahun dan bulan
-        const yearsDifference = currentDate.getFullYear() - hireDateObject.getFullYear();
-        const monthsDifference = currentDate.getMonth() - hireDateObject.getMonth();
-
-        // Total selisih bulan
-        const totalMonthsDifference = yearsDifference * 12 + monthsDifference;
-
-        if (totalMonthsDifference >= 24) {
-            // Jika lebih dari 1 tahun
-            remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays;
-        } else if (totalMonthsDifference < 24 && totalMonthsDifference > 12) {
-            // Jika tepat 1 tahun
-
-            let monthHire = hireDateObject.getMonth();
-            if (hireDateObject.getDate() > 15) {
-                monthHire++;
-            }
-            
-            let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
-
-            if (tempAnnual < 0) {
-              remainingAnnualLeave = 0;
-            } else {
-              remainingAnnualLeave = tempAnnual;
-            }
-        } else if (totalMonthsDifference === 12) {
-          if (hireDateObject.getDate() > 15) {
-            remainingAnnualLeave = 0;
-          } else {
-            let monthHire = hireDateObject.getMonth();
-            let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
-
-            if (tempAnnual < 0) {
-              remainingAnnualLeave = 0;
-            } else {
-              remainingAnnualLeave = tempAnnual;
-            }
-          }
-        } else {
-            // Jika kurang dari 1 tahun
-            remainingAnnualLeave = 0;
-        }
-
+      let remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request);
+      console.log(remainingAnnualLeave)
 
       // convert user, from sequelize instance to plain JavaScript object, and then destructure it
       const data = {...user.get({ plain: true }), isWFA, remainingAnnualLeave};
@@ -766,7 +706,7 @@ class UserController {
       sendData(200, data, "Success Get Detail User", res)
     } 
     catch (error) {
-      next(error.message)
+      next(error)
     }
   }
 
@@ -845,8 +785,8 @@ class UserController {
     const currentNip = req.params.nip
     const { 
       fullname, nip, id_card, email, is_permanent, status_employee, expired, is_active, 
-      office_slug, echelon_code, annual,
-      birthday, hometown, hire_date, religion, gender, last_education, marital_status 
+      birthday, hometown, hire_date, annual, religion, gender, last_education, marital_status,
+      office_slug, echelon_code
     } = req.body;
     let employment_status;
     try {

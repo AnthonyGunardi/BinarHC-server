@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     birthday: DataTypes.DATEONLY,
     hometown: DataTypes.STRING,
     hire_date: DataTypes.DATEONLY,
+    annual: DataTypes.INTEGER,
     religion: DataTypes.STRING,
     gender: DataTypes.STRING,
     last_education: DataTypes.STRING,
@@ -27,7 +28,6 @@ module.exports = (sequelize, DataTypes) => {
     user_id: DataTypes.INTEGER,
     office_id: DataTypes.INTEGER,
     echelon_id: DataTypes.INTEGER,
-    annual: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Biodata',

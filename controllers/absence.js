@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
 const { sendResponse, sendData } = require('../helpers/response.js');
+const { calculateRemainingLeave } = require('../helpers/calculateRemaingLeave');
 
 class OvertimeController {
   static async createByEmployee(req, res, next) {
@@ -12,7 +13,31 @@ class OvertimeController {
 
       //check if user is exist and is login
       const user = await User.findOne({ 
-        where: { email: userEmail } 
+        where: { email: userEmail },
+        include: [
+          {
+            model: Biodata,
+            as: 'Biodata',
+            attributes:['birthday', 'hometown', 'hire_date', 'religion', 'gender', 'last_education', 'marital_status', 'annual' ],
+          },
+          {
+            model: Absence,
+            as: 'Absence_Request',
+            required: false, // LEFT JOIN
+            where: {
+              start_date: {
+                [Op.between]: [
+                  new Date(new Date().getFullYear(), 0, 1), // January 1st of the current year
+                  new Date(new Date().getFullYear(), 11, 31) // December 31st of the current year
+                ]
+              },
+              type: 'Cuti'
+            },
+            attributes: {
+              exclude: ['user_id']
+            }
+          }
+        ]
       });
       if (!user) return sendResponse(404, "User is not found", res);
 
@@ -21,6 +46,15 @@ class OvertimeController {
         where: { start_date, end_date,employee_id: user.id } 
       });
       if (Boolean(absence)) return sendResponse(400, 'Absence request already exist', res);
+
+      //check if remaing leave is enough
+      if (type == 'Cuti') {
+        const startDate = new Date(start_date);
+        const endDate = new Date(end_date);
+        const duration = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1; // Include the start day
+        const remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual_leave, user.Absence_Request);
+        if (remainingAnnualLeave < 1 || remainingAnnualLeave < duration) return sendResponse(400, "Sisa cuti anda tidak cukup.", res);
+      }
 
       //upload file if req.files isn't null
       let url = null

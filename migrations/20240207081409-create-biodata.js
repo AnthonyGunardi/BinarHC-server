@@ -18,6 +18,9 @@ module.exports = {
       hire_date: {
         type: Sequelize.DATEONLY
       },
+      annual: {
+        type: Sequelize.INTEGER
+      },
       religion: {
         type: Sequelize.STRING
       },
