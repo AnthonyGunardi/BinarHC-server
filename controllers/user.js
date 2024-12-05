@@ -726,22 +726,34 @@ class UserController {
         if (totalMonthsDifference >= 24) {
             // Jika lebih dari 1 tahun
             remainingAnnualLeave = user.Biodata.annual - totalAbsenceDays  +1;
-        } else if (totalMonthsDifference < 24 && totalMonthsDifference >= 12) {
+        } else if (totalMonthsDifference < 24 && totalMonthsDifference > 12) {
             // Jika tepat 1 tahun
-            if (hireDateObject.getDate() > 15) {
-                // Jika tanggal hire lebih dari 15
-                remainingAnnualLeave = 0;
-            } else {
-                // Jika tanggal hire 15 atau kurang
-                let monthHire = hireDateObject.getMonth();
-                let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
 
-                if (tempAnnual < 0) {
-                  remainingAnnualLeave = 0 + 2;
-                } else {
-                  remainingAnnualLeave = tempAnnual;
-                }
+            let monthHire = hireDateObject.getMonth();
+            if (hireDateObject.getDate() > 15) {
+                monthHire++;
             }
+            
+            let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
+
+            if (tempAnnual < 0) {
+              remainingAnnualLeave = 0 + 2;
+            } else {
+              remainingAnnualLeave = tempAnnual;
+            }
+        } else if (totalMonthsDifference === 12) {
+          if (hireDateObject.getDate() > 15) {
+            remainingAnnualLeave = 0;
+          } else {
+            let monthHire = hireDateObject.getMonth();
+            let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
+
+            if (tempAnnual < 0) {
+              remainingAnnualLeave = 0;
+            } else {
+              remainingAnnualLeave = tempAnnual;
+            }
+          }
         } else {
             // Jika kurang dari 1 tahun
             remainingAnnualLeave = 0;
