@@ -335,7 +335,9 @@ class UserController {
 
   static async findContractEndEmployees(req, res, next) {
     const today = new Date();
+    const pastDate = new Date();
     const futureDate = new Date();
+    pastDate.setDate(today.getDate() - 30);
     futureDate.setDate(today.getDate() + 30);
     try {
       const users = await User.findAll({
@@ -358,17 +360,23 @@ class UserController {
             attributes: ['period'],
             where: {
               [Op.or]: [
+                // Contracts expiring in the next 30 days
                 {
-                  [Op.and]: [
-                    sequelize.literal(`MONTH(period) = ${today.getMonth() + 1}`),
-                    sequelize.literal(`DAY(period) >= ${today.getDate()}`),
-                  ]
+                  period: {
+                    [Op.between]: [
+                      today.toISOString().slice(0, 10),
+                      futureDate.toISOString().slice(0, 10)
+                    ]
+                  }
                 },
+                // Contracts expired in the past 30 days
                 {
-                  [Op.and]: [
-                    sequelize.literal(`MONTH(period) = ${futureDate.getMonth() + 1}`),
-                    Sequelize.literal(`DAY(period) <= ${futureDate.getDate()}`),
-                  ]
+                  period: {
+                    [Op.between]: [
+                      pastDate.toISOString().slice(0, 10),
+                      today.toISOString().slice(0, 10)
+                    ]
+                  }
                 }
               ]
             },
