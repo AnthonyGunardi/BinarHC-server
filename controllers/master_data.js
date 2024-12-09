@@ -29,7 +29,7 @@ class MasterDataController {
       if (users.length > 0) {
         for (let i = 0; i < users.length; i++) {
           await Biodata.update({ annual: master_data.annual_leave }, {
-            where: { user_id: users[i].id, is_active: true }
+            where: { user_id: users[i].id }
           });
         }
       }
@@ -37,7 +37,7 @@ class MasterDataController {
       sendData(200, master_data, "Success get master data for cron", res);
     } 
     catch (err) {
-        next(err)
+        next(err.message)
     };
   };
 
