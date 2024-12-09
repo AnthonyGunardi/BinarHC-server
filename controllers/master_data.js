@@ -29,7 +29,7 @@ class MasterDataController {
       if (users.length > 0) {
         for (let i = 0; i < users.length; i++) {
           await Biodata.update({ annual: master_data.annual_leave }, {
-            where: { user_id: users[i].id }
+            where: { user_id: users[i].id, is_active: true }
           });
         }
       }
