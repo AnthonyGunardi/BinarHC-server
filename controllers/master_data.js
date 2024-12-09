@@ -37,7 +37,7 @@ class MasterDataController {
       sendData(200, master_data, "Success get master data for cron", res);
     } 
     catch (err) {
-        next(err.message)
+        next(err)
     };
   };
 
