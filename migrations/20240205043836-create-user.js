@@ -31,7 +31,8 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
       is_active: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.ENUM,
+        values: ['superadmin', 'admin', 'employee', 'moderator', 'attendance']
       },
       createdAt: {
         allowNull: false,
