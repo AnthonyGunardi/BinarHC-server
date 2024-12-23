@@ -161,7 +161,7 @@ class UserController {
           email: userData.email,
           password: userData.password,
           is_admin: {
-            [Op.or]: ['admin', 'superadmin']
+            [Op.or]: ['admin', 'superadmin', 'moderator', 'attendance']
           },
           is_active: true
         }
