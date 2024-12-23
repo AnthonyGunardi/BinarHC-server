@@ -95,7 +95,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     is_admin: {
       type: DataTypes.ENUM,
-      values: ['superadmin', 'admin', 'employee'],
+      values: ['superadmin', 'admin', 'employee', 'moderator', 'attendance'],
       defaultValue: false
     },
     is_active: {
