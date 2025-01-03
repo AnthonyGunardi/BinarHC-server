@@ -95,8 +95,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     is_admin: {
       type: DataTypes.ENUM,
-      values: ['superadmin', 'admin', 'employee', 'moderator', 'attendance'],
-      defaultValue: false
+      values: ['superadmin', 'admin', 'employee', 'moderator', 'attendance']
     },
     is_active: {
       type: DataTypes.BOOLEAN,

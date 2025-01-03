@@ -28,11 +28,11 @@ module.exports = {
         type: Sequelize.STRING
       },
       is_admin: {
-        type: Sequelize.BOOLEAN
-      },
-      is_active: {
         type: Sequelize.ENUM,
         values: ['superadmin', 'admin', 'employee', 'moderator', 'attendance']
+      },
+      is_active: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
