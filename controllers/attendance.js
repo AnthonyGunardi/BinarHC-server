@@ -132,6 +132,138 @@ class AttendanceController {
     };
   };
 
+  static async scanAttendance(req, res, next) {
+    try {
+      const { nip } = req.body;
+      const date = new Date().toLocaleDateString();
+      const clock_in = new Date().toLocaleTimeString();
+
+      // Parse and format the date for UTC+7 timezone
+      const combinedDateTime = `${date} ${clock_in}`;
+      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
+
+      //check if user is exist and is login
+      const user = await User.findOne({ 
+        where: { nip, is_active: true },
+        include: [
+          {
+            model: Biodata,
+            as: 'Biodata',
+            attributes:[ 'id' ],
+            include: {
+              model: Office,
+              attributes: [ 'name', 'slug'],
+              include: {
+                model: Office_Address,
+                attributes: [ 'id'],
+                include: {
+                  model: Address,
+                  attributes: [ 'name', 'postal_code', 'meta' ]
+                }
+              }
+            }
+          }
+        ]
+      });
+      if (!user) return sendResponse(404, "User is not found", res);
+
+      //check if user already have registered an approved absence
+      const absence = await Absence.findOne({ 
+        where: {
+          start_date: {
+            [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
+          },
+          end_date: {
+            [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
+          },
+          employee_id: user.id, 
+          status: 'success' 
+        } 
+      });
+      if (Boolean(absence)) return sendResponse(400, 'Anda sedang dalam ijin tidak bekerja', res);
+
+      //check if user already have registered an approved overtime (WFA)
+      const overtime = await Overtime.findOne({ 
+        where: {
+          start_time: {
+            [Op.lte]: parsedDate, // start_date should be less than or equal to checkin day
+          },
+          end_time: {
+            [Op.gte]: parsedDate, // end_date should be greater than or equal to checkin day
+          },
+          type: 'WFA',
+          employee_id: user.id, 
+          status: 'success' 
+        } 
+      });
+
+      // Check if user is already registered for WFA
+      if (Boolean(overtime)) return sendResponse(400, 'Anda terdaftar untuk WFA hari ini', res);
+
+      // Extract the office's meta from the nested user structure
+      const officeAddresses = user.Biodata?.Office?.Office_Addresses || [];
+      if (officeAddresses.length === 0) {
+        return sendResponse(400, 'Office location not found', res);
+      }    
+      
+      //upload file if req.files isn't null
+      let url = null
+      if (req.files != null) {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `attendances/${fileName}`;
+
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/attendances/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
+
+      //check if attendance already exist
+      const attendance = await Attendance.findOne({ 
+        where: { date, user_id: user.id } 
+      });
+      if (Boolean(attendance)) {
+        const clockInTime = moment(attendance.clock_in, 'HH:mm:ss').format('HH:mm');
+        if (clockInTime >= '06:00' && clockInTime <= '13:00') {
+          return sendResponse(400, 'Anda sudah melakukan absen masuk', res);
+        } else {
+            const updatedAttendance = await Attendance.update(
+              { 
+                clock_out: clock_in,
+                meta_out: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
+                location_out: 'Baratajaya, Gubeng, Surabaya', 
+              }, 
+              { where: { id: attendance.id }, returning: true }
+            )
+            return sendResponse(200, "Absen pulang berhasil", res);
+        }
+      }
+      const newAttendance = await Attendance.create(
+        { 
+          date, 
+          is_present: true, 
+          clock_in, 
+          status: 'WFO', 
+          meta: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
+          location_in: 'Baratajaya, Gubeng, Surabaya', 
+          user_id: user.id 
+        }
+      );
+      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_in: newAttendance.location_in, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
+    }
+    catch (err) {
+      next(err)
+    };
+  };
+
   static async clockInByAdmin(req, res, next) {
     try {
       const { nip, date, clock_in, clock_out, status, photo, note } = req.body;
