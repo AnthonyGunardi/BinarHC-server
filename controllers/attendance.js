@@ -250,7 +250,7 @@ class AttendanceController {
         { 
           date, 
           is_present: true, 
-          clock_in, 
+          clock_in: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'), 
           status: 'WFO', 
           meta: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
           location_in: 'Baratajaya, Gubeng, Surabaya', 
