@@ -231,13 +231,13 @@ class AttendanceController {
         where: { date, user_id: user.id } 
       });
       if (Boolean(attendance)) {
-        const clockInTime = moment(attendance.clock_in, 'HH:mm:ss').format('HH:mm');
+        const clockInTime = moment(attendance.clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm');
         if (clockInTime >= '06:00' && clockInTime <= '13:00') {
           return sendResponse(400, 'Anda sudah melakukan absen masuk', res);
         } else {
             const updatedAttendance = await Attendance.update(
               { 
-                clock_out: clock_in,
+                clock_out: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'),
                 meta_out: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
                 location_out: 'Baratajaya, Gubeng, Surabaya', 
               }, 
