@@ -230,34 +230,51 @@ class AttendanceController {
       const attendance = await Attendance.findOne({ 
         where: { date, user_id: user.id } 
       });
-      if (Boolean(attendance)) {
-        const clockInTime = moment(attendance.clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm');
-        if (clockInTime.isBetween(moment('06:00', 'HH:mm'), moment('16:00', 'HH:mm'), null, '[]')) {
+      console.log(attendance);
+      if (attendance) {
+        const clockInTime = moment(clock_in, 'HH:mm:ss').add(7, 'hours');
+        const now = new Date();
+         // Mendapatkan jam dan menit saat ini
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+
+        // Rentang waktu
+        const startTime = { hours: 8, minutes: 0 };  // 08:00
+        const endTime = { hours: 17, minutes: 0 };  // 17:00
+
+        // Konversi waktu ke menit untuk memudahkan perbandingan
+        const currentTotalMinutes = currentHours * 60 + currentMinutes;
+        const startTotalMinutes = startTime.hours * 60 + startTime.minutes;
+        const endTotalMinutes = endTime.hours * 60 + endTime.minutes;
+
+        // if (now.isBetween(moment('06:00', 'HH:mm'), moment('16:00', 'HH:mm'), null, '[]')) {
+        if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
           return sendResponse(400, 'Anda sudah melakukan absen masuk', res);
         } else {
             const updatedAttendance = await Attendance.update(
               { 
                 clock_out: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'),
                 meta_out: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
-                location_out: 'Baratajaya, Gubeng, Surabaya', 
+                location_out: 'Office', 
               }, 
               { where: { id: attendance.id }, returning: true }
             )
             return sendResponse(200, user.fullname, res);
         }
-      }
-      const newAttendance = await Attendance.create(
-        { 
-          date, 
-          is_present: true, 
-          clock_in: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'), 
-          status: 'WFO', 
-          meta: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
-          location_in: 'Baratajaya, Gubeng, Surabaya', 
-          user_id: user.id 
-        }
-      );
-      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_in: newAttendance.location_in, user_id: newAttendance.user_id }, user.fullname, res);  
+      } else {
+        const newAttendance = await Attendance.create(
+          { 
+            date, 
+            is_present: true, 
+            clock_in: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'), 
+            status: 'WFO', 
+            meta: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
+            location_in: 'Baratajaya, Gubeng, Surabaya', 
+            user_id: user.id 
+          }
+        );
+        sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_in: newAttendance.location_in, user_id: newAttendance.user_id }, user.fullname, res); 
+      } 
     }
     catch (err) {
       next(err)
