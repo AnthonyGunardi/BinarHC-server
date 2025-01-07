@@ -4,7 +4,7 @@ const authentication = require('../middlewares/userAuthentication');
 const adminAuthorization = require('../middlewares/adminAuthorization');
 
 route.post('/', authentication, AttendanceController.clockIn);
-route.post('/scan', authentication, AttendanceController.scanAttendance);
+route.post('/scan', AttendanceController.scanAttendance);
 route.post('/user', authentication, adminAuthorization,AttendanceController.clockInByAdmin);
 route.get('/', authentication, adminAuthorization, AttendanceController.getAllAttendances); //with query params, example: ?start_date=2024-10-21&end_date=2024-10-23&division_slug=cia&status=WFO&NIP=BINAR00004
 route.get('/report', authentication, adminAuthorization,AttendanceController.getAttendancesReport); //with query params, example: ?start_date=2024-10-21&end_date=2024-10-23&division_slug=cia&status=WFO&NIP=BINAR00004
