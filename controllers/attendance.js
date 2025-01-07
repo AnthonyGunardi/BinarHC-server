@@ -232,7 +232,7 @@ class AttendanceController {
       });
       if (Boolean(attendance)) {
         const clockInTime = moment(attendance.clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm');
-        if (clockInTime >= '06:00' && clockInTime <= '13:00') {
+        if (clockInTime >= '06:00' && clockInTime <= '16:00') {
           return sendResponse(400, 'Anda sudah melakukan absen masuk', res);
         } else {
             const updatedAttendance = await Attendance.update(
