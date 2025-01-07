@@ -243,7 +243,7 @@ class AttendanceController {
               }, 
               { where: { id: attendance.id }, returning: true }
             )
-            return sendResponse(200, "Absen pulang berhasil", res);
+            return sendResponse(200, user.fullname, res);
         }
       }
       const newAttendance = await Attendance.create(
@@ -257,7 +257,7 @@ class AttendanceController {
           user_id: user.id 
         }
       );
-      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_in: newAttendance.location_in, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
+      sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_in: newAttendance.location_in, user_id: newAttendance.user_id }, user.fullname, res);  
     }
     catch (err) {
       next(err)
