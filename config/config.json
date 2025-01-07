@@ -2,7 +2,7 @@
   "development": {
     "username": "binar",
     "password": "@Silahkan567890",
-    "database": "db_hc_development",
+    "database": "db_hc_binar",
     "host": "91.108.105.61",
     "dialect": "mysql",
     "dialectOptions": { "connectTimeout": 15000 }
