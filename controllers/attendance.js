@@ -235,8 +235,16 @@ class AttendanceController {
         const clockInTime = moment(clock_in, 'HH:mm:ss').add(7, 'hours');
         const now = new Date();
          // Mendapatkan jam dan menit saat ini
-        const currentHours = now.getHours();
-        const currentMinutes = now.getMinutes();
+        // const currentHours = now.getHours();
+        // const currentMinutes = now.getMinutes();
+
+        // Menyesuaikan waktu ke GMT+7
+    const offset = 7 * 60; // GMT+7 dalam menit
+    const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
+
+    // Mendapatkan jam dan menit di GMT+7
+    const currentHours = localTime.getHours();
+    const currentMinutes = localTime.getMinutes();
 
         // Rentang waktu
         const startTime = { hours: 8, minutes: 0 };  // 08:00
