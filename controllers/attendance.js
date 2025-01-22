@@ -196,8 +196,6 @@ class AttendanceController {
           status: 'success' 
         } 
       });
-
-      // Check if user is already registered for WFA
       if (Boolean(overtime)) return sendResponse(400, 'Anda terdaftar untuk WFA hari ini', res);
 
       // Extract the office's meta from the nested user structure
@@ -230,32 +228,23 @@ class AttendanceController {
       const attendance = await Attendance.findOne({ 
         where: { date, user_id: user.id } 
       });
-      console.log(attendance);
       if (attendance) {
-        const clockInTime = moment(clock_in, 'HH:mm:ss').add(7, 'hours');
         const now = new Date();
-         // Mendapatkan jam dan menit saat ini
-        // const currentHours = now.getHours();
-        // const currentMinutes = now.getMinutes();
-
-        // Menyesuaikan waktu ke GMT+7
-    const offset = 7 * 60; // GMT+7 dalam menit
-    const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
-
-    // Mendapatkan jam dan menit di GMT+7
-    const currentHours = localTime.getHours();
-    const currentMinutes = localTime.getMinutes();
-
-        // Rentang waktu
+        // Set time to UTC+7 timezone
+        const offset = 7 * 60; // offset for UTC+7 in minutes
+        const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
+        // Get current hours & current minutes
+        const currentHours = localTime.getHours();
+        const currentMinutes = localTime.getMinutes();
+        // Get time span
         const startTime = { hours: 8, minutes: 0 };  // 08:00
         const endTime = { hours: 17, minutes: 0 };  // 17:00
-
-        // Konversi waktu ke menit untuk memudahkan perbandingan
+        // Convert time to minutes
         const currentTotalMinutes = currentHours * 60 + currentMinutes;
         const startTotalMinutes = startTime.hours * 60 + startTime.minutes;
         const endTotalMinutes = endTime.hours * 60 + endTime.minutes;
-
-        // if (now.isBetween(moment('06:00', 'HH:mm'), moment('16:00', 'HH:mm'), null, '[]')) {
+        
+        // Compare current time (in minutes) to start time & end time (in minutes)
         if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
           return sendResponse(400, 'Anda sudah melakukan absen masuk', res);
         } else {
