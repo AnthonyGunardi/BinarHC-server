@@ -15,6 +15,7 @@ if (config.use_env_variable) {
 const { Op } = require('sequelize');
 const fs = require('fs')
 const path = require('node:path');
+const moment = require('moment-timezone');
 const AccessToken = require('../helpers/accessToken');
 const { sendResponse, sendData } = require('../helpers/response');
 const { generateNIP } = require('../helpers/generateNip');
@@ -416,8 +417,8 @@ class UserController {
 
   static async getEmployee(req, res, next) {
     const nip = req.params.nip;
-    const today = new Date().toISOString().slice(0, 10);
-    const parsedToday = new Date(today);
+    const today = new Date().toISOString();
+    const parsedToday = moment(today, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate()
     let isWFA;
     try {
       const user = await User.findOne({
@@ -704,8 +705,7 @@ class UserController {
         isWFA = true
       };
 
-      let remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request);
-      console.log(remainingAnnualLeave)
+      let remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request, user.is_permanent);
 
       // convert user, from sequelize instance to plain JavaScript object, and then destructure it
       const data = {...user.get({ plain: true }), isWFA, remainingAnnualLeave};

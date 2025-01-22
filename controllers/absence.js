@@ -55,7 +55,7 @@ class OvertimeController {
         const startDate = new Date(start_date);
         const endDate = new Date(end_date);
         const duration = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1; // Include the start day
-        const remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request);
+        const remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request, user.is_permanent);
         if (remainingAnnualLeave < 1 || remainingAnnualLeave < duration) return sendResponse(400, "Sisa cuti anda tidak cukup.", res);
       }
 

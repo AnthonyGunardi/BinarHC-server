@@ -2,7 +2,7 @@
 // `user_Annual` represents the total annual leave entitlement of the employee, retrieved from the `Biodata` model in the Sequelize `User` object.
 // `user_Absence_Request` is an array of current year'sabsence requests retrieved from the Sequelize `User` model. (user.Absence_Request)
 
-const calculateRemainingLeave = ( user_Hire_Date, user_Annual, user_Absence_Request) => {
+const calculateRemainingLeave = ( user_Hire_Date, user_Annual, user_Absence_Request, user_is_permanent) => {
   let remainingAnnualLeave = 0;
   let totalAbsenceDays = 0;
 
@@ -56,7 +56,12 @@ const calculateRemainingLeave = ( user_Hire_Date, user_Annual, user_Absence_Requ
   }
   // If work period is less than 1 year
   else {
-    remainingAnnualLeave = 0;
+    // Hapus setelah 1 Agustus 2025!
+    if (user_is_permanent) {
+      remainingAnnualLeave = user_Annual - totalAbsenceDays;
+    } else {
+      remainingAnnualLeave = 0;
+    }
   }
 
   return remainingAnnualLeave;
