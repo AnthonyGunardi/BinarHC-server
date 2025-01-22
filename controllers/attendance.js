@@ -237,8 +237,8 @@ class AttendanceController {
         const currentHours = localTime.getHours();
         const currentMinutes = localTime.getMinutes();
         // Get time span
-        const startTime = { hours: 8, minutes: 0 };  // 08:00
-        const endTime = { hours: 17, minutes: 0 };  // 17:00
+        const startTime = { hours: 5, minutes: 0 };  // 08:00
+        const endTime = { hours: 13, minutes: 0 };  // 17:00
         // Convert time to minutes
         const currentTotalMinutes = currentHours * 60 + currentMinutes;
         const startTotalMinutes = startTime.hours * 60 + startTime.minutes;
