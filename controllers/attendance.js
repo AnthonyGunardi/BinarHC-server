@@ -140,7 +140,9 @@ class AttendanceController {
 
       // Parse and format the date for UTC+7 timezone
       const combinedDateTime = `${date} ${clock_in}`;
-      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
+      // const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
+          const today = new Date().toISOString();
+          const parsedDate = moment(today, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate()
 
       //check if user is exist and is login
       const user = await User.findOne({ 
