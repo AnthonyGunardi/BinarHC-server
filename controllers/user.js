@@ -329,7 +329,6 @@ class UserController {
       sendData(200, users, "Success get all birthday employees", res)
     }
     catch (err) {
-      console.log(err.message)
       next(err);
     }
   };
@@ -410,7 +409,6 @@ class UserController {
       sendData(200, results, "Success get all contract end employees", res)
     }
     catch (err) {
-      console.log(err.message)
       next(err);
     }
   };

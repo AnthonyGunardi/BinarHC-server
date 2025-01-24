@@ -14,7 +14,7 @@ class AttendanceController {
 
       // Parse and format the date for UTC+7 timezone
       const combinedDateTime = `${date} ${clock_in}`;
-      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
+      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").toDate();
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -135,14 +135,12 @@ class AttendanceController {
   static async scanAttendance(req, res, next) {
     try {
       const { nip } = req.body;
-      const date = new Date().toLocaleDateString();
+      const date = moment(new Date()).format('YYYY-MM-DD');
       const clock_in = new Date().toLocaleTimeString();
 
       // Parse and format the date for UTC+7 timezone
       const combinedDateTime = `${date} ${clock_in}`;
-      // const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
-          const today = new Date().toISOString();
-          const parsedDate = moment(today, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate()
+      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -198,6 +196,8 @@ class AttendanceController {
           status: 'success' 
         } 
       });
+
+      // Check if user is already registered for WFA
       if (Boolean(overtime)) return sendResponse(400, 'Anda terdaftar untuk WFA hari ini', res);
 
       // Extract the office's meta from the nested user structure
@@ -230,23 +230,32 @@ class AttendanceController {
       const attendance = await Attendance.findOne({ 
         where: { date, user_id: user.id } 
       });
+      console.log(attendance);
       if (attendance) {
+        const clockInTime = moment(clock_in, 'HH:mm:ss').add(7, 'hours');
         const now = new Date();
-        // Set time to UTC+7 timezone
-        const offset = 7 * 60; // offset for UTC+7 in minutes
-        const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
-        // Get current hours & current minutes
-        const currentHours = localTime.getHours();
-        const currentMinutes = localTime.getMinutes();
-        // Get time span
-        const startTime = { hours: 5, minutes: 0 };  // 08:00
-        const endTime = { hours: 13, minutes: 0 };  // 17:00
-        // Convert time to minutes
+         // Mendapatkan jam dan menit saat ini
+        // const currentHours = now.getHours();
+        // const currentMinutes = now.getMinutes();
+
+        // Menyesuaikan waktu ke GMT+7
+    const offset = 7 * 60; // GMT+7 dalam menit
+    const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
+
+    // Mendapatkan jam dan menit di GMT+7
+    const currentHours = localTime.getHours();
+    const currentMinutes = localTime.getMinutes();
+
+        // Rentang waktu
+        const startTime = { hours: 6, minutes: 0 };  // 08:00
+        const endTime = { hours: 15, minutes: 0 };  // 17:00
+
+        // Konversi waktu ke menit untuk memudahkan perbandingan
         const currentTotalMinutes = currentHours * 60 + currentMinutes;
         const startTotalMinutes = startTime.hours * 60 + startTime.minutes;
         const endTotalMinutes = endTime.hours * 60 + endTime.minutes;
-        
-        // Compare current time (in minutes) to start time & end time (in minutes)
+
+        // if (now.isBetween(moment('06:00', 'HH:mm'), moment('16:00', 'HH:mm'), null, '[]')) {
         if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
           return sendResponse(400, 'Anda sudah melakukan absen masuk', res);
         } else {
@@ -386,7 +395,7 @@ class AttendanceController {
       sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
     catch (err) {
-      next(err.message)
+      next(err)
     };
   };
 

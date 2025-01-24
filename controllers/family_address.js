@@ -30,7 +30,7 @@ class FamilyAddressController {
       sendData(201, { id: family_address.id, name: address.name }, "Success create family address", res);  
     }
     catch (err) {
-      next(err.message)
+      next(err)
     };
   };
 
