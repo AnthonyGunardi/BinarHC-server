@@ -60,6 +60,7 @@ class UserController {
   };
 
   static async registerEmployee(req, res, next) {    
+    const transaction = await sequelize.transaction();
     try {
       const { 
         fullname, nip, id_card, email, is_permanent, status_employee, expired, is_active, 
@@ -129,23 +130,28 @@ class UserController {
         })
       }
 
-      const newUser = await User.create({ fullname, nip, id_card, email, password, photo: url, is_permanent,is_admin: 'employee', is_active });
-      const newPoint = await Point.create({ balance: 0, user_id: newUser.id});
-      const masterData = await Master_Data.findOne({ where: { id: 1 } });
+      const newUser = await User.create({ fullname, nip, id_card, email, password, photo: url, is_permanent,is_admin: 'employee', is_active }, { transaction });
+      const newPoint = await Point.create({ balance: 0, user_id: newUser.id}, { transaction });
+      const masterData = await Master_Data.findOne({ where: { id: 1 } }, { transaction });
       const newBiodata = await Biodata.create(
         { 
           birthday, hometown, hire_date, religion, gender, last_education, marital_status, 
           office_id: office.id, echelon_id: echelon.id, user_id: newUser.id, annual: masterData.annual_leave
-        }
+        }, { transaction }
       );
       if (is_permanent === false || is_permanent === "false") {
         const newEmploymentPeriode = await Employment_Periode.create(
-          { user_id: newUser.id, status_id: status_employee, period: expired }
+          { user_id: newUser.id, status_id: status_employee, period: expired },
+          { transaction }
         )
       }
+
+      await transaction.commit();
       sendData(201, { fullname: newUser.fullname, nip: newUser.nip, email: newUser.email, balance: newPoint.balance }, "User is created", res);  
     }
     catch (err) {
+      // Rollback the transaction in case of an error
+      if (transaction) await transaction.rollback();
       next(err)
     };
   };

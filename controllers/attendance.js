@@ -135,7 +135,7 @@ class AttendanceController {
   static async scanAttendance(req, res, next) {
     try {
       const { nip } = req.body;
-      const date = moment(new Date()).format('YYYY-MM-DD');
+      const date = moment(new Date()).add(7, 'hours').format('YYYY-MM-DD');
       const clock_in = new Date().toLocaleTimeString();
 
       // Parse and format the date for UTC+7 timezone
@@ -230,32 +230,24 @@ class AttendanceController {
       const attendance = await Attendance.findOne({ 
         where: { date, user_id: user.id } 
       });
-      console.log(attendance);
+
+      // Handler for creating new attendance (during period 06.00-15.00) or updating clock_out time
       if (attendance) {
-        const clockInTime = moment(clock_in, 'HH:mm:ss').add(7, 'hours');
         const now = new Date();
-         // Mendapatkan jam dan menit saat ini
-        // const currentHours = now.getHours();
-        // const currentMinutes = now.getMinutes();
-
         // Menyesuaikan waktu ke GMT+7
-    const offset = 7 * 60; // GMT+7 dalam menit
-    const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
-
-    // Mendapatkan jam dan menit di GMT+7
-    const currentHours = localTime.getHours();
-    const currentMinutes = localTime.getMinutes();
-
+        const offset = 7 * 60; // GMT+7 in minute
+        const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
+        // Mendapatkan jam dan menit di GMT+7
+        const currentHours = localTime.getHours();
+        const currentMinutes = localTime.getMinutes();
         // Rentang waktu
-        const startTime = { hours: 6, minutes: 0 };  // 08:00
-        const endTime = { hours: 15, minutes: 0 };  // 17:00
-
+        const startTime = { hours: 6, minutes: 0 };  // 06:00
+        const endTime = { hours: 15, minutes: 0 };  // 15:00
         // Konversi waktu ke menit untuk memudahkan perbandingan
         const currentTotalMinutes = currentHours * 60 + currentMinutes;
         const startTotalMinutes = startTime.hours * 60 + startTime.minutes;
         const endTotalMinutes = endTime.hours * 60 + endTime.minutes;
 
-        // if (now.isBetween(moment('06:00', 'HH:mm'), moment('16:00', 'HH:mm'), null, '[]')) {
         if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
           return sendResponse(400, 'Anda sudah melakukan absen masuk', res);
         } else {
@@ -277,7 +269,7 @@ class AttendanceController {
             clock_in: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'), 
             status: 'WFO', 
             meta: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
-            location_in: 'Baratajaya, Gubeng, Surabaya', 
+            location_in: 'Office Surabaya', 
             user_id: user.id 
           }
         );
