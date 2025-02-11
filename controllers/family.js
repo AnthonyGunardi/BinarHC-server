@@ -1,4 +1,14 @@
-const { Family, User, Family_Address, Family_Phone } = require('../models/index.js');
+const { Family, User, Family_Address, Family_Phone, Biodata, Office } = require('../models/index.js');
+const Sequelize = require('sequelize');
+let sequelize;
+const env = process.env.NODE_ENV || 'development';
+const config = require(__dirname + '/../config/config.json')[env];
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
+const { Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class FamilyController {
@@ -42,6 +52,73 @@ class FamilyController {
     catch (err) {
         next(err)
     };
+  };
+
+  static async findBirthdayFamilies(req, res, next) {
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + 30);
+    try {
+      const users = await User.findAll({
+        where: { is_admin: 'employee', is_active: true },
+        attributes:['fullname', 'nip', 'photo', 'is_active'],
+        include: [
+          {
+            model: Biodata,
+            as: 'Biodata',
+            attributes:['user_id'],
+            include: {
+              model: Office,
+              attributes: {
+                exclude: ['id', 'createdAt', 'updatedAt']
+              }
+            }
+          },
+          {
+            model: Family,
+            as: 'Family',
+            attributes: ['fullname', 'birthday', 'status'],
+            where: {
+              [Op.or]: [
+                {
+                  [Op.and]: [
+                    Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('Family.birthday')), today.getMonth() + 1),
+                    Sequelize.where(Sequelize.fn('DAY', Sequelize.col('Family.birthday')), { [Op.gte]: today.getDate() })
+                  ]
+                },
+                {
+                  [Op.and]: [
+                    Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('Family.birthday')), futureDate.getMonth() + 1),
+                    Sequelize.where(Sequelize.fn('DAY', Sequelize.col('Family.birthday')), { [Op.lte]: futureDate.getDate() })
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        order: [['Family', 'birthday', 'desc']]
+      });
+
+      // Restructure the data to match the required output format
+      const results = users.map(user => {
+        const office = user.Biodata?.Office?.name || null;
+        
+        return {
+          fullname: user.Family[0].fullname,
+          status: user.Family[0].status,
+          birthday: user.Family[0].birthday,
+          employee_name: user.fullname,
+          nip: user.nip,
+          is_active: user.is_active,
+          Office: office
+        };
+      })
+
+      sendData(200, results, "Success get all birthday families", res)
+    }
+    catch (err) {
+      next(err);
+    }
   };
 
   static async update(req, res, next) {
