@@ -31,7 +31,7 @@ app.use(function (req, res, next) {
 });
 
 //error handler
-// app.use(errorHandler);
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`App is listening at port: ${port}`)
