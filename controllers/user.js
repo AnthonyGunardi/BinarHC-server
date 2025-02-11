@@ -579,6 +579,7 @@ class UserController {
           },
           {
             model: Family,
+            as: 'Family',
             attributes: {
               exclude: ['user_id']
             },
