@@ -1,14 +1,5 @@
 const { Family, User, Family_Address, Family_Phone, Biodata, Office } = require('../models/index.js');
-const Sequelize = require('sequelize');
-let sequelize;
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class FamilyController {

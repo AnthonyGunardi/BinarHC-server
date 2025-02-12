@@ -1,7 +1,5 @@
 const { Employment_Status } = require('../models/index.js');
 const { Op } = require('sequelize');
-const fs = require('fs')
-const path = require('node:path');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class EmploymentStatusController {
