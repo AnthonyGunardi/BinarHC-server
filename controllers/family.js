@@ -49,15 +49,16 @@ class FamilyController {
     const today = new Date();
     const futureDate = new Date();
     futureDate.setDate(today.getDate() + 30);
+  
     try {
       const users = await User.findAll({
         where: { is_admin: 'employee', is_active: true },
-        attributes:['fullname', 'nip', 'photo', 'is_active'],
+        attributes: ['fullname', 'nip', 'photo', 'is_active'],
         include: [
           {
             model: Biodata,
             as: 'Biodata',
-            attributes:['user_id'],
+            attributes: ['user_id'],
             include: {
               model: Office,
               attributes: {
@@ -89,25 +90,24 @@ class FamilyController {
         ],
         order: [['Family', 'birthday', 'desc']]
       });
-
-      // Restructure the data to match the required output format
-      const results = users.map(user => {
+  
+      // Flatten the array to include all family members with birthdays
+      const results = users.flatMap(user => {
         const office = user.Biodata?.Office?.name || null;
         
-        return {
-          fullname: user.Family[0].fullname,
-          status: user.Family[0].status,
-          birthday: user.Family[0].birthday,
+        return user.Family.map(familyMember => ({
+          fullname: familyMember.fullname,
+          status: familyMember.status,
+          birthday: familyMember.birthday,
           employee_name: user.fullname,
           nip: user.nip,
           is_active: user.is_active,
           Office: office
-        };
-      })
-
-      sendData(200, results, "Success get all birthday families", res)
-    }
-    catch (err) {
+        }));
+      });
+  
+      sendData(200, results, "Success get all birthday families", res);
+    } catch (err) {
       next(err);
     }
   };
