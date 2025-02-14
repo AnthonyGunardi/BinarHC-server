@@ -15,6 +15,7 @@ route.get('/:nip', authentication, UserController.getEmployee);
 route.put('/employee/reset/:email', authentication, adminAuthorization, UserController.resetPassword);
 route.put('/employee/password/:nip', authentication, UserController.updatePassword);
 route.put('/toggle/:nip', authentication, adminAuthorization, UserController.toggleUser);
+route.put('/admins/:id', authentication, adminAuthorization, UserController.updateAdmin);
 route.put('/:nip', authentication, adminAuthorization, UserController.updateEmployee);
 
 module.exports = route;

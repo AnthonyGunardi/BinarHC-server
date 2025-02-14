@@ -25,33 +25,40 @@ const { calculateRemainingLeave } = require('../helpers/calculateRemaingLeave');
 class UserController {
   static async registerAdmin(req, res, next) {
     try {
-      const { fullname, email, password, is_active } = req.body
+      const { fullname, email, password, nip, id_card, is_active, is_admin } = req.body
 
       //check if user is already exist
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: 
+        {
+          [Op.or] : [
+            { email },
+            { nip }
+          ]
+        }
+      });
       if (Boolean(user)) return sendResponse(400, 'User already exist', res)
 
-      //upload file if req.files isn't null
-      let url = null;
-      if (req.files !== null) {
-        const file = req.files.photo;
-        const fileSize = file.data.length;
-        const ext = path.extname(file.name);
-        const fileName = file.md5 + ext;
-        const allowedType = ['.png', '.jpg', '.jpeg'];
-        url = `admin-profiles/${fileName}`;
+      // //upload file if req.files isn't null
+      // let url = null;
+      // if (req.files !== null) {
+      //   const file = req.files.photo;
+      //   const fileSize = file.data.length;
+      //   const ext = path.extname(file.name);
+      //   const fileName = file.md5 + ext;
+      //   const allowedType = ['.png', '.jpg', '.jpeg'];
+      //   url = `admin-profiles/${fileName}`;
 
-        //validate file type
-        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
-        //validate file size max 5mb
-        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-        //place the file on server
-        file.mv(`./public/images/admin-profiles/${fileName}`, async (err) => {
-          if(err) return sendResponse(502, err.message, res)
-        })
-      }
+      //   //validate file type
+      //   if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
+      //   //validate file size max 5mb
+      //   if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+      //   //place the file on server
+      //   file.mv(`./public/images/admin-profiles/${fileName}`, async (err) => {
+      //     if(err) return sendResponse(502, err.message, res)
+      //   })
+      // }
 
-      const newUser = await User.create({ fullname, email, password, photo: url, is_admin: 'admin', is_active });
+      const newUser = await User.create({ fullname, email, password, nip, id_card, is_admin, is_active, is_permanent: true });
       sendData(201, { fullname: newUser.fullname, email: newUser.email }, "User is created", res);
     }
     catch (err) {
@@ -229,8 +236,14 @@ class UserController {
   static async findAllAdmins(req, res, next) {
     try {
       const users = await User.findAll({
-        where: { is_admin: 'admin' },
-        attributes:['fullname', 'nip', 'email', 'photo', 'is_active', 'createdAt', 'updatedAt'],
+        where: { 
+            [Op.or] : [
+              { is_admin: 'admin' },
+              { is_admin: 'attendance' },
+              { is_admin: 'moderator' },
+            ]
+        },
+        attributes:['id', 'fullname', 'password', 'nip', 'email', 'id_card', 'photo', 'is_active', 'is_admin', 'createdAt', 'updatedAt'],
         order: [['fullname', 'asc']]
       });
       sendData(200, users, "Success get all admins", res)
@@ -792,6 +805,88 @@ class UserController {
       next(err)
     }
   }
+
+  static async updateAdmin(req, res, next) {
+    const id = req.params.id
+    const { 
+      fullname, nip, email, password, id_card, is_active, is_admin
+    } = req.body;
+
+    try {
+      //check if user is exist
+      const user = await User.findOne({
+        where: { id }
+      })
+      if (!user) return sendResponse(404, "User is not found", res)
+
+      //check if new email or NIP is already used
+      const userWithNewNip = await User.findOne({
+        where: { 
+          [Op.and]: [
+            { 
+              id: {
+                [Op.ne]: user.id, 
+              } 
+            },
+            { [Op.or]: [
+                { email },
+                { nip } 
+              ]
+            } 
+          ]
+        }
+      })
+      if (userWithNewNip) return sendResponse(403, "Email or NIP is already used", res)
+
+      let newPassword;
+      if (password) {
+        newPassword = password
+      } else {
+        newPassword = user.password
+      }
+
+      //upload file if req.files isn't null
+      let url;
+      if(!req.files) {
+        url = user.photo;
+      } else {
+        const file = req.files.photo;
+        const fileSize = file.data.length;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.png', '.jpg', '.jpeg'];
+        url = `user-profiles/${fileName}`;
+    
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
+        //validate file size max 5mb
+        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
+        //place the file on server
+        file.mv(`./public/images/user-profiles/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+        //delete previous file on server
+        if (user.photo !== null) {
+          const filePath = `./public/images/${user.photo}`;
+          fs.unlinkSync(filePath);
+        }
+      }
+
+      const updatedUser = await User.update(
+        { 
+          fullname, nip, email, password: newPassword, id_card, photo: url, is_active, is_admin
+        }, 
+        {
+        where: { id: user.id },
+        returning: true
+        }
+      )
+      sendResponse(200, "Success update user", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  };
 
   static async updateEmployee(req, res, next) {
     const currentNip = req.params.nip
