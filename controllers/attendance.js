@@ -134,13 +134,11 @@ class AttendanceController {
 
   static async scanAttendance(req, res, next) {
     try {
-      const { nip } = req.body;
-      const date = moment(new Date()).add(7, 'hours').format('YYYY-MM-DD');
-      const clock_in = new Date().toLocaleTimeString();
+      const { nip, date, clock_in } = req.body;
 
       // Parse and format the date for UTC+7 timezone
       const combinedDateTime = `${date} ${clock_in}`;
-      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").add(7, 'hours').toDate();
+      const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").toDate();
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -196,8 +194,6 @@ class AttendanceController {
           status: 'success' 
         } 
       });
-
-      // Check if user is already registered for WFA
       if (Boolean(overtime)) return sendResponse(400, 'Anda terdaftar untuk WFA hari ini', res);
 
       // Extract the office's meta from the nested user structure
@@ -253,7 +249,7 @@ class AttendanceController {
         } else {
             const updatedAttendance = await Attendance.update(
               { 
-                clock_out: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'),
+                clock_out: clock_in,
                 meta_out: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
                 location_out: 'Office', 
               }, 
@@ -266,10 +262,10 @@ class AttendanceController {
           { 
             date, 
             is_present: true, 
-            clock_in: moment(clock_in, 'HH:mm:ss').add(7, 'hours').format('HH:mm:ss'), 
+            clock_in,
             status: 'WFO', 
             meta: user.Biodata?.Office?.Office_Addresses[0]?.Address?.meta, 
-            location_in: 'Office Surabaya', 
+            location_in: 'Office', 
             user_id: user.id 
           }
         );
