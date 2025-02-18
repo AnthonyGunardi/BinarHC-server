@@ -12,6 +12,13 @@ class AttendanceController {
       const userEmail = req.user.email
       const { date, clock_in, status, photo, meta, location_in, note } = req.body;
 
+      //convert string to buffer with encoding utf-8
+      let buffer = Buffer.from(location_in, 'utf8');
+      //convert buffer to string with encoding latin1
+      let location_in_latin = buffer.toString('latin1');
+      //remove non-ascii character
+      let location_in_ascii = location_in_latin.replace(/[^\x00-\x7F]/g, "");
+
       // Parse and format the date for UTC+7 timezone
       const combinedDateTime = `${date} ${clock_in}`;
       const parsedDate = moment(combinedDateTime, "YYYY-MM-DD HH:mm:ss").toDate();
@@ -123,7 +130,7 @@ class AttendanceController {
       }
 
       const newAttendance = await Attendance.create(
-        { date, is_present: true, clock_in, status, photo, meta, location_in, note, user_id: user.id }
+        { date, is_present: true, clock_in, status, photo, meta, location_in: location_in_ascii, note, user_id: user.id }
       );
       sendData(201, { id: newAttendance.id, date: newAttendance.date, clock_in: newAttendance.clock_in, status: newAttendance.status, meta: newAttendance.meta, location_in: newAttendance.location_in, user_id: newAttendance.user_id }, "Absen masuk berhasil", res);  
     }
