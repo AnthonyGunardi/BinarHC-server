@@ -400,6 +400,13 @@ class AttendanceController {
     const { clock_out, meta_out, location_out } = req.body;
     const today = new Date().toISOString().slice(0, 10);
     try {
+      //convert string to buffer with encoding utf-8
+      let buffer = Buffer.from(location_out, 'utf8');
+      //convert buffer to string with encoding latin1
+      let location_out_latin = buffer.toString('latin1');
+      //remove non-ascii character
+      let location_out_ascii = location_out_latin.replace(/[^\x00-\x7F]/g, "");
+
       //get user_id
       const user = await User.findOne({ 
         where: { nip, email: userEmail } 
@@ -414,7 +421,7 @@ class AttendanceController {
       if (attendance.clock_out) return sendResponse(400, "Anda sudah absen pulang", res)
 
       const updatedAttendance = await Attendance.update(
-        { clock_out, meta_out, location_out }, 
+        { clock_out, meta_out, location_out: location_out_ascii }, 
         { where: { 
             date: today, 
             user_id: user.id 
