@@ -109,11 +109,17 @@ class EventController {
   static async update(req, res, next) {
     const id = req.params.id
     try {
+      const now = new Date();
+
+      // Menyesuaikan waktu ke GMT+7
+      const offset = 7 * 60; // GMT+7 in minute
+      const localTime = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
+
       const eventData = {
         title: req.body.title,
         url: req.body.url,
         point: req.body.point,
-        published_at: req.body.published_at || new Date(),
+        published_at: req.body.published_at || localTime,
         is_active: req.body.is_active
       };
       const event = await Event.findOne({
