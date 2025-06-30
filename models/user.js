@@ -29,6 +29,8 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Absence, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Absence_Approval'})
       User.hasMany(models.Attendance, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasOne(models.Employment_Periode, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasMany(models.Submission, {foreignKey: 'employee_id', sourceKey: 'id', as: 'Mission_Submission'})
+      User.hasMany(models.Submission, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Graded_Submission'})
     }
   }
   User.init({

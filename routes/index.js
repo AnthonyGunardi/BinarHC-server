@@ -27,6 +27,9 @@ const attendanceRoute = require('./attendance');
 const masterDataRoute = require('./master_data');
 const informationRoute = require('./informations');
 const employmentStatusRoute = require('./employment_status');
+const missionRoute = require('./mission');
+const missionGalleryRoute = require('./mission_gallery');
+const missionUrlRoute = require('./mission_url');
 
 route.use('/v1/users', userRoute);
 route.use('/v1/offices', officeRoute);
@@ -56,5 +59,8 @@ route.use('/v1/attendances', attendanceRoute);
 route.use('/v1/master_data', masterDataRoute);
 route.use('/v1/informations', informationRoute);
 route.use('/v1/employment_statuses', employmentStatusRoute);
+route.use('/v1/missions', missionRoute);
+route.use('/v1/mission_galleries', missionGalleryRoute);
+route.use('/v1/mission_urls', missionUrlRoute);
 
 module.exports = route;

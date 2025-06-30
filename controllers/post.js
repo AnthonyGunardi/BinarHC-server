@@ -7,14 +7,8 @@ const { sendResponse, sendData } = require('../helpers/response.js');
 class PostController {
   static async create(req, res, next) {
     try {
-      const userEmail = req.user.email
-      const { email, title, slug, description, type, published_at, is_active } = req.body;
-
-      //check if user is exist and is login
-      const user = await User.findOne({ 
-        where: { email } 
-      });
-      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+      const user_id = req.user.id
+      const { title, slug, description, type, published_at, is_active } = req.body;
 
       //check if post slug already exist
       const post = await Post.findOne({ 
@@ -43,7 +37,7 @@ class PostController {
       }
 
       const newPost = await Post.create(
-        { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }
+        { title, slug, thumbnail: url, description, type, published_at, user_id, is_active }
       );
       sendData(201, { id: newPost.id, name: newPost.name, slug: newPost.slug, description: newPost.description }, "Success create post", res);  
     }
@@ -161,8 +155,9 @@ class PostController {
   };
 
   static async getPost(req, res, next) {
-    const slug = req.params.slug
     try {
+      const slug = req.params.slug;
+
       const post = await Post.findOne({
         where: { slug },
         attributes:['title', 'slug', 'thumbnail', 'description', 'type', 'is_active', 'published_at', 'createdAt'],
@@ -190,11 +185,12 @@ class PostController {
   }
 
   static async togglePost(req, res, next) {
-    const slug = req.params.slug
-    let postData = {
-      is_active: false
-    };
     try {
+      const slug = req.params.slug
+      let postData = {
+        is_active: false
+      };
+
       const post = await Post.findOne({
         where: { slug }
       })
@@ -214,15 +210,10 @@ class PostController {
   };
 
   static async update(req, res, next) {
-    const currentSlug = req.params.slug
-    const userEmail = req.user.email
-    const { email, title, slug, description, type, published_at, is_active } = req.body;
     try {
-      //check if user is exist and is login
-      const user = await User.findOne({ 
-        where: { email } 
-      });
-      if (!user || user.email != userEmail) return sendResponse(404, "User is not found", res);
+      const currentSlug = req.params.slug
+      const user_id = req.user.id
+      const { title, slug, description, type, published_at, is_active } = req.body;
 
       //check if post slug is exist
       const post = await Post.findOne({
@@ -273,7 +264,7 @@ class PostController {
       if (postWithNewSlug) return sendResponse(403, "Slug already used", res)
 
       const updatedPost = await Post.update(
-        { title, slug, thumbnail: url, description, type, published_at, user_id: user.id, is_active }, 
+        { title, slug, thumbnail: url, description, type, published_at, user_id, is_active }, 
         { where: { id: post.id }, returning: true }
       )
       sendResponse(200, "Success update post", res)

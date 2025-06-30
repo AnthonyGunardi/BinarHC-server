@@ -12,7 +12,7 @@ async function authorization (req, res, next) {
       res.status(403).json({ message: "You are unauthorized to do this action!" })
     }
   } else {
-    res.status(403).json({ message: "You are unauthorized to do this action!" })
+    res.status(404).json({ message: "User is not found" })
   }
 }
 

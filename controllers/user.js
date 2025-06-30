@@ -184,6 +184,7 @@ class UserController {
 
       //generate Access Token
       const payload = {
+        id: user.id,
         fullname: user.fullname,
         nip: user.nip,
         email: user.email,
@@ -218,6 +219,7 @@ class UserController {
 
       //generate Access Token
       const payload = {
+        id: user.id,
         fullname: user.fullname,
         nip: user.nip,
         email: user.email,
@@ -236,12 +238,9 @@ class UserController {
   static async findAllAdmins(req, res, next) {
     try {
       const users = await User.findAll({
-        where: { 
-            [Op.or] : [
-              { is_admin: 'admin' },
-              { is_admin: 'attendance' },
-              { is_admin: 'moderator' },
-            ]
+        where: { is_admin: {
+          [Op.ne]: 'employee', 
+        } 
         },
         attributes:['id', 'fullname', 'password', 'nip', 'email', 'id_card', 'photo', 'is_active', 'is_admin', 'createdAt', 'updatedAt'],
         order: [['fullname', 'asc']]
@@ -722,7 +721,7 @@ class UserController {
       } else {
         isWFA = true
       };
-
+      console.log(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request, user.is_permanent)
       let remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request, user.is_permanent);
 
       // convert user, from sequelize instance to plain JavaScript object, and then destructure it

@@ -26,6 +26,9 @@ const AttendanceController = require('./attendance');
 const MasterDataController = require('./master_data');
 const InformationController = require('./information');
 const EmploymentStatusController = require('./employment_status');
+const MissionController = require('./mission');
+const MissionGalleryController = require('./mission_gallery');
+const MissionUrlController = require('./mission_url');
 
 module.exports = { 
   UserController, 
@@ -55,5 +58,8 @@ module.exports = {
   AttendanceController,
   MasterDataController,
   InformationController,
-  EmploymentStatusController
+  EmploymentStatusController,
+  MissionController,
+  MissionGalleryController,
+  MissionUrlController
 };

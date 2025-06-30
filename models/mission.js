@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Mission.hasMany(models.Mission_Gallery, {foreignKey: 'mission_id', sourceKey: 'id'})
+      Mission.hasOne(models.Mission_Url, {foreignKey: 'mission_id', sourceKey: 'id'})
+      Mission.hasMany(models.Submission, {foreignKey: 'mission_id', sourceKey: 'id'})
     }
   }
   Mission.init({

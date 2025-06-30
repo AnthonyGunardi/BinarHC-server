@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Submission.belongsTo(models.Mission, {foreignKey: 'mission_id', targetKey: 'id'})
+      Submission.belongsTo(models.User, {foreignKey: 'employee_id', targetKey: 'id', as: 'Submitter'})
+      Submission.belongsTo(models.User, {foreignKey: 'admin_id', targetKey: 'id', as: 'Grader'})
     }
   }
   Submission.init({

@@ -6,7 +6,7 @@ const adminAuthorization = require('../middlewares/adminAuthorization');
 route.post('/', authentication, adminAuthorization, PostController.create);
 route.get('/', authentication, PostController.getAllPosts);
 route.get('/scroll', authentication, PostController.getPostsByScroll); //with query params, example: ?lastID=36&limit=5&key=lorem
-route.get('/:slug', authentication, PostController.getPost);
+route.get('/:slug', PostController.getPost);
 route.put('/toggle/:slug', authentication, adminAuthorization, PostController.togglePost);
 route.put('/:slug', authentication, adminAuthorization, PostController.update);
 

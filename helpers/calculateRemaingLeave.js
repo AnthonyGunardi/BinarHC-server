@@ -22,18 +22,25 @@ const calculateRemainingLeave = ( user_Hire_Date, user_Annual, user_Absence_Requ
   const monthsDifference = currentDate.getMonth() - hireDateObject.getMonth();
   // Total selisih dalam bulan
   const totalMonthsDifference = yearsDifference * 12 + monthsDifference;
-
   // If work period > 2 years
   if (totalMonthsDifference >= 24) {
     remainingAnnualLeave = user_Annual - totalAbsenceDays;
   }
-  // If work period more than 1 year, but less than 2 years
   else if (totalMonthsDifference < 24 && totalMonthsDifference > 12) {
     let hiredMonth = hireDateObject.getMonth();
+    let totalYearsDefference = currentDate.getFullYear() - hireDateObject.getFullYear() || 0;
+    let tempRemainingAnnual = 0;
+             
     if (hireDateObject.getDate() > 15) {
         hiredMonth++;
     }
-    let tempRemainingAnnual = user_Annual - totalAbsenceDays - hiredMonth;
+
+    if (totalYearsDefference >= 2) {
+      tempRemainingAnnual = user_Annual - totalAbsenceDays;
+    } else {
+      tempRemainingAnnual = user_Annual - totalAbsenceDays - hiredMonth;
+    }
+    
     if (tempRemainingAnnual < 0) {
       remainingAnnualLeave = 0;
     } else {
@@ -46,7 +53,7 @@ const calculateRemainingLeave = ( user_Hire_Date, user_Annual, user_Absence_Requ
       remainingAnnualLeave = 0;
     } else {
       let monthHire = hireDateObject.getMonth();
-      let tempAnnual = user.Biodata.annual - totalAbsenceDays - monthHire;
+      let tempAnnual = user_Annual - totalAbsenceDays - monthHire;
       if (tempAnnual < 0) {
         remainingAnnualLeave = 0;
       } else {

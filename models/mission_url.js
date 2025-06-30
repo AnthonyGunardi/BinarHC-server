@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Mission_Url.belongsTo(models.Mission, {foreignKey: 'mission_id', targetKey: 'id'})
     }
   }
   Mission_Url.init({
