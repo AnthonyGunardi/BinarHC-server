@@ -49,7 +49,10 @@ const calculateRemainingLeave = ( user_Hire_Date, user_Annual, user_Absence_Requ
   }
   // If work period is exactly 1 year
   else if (totalMonthsDifference === 12) {
-    if (hireDateObject.getDate() > 15) {
+    if (user_is_permanent) {
+      remainingAnnualLeave = user_Annual - totalAbsenceDays;
+    } else {
+          if (hireDateObject.getDate() > 15) {
       remainingAnnualLeave = 0;
     } else {
       let monthHire = hireDateObject.getMonth();
@@ -60,6 +63,7 @@ const calculateRemainingLeave = ( user_Hire_Date, user_Annual, user_Absence_Requ
         remainingAnnualLeave = tempAnnual;
       }
     }
+  }
   }
   // If work period is less than 1 year
   else {
