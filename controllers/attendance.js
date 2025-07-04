@@ -752,6 +752,7 @@ class AttendanceController {
                     meta_out: matchingAttendance.meta_out,
                     location_out: matchingAttendance.location_out,
                     note: matchingAttendance.note,
+                    note_out: matchingAttendance.note_out,
                     createdAt: matchingAttendance.createdAt,
                     updatedAt: matchingAttendance.updatedAt
                   }
