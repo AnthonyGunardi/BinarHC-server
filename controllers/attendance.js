@@ -775,7 +775,7 @@ class AttendanceController {
 
   static async update(req, res, next) {
     const id = req.params.id;
-    const { date, clock_in, clock_out, status, note } = req.body;
+    const { date, clock_in, clock_out, status, note, note_out } = req.body;
     try {
       //check if attendance is exist
       const attendance = await Attendance.findOne({
@@ -783,35 +783,8 @@ class AttendanceController {
       })
       if (!attendance) return sendResponse(404, "Attendance is not found", res)
 
-      //upload file if req.files isn't null
-      let url;
-      if(!req.files) {
-        url = attendance.photo;
-      } else {
-        const file = req.files.photo;
-        const fileSize = file.data.length;
-        const ext = path.extname(file.name);
-        const fileName = file.md5 + ext;
-        const allowedType = ['.png', '.jpg', '.jpeg'];
-        url = `attendances/${fileName}`;
-    
-        //validate file type
-        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)
-        //validate file size max 5mb
-        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-        //place the file on server
-        file.mv(`./public/images/attendances/${fileName}`, async (err) => {
-          if(err) return sendResponse(502, err.message, res)
-        })
-        //delete previous file on server
-        if (attendance.photo !== null) {
-          const filePath = `./public/images/${attendance.photo}`;
-          fs.unlinkSync(filePath);
-        }
-      }
-
       const updatedAttendance = await Attendance.update(
-        { date, clock_in, clock_out, status, note }, 
+        { date, clock_in, clock_out, status, note, note_out: note_out ? note_out : null }, 
         { where: { id: attendance.id }, returning: true }
       )
       sendResponse(200, "Success update Attendance", res)
