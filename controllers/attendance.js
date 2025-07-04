@@ -397,7 +397,7 @@ class AttendanceController {
   static async clockOut(req, res, next) {
     const nip = req.params.nip;
     const userEmail = req.user.email;
-    const { clock_out, meta_out, location_out } = req.body;
+    const { clock_out, meta_out, location_out, note_out } = req.body;
     const today = new Date().toISOString().slice(0, 10);
     try {
       //convert string to buffer with encoding utf-8
@@ -421,7 +421,7 @@ class AttendanceController {
       if (attendance.clock_out) return sendResponse(400, "Anda sudah absen pulang", res)
 
       const updatedAttendance = await Attendance.update(
-        { clock_out, meta_out, location_out: location_out_ascii }, 
+        { clock_out, meta_out, location_out: location_out_ascii, note_out: note_out ? note_out : null }, 
         { where: { 
             date: today, 
             user_id: user.id 
@@ -510,7 +510,7 @@ class AttendanceController {
             ]
           }
         ],
-        order: [['id', 'ASC']]
+        order: [['createdAt', 'ASC']]
       });
       sendData(200, attendances, "Success get all attendances", res);
     } 

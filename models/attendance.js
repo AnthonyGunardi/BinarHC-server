@@ -59,6 +59,7 @@ module.exports = (sequelize, DataTypes) => {
     meta_out: DataTypes.STRING,
     location_out: DataTypes.STRING,
     note: DataTypes.TEXT,
+    note_out: DataTypes.TEXT,
     user_id: DataTypes.INTEGER
   }, {
     sequelize,

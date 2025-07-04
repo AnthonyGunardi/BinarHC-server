@@ -33,6 +33,9 @@ module.exports = {
       note: {
         type: Sequelize.TEXT
       },
+      note_out: {
+        type: Sequelize.TEXT
+      },
       user_id: {
         type: Sequelize.INTEGER,
         references: {
