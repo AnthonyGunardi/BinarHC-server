@@ -721,7 +721,7 @@ class UserController {
       } else {
         isWFA = true
       };
-      console.log(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request, user.is_permanent)
+      
       let remainingAnnualLeave = calculateRemainingLeave(user.Biodata.hire_date, user.Biodata.annual, user.Absence_Request, user.is_permanent);
 
       // convert user, from sequelize instance to plain JavaScript object, and then destructure it

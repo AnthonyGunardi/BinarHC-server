@@ -62,7 +62,6 @@ class OvertimeController {
 
       // Upload file if req.files exists
       let url = null;
-      console.log(req.files, '<--- ini req.files')
       if (req.files) {
         const file = req.files.photo;
         const fileSize = file.data.length;
@@ -92,7 +91,6 @@ class OvertimeController {
     catch (err) {
       // Delete old uploaded file if it exists
       if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
-        console.log('File deleted --->', uploadedFilePath);
         await fs.promises.unlink(uploadedFilePath);
       }
       next(err)
