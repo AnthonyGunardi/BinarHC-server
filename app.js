@@ -10,7 +10,12 @@ const errorHandler = require('./middlewares/error-handler');
 const fileUpload = require ('express-fileupload');
 
 //MIDDLEWARES
-app.use(fileUpload())
+app.use(fileUpload(
+  {  
+    useTempFiles: true,
+    tempFileDir: '/tmp/'
+  }
+))
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
@@ -31,7 +36,7 @@ app.use(function (req, res, next) {
 });
 
 //error handler
-// app.use(errorHandler);
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`App is listening at port: ${port}`)

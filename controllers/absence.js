@@ -10,6 +10,7 @@ class OvertimeController {
     try {
       const userEmail = req.user.email
       const { start_date, end_date, type, note } = req.body;
+      let uploadedFilePath = null; // Store file path in case of rollback
 
       //check if user is exist and is login
       const user = await User.findOne({ 
@@ -59,24 +60,28 @@ class OvertimeController {
         if (remainingAnnualLeave < 1 || remainingAnnualLeave < duration) return sendResponse(400, "Sisa cuti anda tidak cukup.", res);
       }
 
-      //upload file if req.files isn't null
-      let url = null
-      if (req.files != null) {
+      // Upload file if req.files exists
+      let url = null;
+      console.log(req.files, '<--- ini req.files')
+      if (req.files) {
         const file = req.files.photo;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         const fileName = file.md5 + ext;
         const allowedType = ['.png', '.jpg', '.jpeg'];
         url = `absence-requests/${fileName}`;
-
-        //validate file type
-        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must be image with extension png, jpg, jpeg", res)    
-        //validate file size max 5mb
-        if(fileSize > 5000000) return sendResponse(422, "Image must be less than 5 mb", res)
-        //place the file on server
-        file.mv(`./public/images/absence-requests/${fileName}`, async (err) => {
-          if(err) return sendResponse(502, err.message, res)
-        })
+        uploadedFilePath = `./public/images/${url}`; // Store uploaded file path
+  
+        // Validate file type
+        if (!allowedType.includes(ext.toLowerCase())) {
+          return sendResponse(422, "File must be an image with extension png, jpg, jpeg", res);
+        }  
+        // Validate file size (max 5MB)
+        if (fileSize > 5000000) {
+          return sendResponse(422, "Image must be less than 5 MB", res);
+        } 
+        // Move file to the server
+        await file.mv(uploadedFilePath);
       }
 
       const newAbsence = await Absence.create(
@@ -85,6 +90,11 @@ class OvertimeController {
       sendData(201, { id: newAbsence.id, start_date: newAbsence.start_date, end_date: newAbsence.end_date, type: newAbsence.type, status: newAbsence.status, note: newAbsence.note, employee_id: newAbsence.employee_id }, "Berhasil diajukan", res);  
     }
     catch (err) {
+      // Delete old uploaded file if it exists
+      if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+        console.log('File deleted --->', uploadedFilePath);
+        await fs.promises.unlink(uploadedFilePath);
+      }
       next(err)
     };
   };
