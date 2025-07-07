@@ -88,7 +88,10 @@ class FamilyController {
             }
           }
         ],
-        order: [['Family', 'birthday', 'desc']]
+          order: [
+            [Sequelize.literal("MONTH(`Family`.`birthday`)"), 'ASC'],
+            [Sequelize.literal("DAY(`Family`.`birthday`)"), 'ASC']
+          ]
       });
   
       // Flatten the array to include all family members with birthdays

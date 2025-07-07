@@ -342,7 +342,10 @@ class UserController {
             }
           }
         },
-        order: [['Biodata', 'birthday', 'desc']]
+          order: [
+            [Sequelize.literal("MONTH(`Biodata`.`birthday`)"), 'ASC'],
+            [Sequelize.literal("DAY(`Biodata`.`birthday`)"), 'ASC']
+          ]
       });
       sendData(200, users, "Success get all birthday employees", res)
     }
