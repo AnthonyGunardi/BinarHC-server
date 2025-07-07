@@ -431,6 +431,27 @@ class UserController {
     }
   };
 
+  static async checkUserNip(req, res, next) {
+    try {
+      const { nip } = req.params;
+      const user = await User.findOne({ 
+        where: { nip, is_active: true }
+      });
+      if (!user) return sendData(200, {is_valid: false}, "Success checking", res);
+
+      const result = {
+        is_valid: true,
+        id: user.id,
+        fullname: user.fullname,
+        nip: user.nip
+      }
+
+      sendData(200, result, "Success checking", res);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   static async getEmployee(req, res, next) {
     const nip = req.params.nip;
     const today = new Date().toISOString();
