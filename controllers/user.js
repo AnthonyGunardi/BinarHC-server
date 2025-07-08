@@ -413,7 +413,7 @@ class UserController {
             }
           }
         ],
-        order: [['Employment_Periode', 'period', 'desc']]
+        order: [['Employment_Periode', 'period', 'asc']]
       });
 
       // Restructure the data to match the required output format
