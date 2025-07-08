@@ -398,7 +398,11 @@ class AttendanceController {
     const nip = req.params.nip;
     const userEmail = req.user.email;
     const { clock_out, meta_out, location_out, note_out } = req.body;
-    const today = new Date().toISOString().slice(0, 10);
+    // Menyesuaikan waktu ke GMT+7
+    const now = new Date();
+    const offset = 7 * 60; // GMT+7 in minute
+    const today = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000).toISOString().slice(0, 10);
+
     try {
       //convert string to buffer with encoding utf-8
       let buffer = Buffer.from(location_out, 'utf8');
