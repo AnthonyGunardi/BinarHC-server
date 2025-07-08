@@ -48,7 +48,10 @@ class MissionController {
   static async getAllMissions(req, res, next) {
     try {
       const { is_active } = req.query;
-      const today = new Date();
+      // Menyesuaikan waktu ke GMT+7
+      const now = new Date();
+      const offset = 7 * 60; // GMT+7 in minute
+      const today = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
       const filters = {};
     
       filters.published_at = {

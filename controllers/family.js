@@ -46,7 +46,10 @@ class FamilyController {
   };
 
   static async findBirthdayFamilies(req, res, next) {
-    const today = new Date();
+    // Menyesuaikan waktu ke GMT+7
+    const now = new Date();
+    const offset = 7 * 60; // GMT+7 in minute
+    const today = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
     const futureDate = new Date();
     futureDate.setDate(today.getDate() + 30);
   
