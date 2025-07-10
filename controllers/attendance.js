@@ -244,7 +244,7 @@ class AttendanceController {
         const currentHours = localTime.getHours();
         const currentMinutes = localTime.getMinutes();
         // Rentang waktu
-        const startTime = { hours: 6, minutes: 0 };  // 06:00
+        const startTime = { hours: 3, minutes: 0 };  // 03:00
         const endTime = { hours: 15, minutes: 0 };  // 15:00
         // Konversi waktu ke menit untuk memudahkan perbandingan
         const currentTotalMinutes = currentHours * 60 + currentMinutes;
