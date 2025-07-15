@@ -29,6 +29,7 @@ const EmploymentStatusController = require('./employment_status');
 const MissionController = require('./mission');
 const MissionGalleryController = require('./mission_gallery');
 const MissionUrlController = require('./mission_url');
+const EducationController = require('./education');
 
 module.exports = { 
   UserController, 
@@ -61,5 +62,6 @@ module.exports = {
   EmploymentStatusController,
   MissionController,
   MissionGalleryController,
-  MissionUrlController
+  MissionUrlController,
+  EducationController
 };

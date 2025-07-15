@@ -30,6 +30,7 @@ const employmentStatusRoute = require('./employment_status');
 const missionRoute = require('./mission');
 const missionGalleryRoute = require('./mission_gallery');
 const missionUrlRoute = require('./mission_url');
+const educationRoute = require('./educations');
 
 route.use('/v1/users', userRoute);
 route.use('/v1/offices', officeRoute);
@@ -62,5 +63,6 @@ route.use('/v1/employment_statuses', employmentStatusRoute);
 route.use('/v1/missions', missionRoute);
 route.use('/v1/mission_galleries', missionGalleryRoute);
 route.use('/v1/mission_urls', missionUrlRoute);
+route.use('/v1/educations', educationRoute);
 
 module.exports = route;
