@@ -1,4 +1,4 @@
-const { Education, Sub_Education } = require('../models/index.js');
+const { Education, Sub_Education, Schedule } = require('../models/index.js');
 const { Sequelize, Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
@@ -59,6 +59,12 @@ class EducationController {
             attributes: {
               exclude: ['education_id', 'createdAt', 'updatedAt']
             }
+          },
+          {
+            model: Schedule,
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
+            }
           }
         ],
         limit: limit,
@@ -90,6 +96,12 @@ class EducationController {
             model: Sub_Education,
             attributes: {
               exclude: ['education_id']
+            }
+          },
+          {
+            model: Schedule,
+            attributes: {
+              exclude: ['createdAt', 'updatedAt']
             }
           }
         ],
