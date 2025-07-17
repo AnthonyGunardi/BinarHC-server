@@ -33,6 +33,8 @@ const missionUrlRoute = require('./mission_url');
 const educationRoute = require('./educations');
 const subEducationRoute = require('./sub_educations');
 const scheduleRoute = require('./schedule');
+const userEducationRoute = require('./user_educations');
+const educationRequestRoute = require('./education_requests');
 
 route.use('/v1/users', userRoute);
 route.use('/v1/offices', officeRoute);
@@ -68,5 +70,7 @@ route.use('/v1/mission_urls', missionUrlRoute);
 route.use('/v1/educations', educationRoute);
 route.use('/v1/sub_educations', subEducationRoute);
 route.use('/v1/schedules', scheduleRoute);
+route.use('/v1/user_educations', userEducationRoute);
+route.use('/v1/education_requests', educationRequestRoute);
 
 module.exports = route;

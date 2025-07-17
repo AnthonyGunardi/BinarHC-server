@@ -31,6 +31,8 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Employment_Periode, {foreignKey: 'user_id', sourceKey: 'id'})
       User.hasMany(models.Submission, {foreignKey: 'employee_id', sourceKey: 'id', as: 'Mission_Submission'})
       User.hasMany(models.Submission, {foreignKey: 'admin_id', sourceKey: 'id', as: 'Graded_Submission'})
+      User.hasMany(models.User_Education, {foreignKey: 'user_id', sourceKey: 'id'})
+      User.hasMany(models.Education_Request, { foreignKey: 'user_id', sourceKey: 'id' })
     }
   }
   User.init({

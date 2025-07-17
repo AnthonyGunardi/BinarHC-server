@@ -32,6 +32,8 @@ const MissionUrlController = require('./mission_url');
 const EducationController = require('./education');
 const SubEducationController = require('./sub_education');
 const ScheduleController = require('./schedule');
+const UserEducationController = require('./user_education');
+const EducationRequestController = require('./education_request');
 
 module.exports = { 
   UserController, 
@@ -67,5 +69,7 @@ module.exports = {
   MissionUrlController,
   EducationController,
   SubEducationController,
-  ScheduleController
+  ScheduleController,
+  UserEducationController,
+  EducationRequestController
 };

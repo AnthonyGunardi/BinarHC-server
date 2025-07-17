@@ -13,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Education.hasMany(models.Sub_Education, {foreignKey: 'education_id', targetKey: 'id'})
       Education.hasMany(models.Schedule, {foreignKey: 'education_id', targetKey: 'id'})
+      Education.hasMany(models.User_Education, {foreignKey: 'education_id', targetKey: 'id'})
+      Education.hasMany(models.Education_Request, {foreignKey: 'education_id', targetKey: 'id'})
     }
   }
   Education.init({
