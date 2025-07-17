@@ -141,7 +141,6 @@ class SubmissionController {
 
   static async updatePoint(req, res, next) {
     let transaction;
-    let uploadedFilePath = null; // Store file path in case of rollback
 
     try {
       transaction = await sequelize.transaction();
@@ -183,12 +182,6 @@ class SubmissionController {
     catch (err) {
       // Rollback the transaction in case of an error
       if (transaction) await transaction.rollback();
-
-      // Delete old uploaded file if it exists
-      if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
-        await fs.promises.unlink(uploadedFilePath);
-      }
-
       next(err)
     }
   };
