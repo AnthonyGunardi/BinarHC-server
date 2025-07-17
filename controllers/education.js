@@ -1,7 +1,5 @@
-const { Education, Mission_Gallery, Mission_Url } = require('../models/index.js');
-const { Op } = require('sequelize');
-const fs = require('fs')
-const path = require('node:path');
+const { Education, Sub_Education } = require('../models/index.js');
+const { Sequelize, Op } = require('sequelize');
 const { sendResponse, sendData } = require('../helpers/response.js');
 
 class EducationController {
@@ -18,7 +16,7 @@ class EducationController {
       const newEducation = await Education.create(
         { title, slug, description, certification, is_restream, is_public, is_active, publish_date, publish_time }
       );
-      sendData(201, { id: newEducation.id, title: newEducation.title, slug: newEducation.slug, type: newEducation.type }, "Success create education", res);  
+      sendData(201, { id: newEducation.id, title: newEducation.title, slug: newEducation.slug }, "Success create education", res);  
     }
     catch (err) {
       next(err)
@@ -27,24 +25,57 @@ class EducationController {
 
   static async getAllEducations(req, res, next) {
     try {
-      const { is_active } = req.query;
-      const filters = {};
+      const lastID = parseInt(req.query.lastID) || 0;
+      const limit = parseInt(req.query.limit) || 0;
+      const search = req.query.key || "";
 
-      // Apply is_active filter only if is_active is provided
-      if (is_active) {
-        filters.is_active = is_active === 'true' ? true : false;
+      // Adjust time to GMT+7
+      const now = new Date();
+      const offset = 7 * 60;
+      const today = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
+      const todayISOString = today.toISOString().slice(0, 19).replace('T', ' '); // 'YYYY-MM-DD HH:MM:SS'
+
+      // Base WHERE clause
+      const baseWhere = {
+        [Op.and]: [
+          Sequelize.literal(`CONCAT(publish_date, ' ', publish_time) <= '${todayISOString}'`)
+        ],
+        is_active: true,
+        [Op.or]: [
+          { title: { [Op.like]: `%${search}%` } },
+          { description: { [Op.like]: `%${search}%` } }
+        ]
+      };
+
+      if (lastID > 0) {
+        baseWhere.id = { [Op.lt]: lastID };
       }
 
-      const educations = await Education.findAll({
-        where: filters,
-        order: [['id', 'asc']]
+      const results = await Education.findAll({
+        where: baseWhere,
+        include: [
+          {
+            model: Sub_Education,
+            attributes: {
+              exclude: ['education_id', 'createdAt', 'updatedAt']
+            }
+          }
+        ],
+        limit: limit,
+        order: [['id', 'DESC']]
       });
-      sendData(200, educations, "Success get all educations", res);
-    } 
-    catch (err) {
-        next(err)
-    };
-  };
+
+      const payload = {
+        datas: results,
+        lastID: results.length ? results[results.length - 1].id : 0,
+        hasMore: results.length >= limit
+      };
+
+      sendData(200, payload, "Success get educations data", res);
+    } catch (err) {
+      next(err);
+    }
+  }
 
   static async getEducation(req, res, next) {
     const slug = req.params.slug;
@@ -54,7 +85,14 @@ class EducationController {
         attributes:{
           exclude: ['createdAt', 'updatedAt']
         },
-        order: [['id', 'asc']]
+        include: [
+          {
+            model: Sub_Education,
+            attributes: {
+              exclude: ['education_id']
+            }
+          }
+        ],
       })
       if (!education) return sendResponse(404, "Education is not found", res)
       sendData(200, education, "Success get education data", res)
@@ -89,8 +127,6 @@ class EducationController {
   };
 
   static async update(req, res, next) {
-    let transaction;
-  
     try {
       const currentSlug = req.params.slug;
       const { title, slug, description, certification, is_restream, is_public, is_active, publish_date, publish_time } = req.body;
@@ -123,7 +159,7 @@ class EducationController {
       // Update education
       await Education.update(
         { title, slug, description, certification, is_restream, is_public, is_active, publish_date, publish_time },
-        { where: { id: education.id }, transaction }
+        { where: { id: education.id } }
       );
 
       sendResponse(200, "Success update education", res);

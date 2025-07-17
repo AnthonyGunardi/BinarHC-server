@@ -31,6 +31,7 @@ const missionRoute = require('./mission');
 const missionGalleryRoute = require('./mission_gallery');
 const missionUrlRoute = require('./mission_url');
 const educationRoute = require('./educations');
+const subEducationRoute = require('./sub_educations');
 
 route.use('/v1/users', userRoute);
 route.use('/v1/offices', officeRoute);
@@ -64,5 +65,6 @@ route.use('/v1/missions', missionRoute);
 route.use('/v1/mission_galleries', missionGalleryRoute);
 route.use('/v1/mission_urls', missionUrlRoute);
 route.use('/v1/educations', educationRoute);
+route.use('/v1/sub_educations', subEducationRoute);
 
 module.exports = route;
