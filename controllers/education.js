@@ -104,66 +104,6 @@ class EducationController {
     }
   }
 
-  static async getAllEducations(req, res, next) {
-    try {
-      const lastID = parseInt(req.query.lastID) || 0;
-      const limit = parseInt(req.query.limit) || 0;
-      const search = req.query.key || "";
-
-      // Adjust time to GMT+7
-      const now = new Date();
-      const offset = 7 * 60;
-      const today = new Date(now.getTime() + (offset - now.getTimezoneOffset()) * 60000);
-      const todayISOString = today.toISOString().slice(0, 19).replace('T', ' '); // 'YYYY-MM-DD HH:MM:SS'
-
-      // Base WHERE clause
-      const baseWhere = {
-        [Op.and]: [
-          Sequelize.literal(`CONCAT(publish_date, ' ', publish_time) <= '${todayISOString}'`)
-        ],
-        is_active: true,
-        [Op.or]: [
-          { title: { [Op.like]: `%${search}%` } },
-          { description: { [Op.like]: `%${search}%` } }
-        ]
-      };
-
-      if (lastID > 0) {
-        baseWhere.id = { [Op.lt]: lastID };
-      }
-
-      const results = await Education.findAll({
-        where: baseWhere,
-        include: [
-          {
-            model: Sub_Education,
-            attributes: {
-              exclude: ['education_id', 'createdAt', 'updatedAt']
-            }
-          },
-          {
-            model: Schedule,
-            attributes: {
-              exclude: ['createdAt', 'updatedAt']
-            }
-          }
-        ],
-        limit: limit,
-        order: [['id', 'DESC']]
-      });
-
-      const payload = {
-        datas: results,
-        lastID: results.length ? results[results.length - 1].id : 0,
-        hasMore: results.length >= limit
-      };
-
-      sendData(200, payload, "Success get educations data", res);
-    } catch (err) {
-      next(err);
-    }
-  }
-
   static async getEducation(req, res, next) {
     const slug = req.params.slug;
     try {
